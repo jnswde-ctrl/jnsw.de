@@ -1,0 +1,2 @@
+import { SectionPage } from "../SectionPage";
+export default function CommunityPage(){return <SectionPage label="Community" title={<>Gute Dinge<br /><em>gemeinsam.</em></>} intro="Ein Ort fuer Menschen, die Marken und digitale Produkte mit Haltung gestalten wollen. Komm vorbei, bring Fragen mit."/>;}

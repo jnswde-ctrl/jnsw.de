@@ -1,0 +1,2 @@
+import { SectionPage } from "../SectionPage";
+export default function InformationenPage(){return <SectionPage label="Informationen" title={<>Wissen,<br />das <em>wirkt.</em></>} intro="Gedanken zu Marken, digitalen Produkten und der Arbeit dazwischen. Direkt, praktisch und ohne Buzzwords."/>;}

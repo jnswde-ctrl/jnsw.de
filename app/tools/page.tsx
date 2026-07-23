@@ -1,0 +1,2 @@
+import { SectionPage } from "../SectionPage";
+export default function ToolsPage(){return <SectionPage label="Tools" title={<>Werkzeug<br />fuer <em>Ideen.</em></>} intro="Kleine digitale Helfer, Vorlagen und Denkwerkzeuge - gemacht, um aus einem ersten Gedanken etwas Konkretes zu machen."/>;}
