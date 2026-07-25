@@ -24,6 +24,17 @@ Regeln:
 - Vermeide wiederholte Analysen bereits bekannter Bereiche.
 - Verwende niedrige Reasoning-Stufen für Routinearbeit.
 - Formuliere keine langen Erklärungen.
+- Wenn der Benutzer nach dem „nächsten sinnvollen Entwicklungsschritt“ fragt,
+  entscheide nicht selbstständig über die Produktfunktion.
+- Ermittle zunächst den aktuellen Ausgangspunkt und formuliere zwei bis drei
+  klar unterscheidbare Optionen.
+- Bewerte jede Option knapp nach Nutzwert, Portfolio-Wirkung, Lernwert,
+  technischem Risiko und geschätztem Umfang.
+- Gib eine begründete Empfehlung, kennzeichne sie aber als Empfehlung.
+- Warte auf die Auswahl des Benutzers, bevor du einen vollständigen
+  Entwicklungsauftrag formulierst.
+- Wenn der Benutzer ausdrücklich „mit mir“ sagt, muss vor der endgültigen
+  Festlegung mindestens ein Entscheidungsschritt mit dem Benutzer erfolgen.
 
 Ausgabeformat:
 
