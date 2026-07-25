@@ -22,3 +22,7 @@
 **/values.dev.yaml
 LICENSE
 README.md
+**/.next
+**/.vinext
+**/.wrangler
+**/dist
