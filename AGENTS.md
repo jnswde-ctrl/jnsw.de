@@ -166,3 +166,12 @@ Eine Änderung ist abgeschlossen, wenn:
 - E-Mail-Verifikation und Passwort-Reset
 - sichere Verknüpfung der beiden Anmeldewege
 - verbindlicher Deployment- und D1-Migrationsprozess
+
+## KI- und Agent-Effizienz
+
+- Subagents nur für klar abgegrenzte, unabhängige Aufgaben einsetzen.
+- Vor einer Analyse relevante Dateien und Verzeichnisse eingrenzen.
+- Bereits untersuchte Bereiche nicht ohne konkreten Grund erneut vollständig analysieren.
+- Ergebnisse knapp zusammenfassen; keine vollständigen Dateiinhalte wiedergeben.
+- Standardmäßig höchstens einen Subagent einsetzen. Parallelisierung nur bei tatsächlich unabhängigen Aufgaben.
+- Hohe Reasoning-Stufen nur für komplexe Architektur-, Sicherheits- oder Fehleranalysen verwenden.

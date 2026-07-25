@@ -1,6 +1,8 @@
 [agents]
 enabled = true
 max_concurrent_threads_per_session = 2
+default_subagent_model = "gpt-5.6-terra"
+default_subagent_reasoning_effort = "low"
 
 [agents.design_researcher]
 description = "Analysiert die vorhandene Oberfläche und liefert lesend begründete UX-, UI-, Responsive- und Accessibility-Empfehlungen."
@@ -9,3 +11,7 @@ config_file = "agents/design_researcher.toml"
 [agents.auth_reviewer]
 description = "Prüft das vorhandene Authentifizierungs- und Sitzungssystem ausschließlich lesend auf konkrete Fehler und Sicherheitsrisiken."
 config_file = "agents/auth_reviewer.toml"
+
+[agents.prompt_coach]
+description = "Hilft bei größeren Aufgaben, einen klaren und token-effizienten Auftrag für den Haupt-Agenten zu formulieren."
+config_file = "agents/prompt_coach.toml"
