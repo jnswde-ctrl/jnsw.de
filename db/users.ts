@@ -1,13 +1,115 @@
 import { and, asc, count, eq } from "drizzle-orm";
 import { getDb } from ".";
 import { users, type userRoleValues, type userStatusValues } from "./schema";
-export type UserRole = (typeof userRoleValues)[number]; export type UserStatus = (typeof userStatusValues)[number]; export type AppUser = typeof users.$inferSelect;
-export function normalizeEmail(email: string) { return email.trim().toLowerCase(); }
-export async function findOrCreateUser(identity: { email: string; displayName: string }): Promise<AppUser> { const db = getDb(), email = normalizeEmail(identity.email), now = new Date().toISOString(); const existing = await db.query.users.findFirst({ where: eq(users.email, email) }); if (existing) { const [user] = await db.update(users).set({ lastSignedInAt: now, updatedAt: now }).where(eq(users.id, existing.id)).returning(); return user; } const [user] = await db.insert(users).values({ id: crypto.randomUUID(), email, displayName: identity.displayName.trim().slice(0, 100) || email, lastSignedInAt: now }).returning(); return user; }
-export async function findUserByEmail(email: string) { return getDb().query.users.findFirst({ where: eq(users.email, normalizeEmail(email)) }); }
-export async function createPasswordUser({ email, displayName, passwordHash }: { email: string; displayName: string; passwordHash: string }) { const now = new Date().toISOString(); const [user] = await getDb().insert(users).values({ id: crypto.randomUUID(), email: normalizeEmail(email), displayName, passwordHash, lastSignedInAt: now }).returning(); return user; }
-export async function updatePassword(id: string, passwordHash: string) { const [user] = await getDb().update(users).set({ passwordHash, updatedAt: new Date().toISOString() }).where(eq(users.id, id)).returning(); return user; }
-export async function updateOwnProfile(id: string, displayName: string): Promise<AppUser> { const [user] = await getDb().update(users).set({ displayName, updatedAt: new Date().toISOString() }).where(eq(users.id, id)).returning(); return user; }
-export async function listUsers({ limit = 50, offset = 0 } = {}) { const db = getDb(); const [items, result] = await Promise.all([db.select().from(users).orderBy(asc(users.createdAt)).limit(limit).offset(offset), db.select({ total: count() }).from(users)]); return { items, total: result[0]?.total ?? 0 }; }
-export async function updateUserAccess(id: string, changes: Partial<Pick<AppUser, "role" | "status">>) { const [user] = await getDb().update(users).set({ ...changes, updatedAt: new Date().toISOString() }).where(eq(users.id, id)).returning(); return user; }
-export async function activeAdminCount() { const [result] = await getDb().select({ total: count() }).from(users).where(and(eq(users.role, "admin"), eq(users.status, "active"))); return result?.total ?? 0; }
+export type UserRole = (typeof userRoleValues)[number];
+export type UserStatus = (typeof userStatusValues)[number];
+export type AppUser = typeof users.$inferSelect;
+export function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+export async function findOrCreateUser(identity: {
+  email: string;
+  displayName: string;
+}): Promise<AppUser> {
+  const db = getDb(),
+    email = normalizeEmail(identity.email),
+    now = new Date().toISOString();
+  const existing = await db.query.users.findFirst({
+    where: eq(users.email, email),
+  });
+  if (existing) {
+    const [user] = await db
+      .update(users)
+      .set({ lastSignedInAt: now, updatedAt: now })
+      .where(eq(users.id, existing.id))
+      .returning();
+    return user;
+  }
+  const [user] = await db
+    .insert(users)
+    .values({
+      id: crypto.randomUUID(),
+      email,
+      displayName: identity.displayName.trim().slice(0, 100) || email,
+      lastSignedInAt: now,
+    })
+    .returning();
+  return user;
+}
+export async function findUserByEmail(email: string) {
+  return getDb().query.users.findFirst({
+    where: eq(users.email, normalizeEmail(email)),
+  });
+}
+export async function createPasswordUser({
+  email,
+  displayName,
+  passwordHash,
+}: {
+  email: string;
+  displayName: string;
+  passwordHash: string;
+}) {
+  const now = new Date().toISOString();
+  const [user] = await getDb()
+    .insert(users)
+    .values({
+      id: crypto.randomUUID(),
+      email: normalizeEmail(email),
+      displayName,
+      passwordHash,
+      lastSignedInAt: now,
+    })
+    .returning();
+  return user;
+}
+export async function updatePassword(id: string, passwordHash: string) {
+  const [user] = await getDb()
+    .update(users)
+    .set({ passwordHash, updatedAt: new Date().toISOString() })
+    .where(eq(users.id, id))
+    .returning();
+  return user;
+}
+export async function updateOwnProfile(
+  id: string,
+  displayName: string,
+): Promise<AppUser> {
+  const [user] = await getDb()
+    .update(users)
+    .set({ displayName, updatedAt: new Date().toISOString() })
+    .where(eq(users.id, id))
+    .returning();
+  return user;
+}
+export async function listUsers({ limit = 50, offset = 0 } = {}) {
+  const db = getDb();
+  const [items, result] = await Promise.all([
+    db
+      .select()
+      .from(users)
+      .orderBy(asc(users.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db.select({ total: count() }).from(users),
+  ]);
+  return { items, total: result[0]?.total ?? 0 };
+}
+export async function updateUserAccess(
+  id: string,
+  changes: Partial<Pick<AppUser, "role" | "status">>,
+) {
+  const [user] = await getDb()
+    .update(users)
+    .set({ ...changes, updatedAt: new Date().toISOString() })
+    .where(eq(users.id, id))
+    .returning();
+  return user;
+}
+export async function activeAdminCount() {
+  const [result] = await getDb()
+    .select({ total: count() })
+    .from(users)
+    .where(and(eq(users.role, "admin"), eq(users.status, "active")));
+  return result?.total ?? 0;
+}

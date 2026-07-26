@@ -1,43 +1,37 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "docker-build",
-			"label": "docker-build",
-			"platform": "node",
-			"dockerBuild": {
-				"dockerfile": "${workspaceFolder}/Dockerfile",
-				"context": "${workspaceFolder}",
-				"pull": true
-			}
-		},
-		{
-			"type": "docker-run",
-			"label": "docker-run: release",
-			"dependsOn": [
-				"docker-build"
-			],
-			"platform": "node"
-		},
-		{
-			"type": "docker-run",
-			"label": "docker-run: debug",
-			"dependsOn": [
-				"docker-build"
-			],
-			"dockerRun": {
-				"command": "node --inspect=0.0.0.0:9229 node_modules/vinext/dist/cli.js dev --hostname 0.0.0.0 --port 3000",
-				"ports": [
-					{ "containerPort": 3000, "hostPort": 3000 }
-				],
-				"env": {
-					"DEBUG": "*",
-					"NODE_ENV": "development"
-				}
-			},
-			"node": {
-				"enableDebugging": true
-			}
-		}
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "docker-build",
+      "label": "docker-build",
+      "platform": "node",
+      "dockerBuild": {
+        "dockerfile": "${workspaceFolder}/Dockerfile",
+        "context": "${workspaceFolder}",
+        "pull": true
+      }
+    },
+    {
+      "type": "docker-run",
+      "label": "docker-run: release",
+      "dependsOn": ["docker-build"],
+      "platform": "node"
+    },
+    {
+      "type": "docker-run",
+      "label": "docker-run: debug",
+      "dependsOn": ["docker-build"],
+      "dockerRun": {
+        "command": "node --inspect=0.0.0.0:9229 node_modules/vinext/dist/cli.js dev --hostname 0.0.0.0 --port 3000",
+        "ports": [{ "containerPort": 3000, "hostPort": 3000 }],
+        "env": {
+          "DEBUG": "*",
+          "NODE_ENV": "development"
+        }
+      },
+      "node": {
+        "enableDebugging": true
+      }
+    }
+  ]
 }

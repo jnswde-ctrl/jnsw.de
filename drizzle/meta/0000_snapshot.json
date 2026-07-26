@@ -71,17 +71,12 @@
       "indexes": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         },
         "users_role_status_idx": {
           "name": "users_role_status_idx",
-          "columns": [
-            "role",
-            "status"
-          ],
+          "columns": ["role", "status"],
           "isUnique": false
         }
       },

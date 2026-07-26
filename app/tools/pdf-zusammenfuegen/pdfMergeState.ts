@@ -13,7 +13,10 @@ export function removeItem(items: PdfItem[], id: string) {
 }
 
 export function isPdfFile(file: Pick<File, "name" | "type">) {
-  return file.type === "application/pdf" || (/\.pdf$/i.test(file.name) && file.type === "");
+  return (
+    file.type === "application/pdf" ||
+    (/\.pdf$/i.test(file.name) && file.type === "")
+  );
 }
 
 export function formatBytes(bytes: number) {
