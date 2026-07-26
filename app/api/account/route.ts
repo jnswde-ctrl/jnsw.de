@@ -1,4 +1,4 @@
-import { requireAppUser, publicUser } from "../../auth";
+﻿import { isSameOrigin, requireAppUser, publicUser } from "../../auth";
 import { updateOwnProfile } from "../../../db/users";
 export async function GET() {
   const user = await requireAppUser();
@@ -9,6 +9,8 @@ export async function GET() {
   return Response.json({ user: publicUser(user) });
 }
 export async function PATCH(request: Request) {
+  if (!isSameOrigin(request))
+    return Response.json({ error: "Invalid origin" }, { status: 403 });
   const user = await requireAppUser();
   if (!user)
     return Response.json({ error: "Authentication required" }, { status: 401 });

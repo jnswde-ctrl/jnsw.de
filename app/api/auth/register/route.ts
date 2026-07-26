@@ -1,4 +1,4 @@
-import { createSession } from "../../../../db/sessions";
+﻿import { createSession } from "../../../../db/sessions";
 import {
   createPasswordUser,
   findUserByEmail,
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   const existing = await findUserByEmail(email);
-  if (existing?.passwordHash)
+  if (existing)
     return Response.json(
       { error: "An account already exists for this email" },
       { status: 409 },

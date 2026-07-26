@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono&family=Manrope:wght@400;500;600;700;800&display=swap");
+﻿@import url("https://fonts.googleapis.com/css2?family=DM+Mono&family=Manrope:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 :root {
   --ink: #08080a;
@@ -657,3 +657,20 @@ footer {
     display: none;
   }
 }
+
+.community-section { background: var(--paper); color: var(--ink); padding: 110px 3.2vw; }
+.community-account { max-width: 600px; margin-left: 22%; }
+.community-account h2 { font-size: clamp(3rem, 6vw, 6rem); line-height: .9; letter-spacing: -.08em; margin: 22px 0; }
+.community-account > p { max-width: 440px; line-height: 1.55; }
+.community-account form { display: grid; gap: 18px; margin-top: 35px; }
+.community-account label { display: grid; gap: 8px; font: 11px "DM Mono", monospace; text-transform: uppercase; }
+.community-account input { width: 100%; border: 1px solid var(--ink); background: transparent; padding: 14px; font: 16px Manrope, sans-serif; }
+.community-account small { font: 10px "DM Mono", monospace; text-transform: none; }
+.community-tabs { display: flex; gap: 18px; margin-top: 30px; }
+.community-tabs button { border: 0; border-bottom: 2px solid transparent; background: transparent; padding: 0 0 7px; font: 11px "DM Mono", monospace; text-transform: uppercase; cursor: pointer; }
+.community-tabs button[aria-pressed="true"] { border-color: var(--blue); }
+.community-button { border: 1px solid var(--ink); background: var(--ink); color: var(--paper); padding: 15px 18px; justify-self: start; font: 11px "DM Mono", monospace; text-transform: uppercase; cursor: pointer; }
+.community-button:hover, .community-button:focus-visible { background: var(--acid); color: var(--ink); outline: 2px solid var(--blue); outline-offset: 2px; }
+.community-button.secondary { background: transparent; color: var(--ink); margin-top: 20px; }
+.community-error { color: #a30000; margin: 0; }
+@media (max-width: 720px) { .community-section { padding: 75px 20px; } .community-account { margin: 0; } .community-button { width: 100%; } }
