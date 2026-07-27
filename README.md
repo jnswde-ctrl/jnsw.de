@@ -16,16 +16,16 @@ npm run dev
 npm run build
 ```
 
-This starter does not use `wrangler.jsonc`.
+`wrangler.jsonc` provides the shared local Cloudflare Worker and D1
+configuration used by Vite and Wrangler.
 
 ## Included Shape
 
 - edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
+- `.openai/hosting.json` declares the Sites D1 binding
+- `wrangler.jsonc` defines the local Worker and D1 binding
+- `db/schema.ts` defines the Drizzle schema
+- `drizzle/` contains versioned D1 migrations
 
 ## Workspace Auth Headers
 
@@ -93,6 +93,31 @@ actions tied to the current ChatGPT user. Leave public content anonymous.
 - `npm run build`: verify the vinext build output
 - `npm test`: build the starter and verify its rendered loading skeleton
 - `npm run db:generate`: generate Drizzle migrations after schema changes
+
+## Database workflow
+
+The local D1 database is persisted below `.wrangler/state` and is ignored by
+Git. Before using features that access the database, apply the checked-in
+migrations once:
+
+```bash
+npm exec wrangler -- d1 migrations apply DB --local --persist-to .wrangler/state
+```
+
+To see whether further migrations are pending, run:
+
+```bash
+npm exec wrangler -- d1 migrations list DB --local --persist-to .wrangler/state
+```
+
+For schema changes, update `db/schema.ts`, generate a migration with
+`npm run db:generate`, inspect the generated SQL in `drizzle/`, and apply it
+locally. Wrangler records applied migration names in the local D1 table
+`d1_migrations`, so running the apply command again only executes outstanding
+migrations.
+
+Production D1 migrations remain the responsibility of the hosting control
+plane; this repository does not contain a production database ID.
 
 ## Learn More
 
