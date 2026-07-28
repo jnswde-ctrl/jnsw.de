@@ -1,4 +1,4 @@
-﻿import { cookies } from "next/headers";
+import { cookies } from "next/headers";
 import type { AppUser } from "../db/users";
 import { getSessionUser } from "../db/sessions";
 export const SESSION_COOKIE = "jnsw_session";
@@ -17,8 +17,4 @@ export function sessionCookie(token: string, expiresAt: string) {
 }
 export function expiredSessionCookie() {
   return `${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
-}
-export function isSameOrigin(request: Request) {
-  const origin = request.headers.get("origin");
-  return !origin || origin === new URL(request.url).origin;
 }

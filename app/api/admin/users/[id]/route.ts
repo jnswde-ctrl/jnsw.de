@@ -5,12 +5,15 @@ import {
   type UserStatus,
 } from "../../../../../db/users";
 import { isActiveAdmin, publicUser, requireAppUser } from "../../../../auth";
+import { isSameOrigin } from "../../../../request-security";
 const roles: UserRole[] = ["admin", "member"],
   statuses: UserStatus[] = ["active", "suspended"];
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  if (!isSameOrigin(request))
+    return Response.json({ error: "Invalid origin" }, { status: 403 });
   const actor = await requireAppUser();
   if (!actor)
     return Response.json({ error: "Authentication required" }, { status: 401 });

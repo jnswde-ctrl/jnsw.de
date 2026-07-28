@@ -1,4 +1,5 @@
-﻿import { isSameOrigin, requireAppUser, publicUser } from "../../auth";
+import { requireAppUser, publicUser } from "../../auth";
+import { isSameOrigin } from "../../request-security";
 import { updateOwnProfile } from "../../../db/users";
 export async function GET() {
   const user = await requireAppUser();

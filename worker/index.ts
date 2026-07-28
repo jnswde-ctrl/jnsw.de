@@ -1,4 +1,4 @@
-/** Cloudflare Worker entry point for the vinext-starter template. */
+/** Cloudflare Worker entry point for the JNSW.DE. */
 import {
   handleImageOptimization,
   DEFAULT_DEVICE_SIZES,

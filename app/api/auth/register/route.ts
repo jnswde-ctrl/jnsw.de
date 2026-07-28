@@ -1,11 +1,12 @@
-﻿import { createSession } from "../../../../db/sessions";
+import { createSession } from "../../../../db/sessions";
 import {
   createPasswordUser,
   findUserByEmail,
   normalizeEmail,
   updatePassword,
 } from "../../../../db/users";
-import { isSameOrigin, publicUser, sessionCookie } from "../../../auth";
+import { publicUser, sessionCookie } from "../../../auth";
+import { isSameOrigin } from "../../../request-security";
 import { hashPassword, isValidPassword } from "../../../passwords";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export async function POST(request: Request) {

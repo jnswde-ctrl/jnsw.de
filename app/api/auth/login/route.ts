@@ -1,6 +1,7 @@
 import { createSession } from "../../../../db/sessions";
 import { findUserByEmail, normalizeEmail } from "../../../../db/users";
-import { isSameOrigin, publicUser, sessionCookie } from "../../../auth";
+import { publicUser, sessionCookie } from "../../../auth";
+import { isSameOrigin } from "../../../request-security";
 import { verifyPassword } from "../../../passwords";
 export async function POST(request: Request) {
   if (!isSameOrigin(request))

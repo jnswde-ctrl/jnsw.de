@@ -1,9 +1,6 @@
 import { revokeSession } from "../../../../db/sessions";
-import {
-  expiredSessionCookie,
-  isSameOrigin,
-  SESSION_COOKIE,
-} from "../../../auth";
+import { expiredSessionCookie, SESSION_COOKIE } from "../../../auth";
+import { isSameOrigin } from "../../../request-security";
 import { cookies } from "next/headers";
 export async function POST(request: Request) {
   if (!isSameOrigin(request))
