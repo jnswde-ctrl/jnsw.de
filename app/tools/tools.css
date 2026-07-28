@@ -525,6 +525,7 @@
   font-size: 14px;
   line-height: 1.55;
 }
+.pdf-case-link { grid-column: 3; justify-self: start; margin-top: 24px; border-bottom: 1px solid var(--paper); padding-bottom: 6px; font: 10px "DM Mono", monospace; text-transform: uppercase; }
 .pdf-tool-section {
   padding: 55px 3.2vw 90px;
 }
@@ -709,6 +710,7 @@
   .pdf-tool-heading > p:last-child {
     margin-top: 35px;
   }
+  .pdf-case-link { display: inline-block; }
   .pdf-tool-section {
     padding: 45px 20px 70px;
   }

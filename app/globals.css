@@ -580,6 +580,7 @@ footer {
   padding: 22px 3.2vw;
   margin: 0;
 }
+.case-study { background: var(--paper); color: var(--ink); }.case-study-hero { min-height: 72svh; padding: 26px 3.2vw 55px; color: var(--paper); background: radial-gradient(circle at 88% 5%, rgba(49,87,255,.58), transparent 33%), var(--ink); }.case-study-grid { display:grid; grid-template-columns:22% 1fr 22%; padding-top:14vh; }.case-study-grid h1 { grid-column:2/4; margin:0; font-size:clamp(4rem,9vw,9.5rem); line-height:.82; letter-spacing:-.09em; }.case-study-grid h1 em { font-family:Georgia,serif; font-weight:400; }.case-study-intro { grid-column:3; margin-top:50px; font-size:13px; line-height:1.55; }.case-study-intro a { border-bottom:1px solid var(--paper); padding-bottom:6px; font:10px "DM Mono",monospace; text-transform:uppercase; }.case-study-body { padding:95px 3.2vw 120px; }.case-study-body>.eyebrow { color:var(--ink); }.case-study-summary { display:grid; grid-template-columns:22% 1fr 22%; margin:46px 0 90px; }.case-study-summary>p { grid-column:2/4; max-width:760px; margin:0; font-size:clamp(2rem,4vw,4.1rem); line-height:.95; letter-spacing:-.07em; }.case-study-summary dl { grid-column:3; margin:55px 0 0; }.case-study-summary dl div { display:flex; justify-content:space-between; gap:15px; border-top:1px solid rgba(8,8,10,.25); padding:9px 0; font:10px "DM Mono",monospace; text-transform:uppercase; }.case-study-summary dt,.case-study-summary dd { margin:0; }.case-study-sections { margin-left:22%; border-top:1px solid rgba(8,8,10,.25); }.case-study-sections article { display:grid; grid-template-columns:14% 1fr; gap:20px; padding:36px 0 42px; border-bottom:1px solid rgba(8,8,10,.25); }.case-study-sections article>span { font:10px "DM Mono",monospace; color:var(--blue); }.case-study-sections h2 { margin:0 0 13px; font-size:clamp(1.8rem,3vw,3.4rem); line-height:.95; letter-spacing:-.07em; }.case-study-sections p { max-width:610px; margin:0; font-size:15px; line-height:1.65; }
 @media (max-width: 720px) {
   .subpage-hero {
     padding: 20px;
@@ -626,6 +627,7 @@ footer {
     padding: 20px;
     font-size: 8px;
   }
+  .case-study-hero { min-height:78svh; padding:20px 20px 45px; }.case-study-grid { display:block; padding-top:16vh; }.case-study-grid h1 { margin-top:48px; font-size:16vw; }.case-study-intro { margin-top:45px; }.case-study-body { padding:70px 20px 80px; }.case-study-summary { display:block; margin:32px 0 60px; }.case-study-summary dl { margin-top:40px; }.case-study-sections { margin-left:0; }.case-study-sections article { grid-template-columns:34px 1fr; padding:28px 0 34px; }
   .site-footer span:nth-child(2) {
     display: none;
   }

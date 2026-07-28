@@ -19,6 +19,31 @@ export function isPdfFile(file: Pick<File, "name" | "type">) {
   );
 }
 
+export function fileIdentity(
+  file: Pick<File, "name" | "size" | "lastModified">,
+) {
+  return `${file.name}:${file.size}:${file.lastModified}`;
+}
+
+export function addUniqueFiles(
+  current: PdfItem[],
+  files: File[],
+): { items: PdfItem[]; duplicates: number } {
+  const seen = new Set(current.map(({ file }) => fileIdentity(file)));
+  const additions: PdfItem[] = [];
+  let duplicates = 0;
+
+  for (const file of files) {
+    const identity = fileIdentity(file);
+    if (seen.has(identity)) {
+      duplicates += 1;
+      continue;
+    }
+    seen.add(identity);
+    additions.push({ id: crypto.randomUUID(), file });
+  }
+  return { items: [...current, ...additions], duplicates };
+}
 export function formatBytes(bytes: number) {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
   return `${(bytes / (1024 * 1024)).toLocaleString("de-DE", { maximumFractionDigits: 1 })} MB`;

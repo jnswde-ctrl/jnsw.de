@@ -3,6 +3,7 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { mergePdfSources, pdfErrorMessage } from "./mergePdf";
 import {
+  addUniqueFiles,
   formatBytes,
   isPdfFile,
   moveItem,
@@ -56,16 +57,15 @@ export function PdfMergeTool() {
     const valid = selected.filter(isPdfFile);
     const invalid = selected.length - valid.length;
     resetFeedback();
-    setItems((current) => [
-      ...current,
-      ...valid.map((file) => ({ id: crypto.randomUUID(), file })),
-    ]);
-    if (invalid > 0) {
+    const result = addUniqueFiles(items, valid);
+    setItems(result.items);
+    if (invalid > 0 || result.duplicates > 0) {
       setStatus("error");
       setMessage(
-        invalid === 1
-          ? "Eine Datei wurde nicht hinzugefügt, weil sie keine PDF-Datei ist."
-          : `${invalid} Dateien wurden nicht hinzugefügt, weil sie keine PDF-Dateien sind.`,
+        [
+          invalid > 0 && `${invalid} Datei${invalid === 1 ? "" : "en"} wurde${invalid === 1 ? "" : "n"} nicht hinzugefügt, weil ${invalid === 1 ? "sie keine PDF-Datei ist" : "es keine PDF-Dateien sind"}.`,
+          result.duplicates > 0 && `${result.duplicates} bereits ausgewählte Datei${result.duplicates === 1 ? " wurde" : "en wurden"} nicht doppelt hinzugefügt.`,
+        ].filter(Boolean).join(" "),
       );
     }
     event.target.value = "";
@@ -169,6 +169,7 @@ export function PdfMergeTool() {
                   ? "Mindestens 2 Dateien erforderlich"
                   : `${items.length} Dateien bereit`}
               </span>
+              {items.length > 0 && <button type="button" className="button button-secondary" onClick={() => { resetFeedback(); setItems([]); }}>Auswahl leeren</button>}
               <button
                 type="button"
                 className="button button-primary"

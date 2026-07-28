@@ -24,6 +24,7 @@ export default function PdfMergePage() {
             Bringe mehrere PDFs in die richtige Reihenfolge und lade sie als
             eine Datei herunter.
           </p>
+          <a className="pdf-case-link" href="/projekte/pdf-tool">Zur Case Study →</a>
         </div>
       </section>
       <section className="pdf-tool-section" aria-labelledby="pdf-tool-title">
