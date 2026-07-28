@@ -5,12 +5,12 @@ export default function InformationenPage() {
       label="Informationen"
       title={
         <>
-          Wissen,
+          Notizen,
           <br />
-          das <em>wirkt.</em>
+          die <em>folgen.</em>
         </>
       }
-      intro="Gedanken zu Marken, digitalen Produkten und der Arbeit dazwischen. Direkt, praktisch und ohne Buzzwords."
+      intro="Dieser Bereich entsteht mit den ersten veröffentlichten Beiträgen zu digitalen Produkten, Werkzeugen und ihrer Umsetzung."
     />
   );
 }

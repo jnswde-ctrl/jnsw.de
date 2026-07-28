@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const links = [
+  ["Projekte", "/projekte"],
   ["Tools", "/tools"],
-  ["Informationen", "/informationen"],
-  ["Community", "/community"],
+  ["Über", "/#ueber"],
 ];
 
 export function SiteNav() {
