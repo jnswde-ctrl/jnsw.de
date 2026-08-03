@@ -2,14 +2,9 @@
 
 ## Projektzweck
 
-JNSW.DE ist eine deutschsprachige Portfolio- und Community-Website für digitale Produkte, Markenidentitäten, Werkzeuge und Informationen.
+JNSW.DE ist eine deutschsprachige Portfolio- und Community-Plattform für digitale Produkte, Werkzeuge und Informationen.
 
-Der öffentliche Bereich umfasst derzeit:
-
-- die Startseite
-- `/tools`
-- `/informationen`
-- `/community`
+Die öffentliche Haupterfahrung ist eine zusammenhängende One-Page-Plattform unter `/`. Projekte, Tools, Informationen und Community sind Scroll-Abschnitte derselben Seite. Das feste Menü fokussiert diese Abschnitte per Smooth-Scroll ohne Seitenwechsel. Detailrouten wie `/tools/pdf-zusammenfuegen` und `/projekte/pdf-tool` bleiben als direkte Einstiege für einzelne Produkte und Case Studies bestehen.
 
 Zusätzlich existiert eine Backend-Grundlage für Benutzerkonten, Sitzungen und Administration. Eine sichtbare Login-, Profil- oder Admin-Oberfläche ist noch nicht vorhanden.
 
@@ -17,12 +12,11 @@ Zusätzlich existiert eine Backend-Grundlage für Benutzerkonten, Sitzungen und 
 
 - `app/`: Next.js App Router, Seiten, gemeinsame UI und globale Styles
 - `app/api/`: Route Handler für Authentifizierung, Konto und Administration
-- `app/_sites-preview/`: isolierte Vorschau des ursprünglichen Sites-Starters
 - `db/`: Drizzle-Schema sowie Benutzer- und Sitzungszugriff
 - `drizzle/`: versionierte D1-/SQLite-Migrationen
 - `worker/`: Cloudflare-Worker-Einstiegspunkt
 - `build/`: projektspezifisches Vite-Plugin für Sites-Builds
-- `docs/`: fachliche Dokumentation
+- `docs/`: fachliche Dokumentation und Gestaltungsrichtlinien
 - `tests/`: Tests mit dem Node.js-Test-Runner
 - `public/`: statische Dateien
 - `.openai/hosting.json`: Sites-Projekt und D1-Binding
@@ -55,12 +49,10 @@ npm run lint
 npm run db:generate
 ```
 
-Bedeutung:
-
 - `npm run dev`: lokale vinext-Entwicklung starten
 - `npm run build`: Produktions-Build erzeugen
 - `npm run start`: gebauten Stand starten
-- `npm test`: zuerst bauen, danach `tests/rendered-html.test.mjs` ausführen
+- `npm test`: baut zuerst und führt die Unit-Tests aus
 - `npm run lint`: ESLint ausführen
 - `npm run db:generate`: Drizzle-Migrationen aus `db/schema.ts` generieren
 
@@ -69,100 +61,64 @@ Bedeutung:
 ## Architekturkonventionen
 
 - Seiten und Layouts verwenden den Next.js App Router unter `app/`.
-- Gemeinsame Navigation liegt in `app/SiteNav.tsx`.
-- Die Bereichsseiten verwenden `app/SectionPage.tsx`.
+- Die Plattformstartseite in `app/page.tsx` ist die primäre öffentliche Navigationserfahrung.
+- Gemeinsame Navigation liegt in `app/SiteNav.tsx`. Sie verwendet Abschnittsanker und darf auf der Startseite keine Routenwechsel auslösen.
+- Abschnitts-IDs und Menüpunkte bleiben synchron: `top`, `projekte`, `tools`, `informationen`, `community`.
+- Direkte Detailrouten ergänzen die Plattform, ersetzen aber nicht die Scroll-Navigation.
 - Serverseitige API-Endpunkte liegen als Route Handler unter `app/api/`.
-- Datenbankzugriffe werden in `db/` gekapselt.
-- Das zentrale Schema liegt in `db/schema.ts`.
+- Datenbankzugriffe werden in `db/` gekapselt; das zentrale Schema liegt in `db/schema.ts`.
 - Schemaänderungen benötigen eine passende Migration unter `drizzle/`.
-- Das Cloudflare-D1-Binding heißt `DB`.
-- Der Worker delegiert reguläre Requests an vinext.
-- Öffentliche Seiten verwenden derzeit Server Components; Client Components nur bei tatsächlichem clientseitigem Verhalten einführen.
+- Das Cloudflare-D1-Binding heißt `DB`; der Worker delegiert reguläre Requests an vinext.
+- Öffentliche Seiten verwenden Server Components. Client Components sind nur für tatsächliches clientseitiges Verhalten wie Menüstatus, Dialoge oder Formulare erlaubt.
 - UTF-8 verwenden und bestehende Zeichenkodierungsfehler nicht weiterverbreiten.
 
 ## Design und Komponenten
 
-Die zentralen Designregeln stehen in `app/globals.css`.
+Die verbindliche Gestaltungsrichtlinie liegt in `docs/design-richtlinie.md`; sie geht allgemeinen Stilpräferenzen vor.
 
-Vorhandene Farbvariablen:
-
-- `--ink: #08080a`
-- `--paper: #f4f0e7`
-- `--blue: #3157ff`
-- `--acid: #b8ff62`
-- `--line: rgba(244,240,231,.18)`
-
-Typografie:
-
-- Manrope für Überschriften und Fließtext
-- DM Mono für Navigation, Labels und Metadaten
-- Georgia als kursiver Editorial-Akzent
-
-Bestehende gemeinsame Komponenten und Muster wiederverwenden, insbesondere:
-
-- `SiteNav`
-- `SectionPage`
-- `.eyebrow`
-- Hero- und Footer-Strukturen
-- vorhandene CSS-Variablen
-- den mobilen Breakpoint bei `720px`
-
-Tailwind ist konfiguriert, die aktuelle Oberfläche verwendet jedoch überwiegend globale CSS-Klassen. Eine verbindliche Strategie für neue Styles ist ein offener Punkt.
+- Oberfläche durchgehend dunkel: `--ink`, `--surface` und `--surface-raised` sind die einzigen Flächenebenen.
+- `--paper` ist Text- und Kontrastfarbe, kein großflächiger Hintergrund.
+- `--blue` steht für Fokus und räumliche Tiefe; `--acid` für primäre Aktionen und kleine Statussignale.
+- Der Seitenhintergrund muss zwischen Abschnitten fließend bleiben. Keine harten Farbwechsel, die getrennte Seiten suggerieren.
+- Das feste Menü bleibt beim Scrollen sichtbar, kennzeichnet den aktuellen Abschnitt und respektiert Tastaturfokus sowie `prefers-reduced-motion`.
+- Den PDF-Dialog als Referenz für dunkle Arbeitsflächen, feine Linien und Interaktionszustände verwenden.
+- Vorhandene Klassen, `SiteNav`, `.eyebrow`, Hero-/Footer-Strukturen und den mobilen Breakpoint bei `720px` wiederverwenden.
+- Tailwind ist konfiguriert; neue Styles folgen weiterhin den bestehenden globalen CSS-Klassen, bis eine andere Strategie beschlossen wird.
 
 ## Authentifizierung und sensible Daten
 
-Es bestehen zwei Anmeldewege:
-
-- E-Mail und Passwort
-- von der Hostingplattform bereitgestelltes „Sign in with ChatGPT“
-
-Regeln:
+Es bestehen zwei Anmeldewege: E-Mail/Passwort sowie „Sign in with ChatGPT“ der Hostingplattform.
 
 - Die zentrale Benutzerauflösung erfolgt über `app/auth.ts`.
-- ChatGPT-Identitäts-Header werden ausschließlich hinter der vorgesehenen Hostingplattform als vertrauenswürdig behandelt.
+- ChatGPT-Identitäts-Header sind nur hinter der vorgesehenen Hostingplattform vertrauenswürdig.
 - Die reservierten Pfade `/signin-with-chatgpt`, `/signout-with-chatgpt` und `/callback` nicht als eigene App-Routen implementieren.
-- Passwörter ausschließlich über die Funktionen in `app/passwords.ts` verarbeiten.
-- Sitzungstoken nur gehasht speichern.
-- Sitzungen über das Cookie `jnsw_session` verwalten.
-- API-Antworten müssen `publicUser()` verwenden, wenn ein Benutzerobjekt zurückgegeben wird.
+- Passwörter ausschließlich über `app/passwords.ts` verarbeiten.
+- Sitzungstoken nur gehasht speichern und über das Cookie `jnsw_session` verwalten.
+- API-Antworten verwenden für Benutzer `publicUser()`.
 - Rollen- und Statusprüfungen für Admin-Endpunkte nicht umgehen.
 - Secrets und lokale Umgebungsdateien nicht committen; `.env*` ist ignoriert.
-- Schreibende Auth-Endpunkte verwenden eine Same-Origin-Prüfung. Die noch fehlende konsistente Prüfung anderer schreibender Endpunkte ist ein offener Sicherheitsaspekt.
-- Die sichere Verknüpfung von ChatGPT- und Passwortkonten ist ein offener Punkt.
+- Schreibende Endpunkte benötigen eine Same-Origin-Prüfung.
 
 ## Tests und Verifikation
 
-Vor Abschluss einer Änderung mindestens die für den Umfang relevanten Prüfungen ausführen:
+Vor Abschluss einer Änderung mindestens die relevanten Prüfungen ausführen:
 
 - `npm run lint`
 - `npm run build`
-- `npm test`, wenn die Änderung den Build, gerendertes HTML oder getestete Komponenten betrifft
-- `npm run db:generate`, wenn `db/schema.ts` geändert wurde; die erzeugte Migration prüfen
+- `npm test`, wenn Build, gerendertes HTML oder getestete Komponenten betroffen sind
+- `npm run db:generate`, wenn `db/schema.ts` geändert wurde; die Migration anschließend prüfen
 
-Die bestehenden HTML-Tests beziehen sich teilweise noch auf den ursprünglichen Starter und müssen vor ihrer Verwendung als verlässliche Abnahme aktualisiert werden.
-
-Frontend-Änderungen zusätzlich in den betroffenen Desktop- und Mobilansichten visuell prüfen. Ein festgelegter Browser-, Accessibility- oder Performance-Prüfstandard ist noch offen.
+Frontend-Änderungen auf Desktop und Mobil visuell prüfen. Für die Scroll-Plattform zusätzlich kontrollieren: Menü bleibt sichtbar, aktive Abschnittsmarkierung folgt dem Scrollen, jeder Menüpunkt fokussiert den korrekten Abschnitt und es entstehen keine Seitenwechsel.
 
 ## Definition of Done
 
-Eine Änderung ist abgeschlossen, wenn:
-
-- der beauftragte Funktionsumfang umgesetzt ist
-- bestehende gemeinsame Komponenten und Architekturgrenzen eingehalten wurden
-- keine Secrets oder sensiblen Benutzerdaten offengelegt werden
-- notwendige Schemaänderungen eine geprüfte Migration besitzen
-- relevante Dokumentation aktualisiert wurde
-- die anwendbaren Lint-, Build- und Testprüfungen erfolgreich sind
-- bekannte nicht ausgeführte oder fehlschlagende Prüfungen ausdrücklich dokumentiert sind
-- betroffene Oberflächen auf Desktop und Mobil visuell geprüft wurden
-- keine unbeabsichtigten Änderungen an generierten oder fremden Dateien enthalten sind
+Eine Änderung ist abgeschlossen, wenn der beauftragte Umfang umgesetzt ist, Architektur- und Sicherheitsgrenzen eingehalten sind, relevante Dokumentation aktualisiert wurde, die anwendbaren Prüfungen erfolgreich sind und bekannte nicht ausgeführte Prüfungen dokumentiert sind.
 
 ## Offene Punkte
 
-- verbindliche Stylingstrategie für globale CSS-Klassen und Tailwind
 - Zielumfang und Zugriffsmodell des Community-Bereichs
 - Browser- und Geräteunterstützung
-- Accessibility- und Performance-Anforderungen
+- verbindliche Accessibility- und Performance-Anforderungen
 - E-Mail-Verifikation und Passwort-Reset
 - sichere Verknüpfung der beiden Anmeldewege
 - verbindlicher Deployment- und D1-Migrationsprozess
