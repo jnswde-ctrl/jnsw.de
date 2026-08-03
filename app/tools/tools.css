@@ -345,7 +345,8 @@
   opacity: 0.35;
 }
 .button-primary {
-  background: var(--paper);
+  border-color: var(--acid);
+  background: var(--acid);
   color: var(--ink);
   min-width: 220px;
 }
