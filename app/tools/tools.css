@@ -224,14 +224,14 @@
   text-transform: uppercase;
   text-align: left;
 }
-.wizard-progress button span {
+.wizard-step-number {
   color: inherit;
 }
 .wizard-progress button.is-active {
   color: var(--paper);
 }
-.wizard-progress button.is-active span,
-.wizard-progress button.is-complete span {
+.wizard-progress button.is-active .wizard-step-number,
+.wizard-progress button.is-complete .wizard-step-number {
   color: var(--acid);
 }
 .wizard-progress button.is-complete {
@@ -343,6 +343,12 @@
 .file-actions button:disabled {
   cursor: not-allowed;
   opacity: 0.35;
+}
+.button-primary:disabled {
+  border-color: #354c21;
+  background: #354c21;
+  color: rgba(244, 240, 231, 0.62);
+  opacity: 1;
 }
 .button-primary {
   border-color: var(--acid);
@@ -650,30 +656,41 @@
     display: block;
   }
   .wizard-progress {
-    position: sticky;
-    top: 76px;
-    z-index: 2;
-    padding: 0 16px;
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    padding: 16px 20px;
     border-right: 0;
     border-bottom: 1px solid var(--line);
-    flex-direction: row;
     background: #0d0d10;
   }
   .wizard-progress button {
-    flex: 1;
-    padding: 14px 0;
+    min-width: 0;
+    padding: 0;
     border-bottom: 0;
     gap: 7px;
-    font-size: 8px;
+    font-size: 0.75rem;
+  }
+  .wizard-progress button:disabled { opacity: 1; }
+  .wizard-step-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .wizard-panel {
-    padding: 32px 20px 50px;
+    padding: 40px max(20px, env(safe-area-inset-right)) max(50px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   }
   .wizard-step h3 {
-    font-size: 12vw;
+    max-width: 10ch;
+    font-size: clamp(2.75rem, 13vw, 4rem);
+    line-height: 0.92;
+    letter-spacing: -0.055em;
+    text-wrap: balance;
   }
   .file-drop-button {
-    min-height: 130px;
+    min-height: 152px;
+    padding: 24px;
   }
   .wizard-actions,
   .wizard-actions-split {
@@ -706,7 +723,8 @@
   }
   .pdf-tool-heading h1 {
     margin-top: 38px;
-    font-size: 17vw;
+    max-width: 100%;
+    font-size: clamp(3rem, 12vw, 4.5rem);
   }
   .pdf-tool-heading > p:last-child {
     margin-top: 35px;

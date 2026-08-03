@@ -29,6 +29,7 @@ export function PdfMergeTool() {
   const inputRef = useRef<HTMLInputElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const urlRef = useRef<string | null>(null);
+  const filesNeeded = Math.max(0, 2 - items.length);
 
   const clearResult = () => {
     if (urlRef.current) URL.revokeObjectURL(urlRef.current);
@@ -121,8 +122,10 @@ export function PdfMergeTool() {
             disabled={number > step || status === "processing"}
             aria-current={step === number ? "step" : undefined}
           >
-            <span>{String(number).padStart(2, "0")}</span>
-            {label}
+            <span className="wizard-step-number">
+              {String(number).padStart(2, "0")}
+            </span>
+            <span className="wizard-step-label">{label}</span>
           </button>
         ))}
       </nav>
@@ -164,9 +167,9 @@ export function PdfMergeTool() {
               </small>
             </button>
             <div className="wizard-actions">
-              <span>
-                {items.length < 2
-                  ? "Mindestens 2 Dateien erforderlich"
+              <span id="wizard-file-requirement">
+                {filesNeeded > 0
+                  ? `Wähle noch ${filesNeeded} PDF-Datei${filesNeeded === 1 ? "" : "en"} aus.`
                   : `${items.length} Dateien bereit`}
               </span>
               {items.length > 0 && <button type="button" className="button button-secondary" onClick={() => { resetFeedback(); setItems([]); }}>Auswahl leeren</button>}
@@ -175,6 +178,7 @@ export function PdfMergeTool() {
                 className="button button-primary"
                 onClick={() => goTo(2)}
                 disabled={items.length < 2}
+                aria-describedby="wizard-file-requirement"
               >
                 Weiter zur Reihenfolge
               </button>
