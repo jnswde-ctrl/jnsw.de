@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { SiteNav } from "../../SiteNav";
-import { PdfMergeTool } from "./PdfMergeTool";
+import { PdfWorkbench } from "./PdfWorkbench";
 
 export const metadata: Metadata = {
-  title: "PDF zusammenfügen – kostenlos & lokal | JNSW.DE",
+  title: "PDF-Werkbank – kostenlos & lokal | JNSW.DE",
   description:
-    "Mehrere PDF-Dateien kostenlos direkt im Browser zusammenfügen. Ohne Upload, Konto oder Serververarbeitung.",
+    "PDF-Dateien lokal verbinden, benennen und gesammelt als ZIP exportieren. Ohne Upload, Konto oder Serververarbeitung.",
 };
 
 export default function PdfMergePage() {
@@ -18,11 +18,10 @@ export default function PdfMergePage() {
           <h1>
             PDF
             <br />
-            <em>zusammenfügen.</em>
+            <em>Werkbank.</em>
           </h1>
           <p>
-            Bringe mehrere PDFs in die richtige Reihenfolge und lade sie als
-            eine Datei herunter.
+            Wähle zuerst die Aufgabe: Dokumente verbinden oder Dateien einheitlich umbenennen und als ZIP bündeln.
           </p>
           <a className="pdf-case-link" href="/projekte/pdf-tool">Zur Case Study →</a>
         </div>
@@ -44,7 +43,7 @@ export default function PdfMergePage() {
             </p>
           </div>
         </div>
-        <PdfMergeTool />
+        <PdfWorkbench />
         <aside className="device-note">
           <p className="eyebrow">Hinweis zur Dateigröße</p>
           <p>

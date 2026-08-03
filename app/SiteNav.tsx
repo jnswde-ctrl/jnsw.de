@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const links = [
-  ["Projekte", "projekte"],
   ["Tools", "tools"],
   ["Informationen", "informationen"],
   ["Community", "community"],
@@ -35,9 +35,9 @@ export function SiteNav() {
 
   return (
     <nav className="nav" aria-label="Hauptnavigation">
-      <a className="wordmark" href="#top" onClick={(event) => { event.preventDefault(); scrollToSection("top"); }}>
+      <Link className="wordmark" href="/#top" onClick={(event) => { if (document.getElementById("top")) { event.preventDefault(); scrollToSection("top"); } }}>
         JNSW<span>.DE</span>
-      </a>
+      </Link>
       <div className="nav-links">
         {links.map(([label, id]) => (
           <a href={`#${id}`} key={id} aria-current={activeSection === id ? "page" : undefined} onClick={(event) => { event.preventDefault(); scrollToSection(id); }}>

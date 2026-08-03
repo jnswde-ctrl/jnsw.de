@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { PdfMergeTool } from "./pdf-zusammenfuegen/PdfMergeTool";
+import { PdfWorkbench } from "./pdf-zusammenfuegen/PdfWorkbench";
 
 export function ToolsExperience() {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -27,14 +27,13 @@ export function ToolsExperience() {
           onClick={() => dialogRef.current?.showModal()}
         >
           <span className="tool-index">01</span>
-          <span className="tool-title">PDF zusammenfügen</span>
-          <span className="tool-meta">PDF · Lokal im Browser</span>
+          <span className="tool-title">PDF-Werkbank</span>
+          <span className="tool-meta">Verbinden · umbenennen · ZIP · lokal</span>
           <span className="tool-arrow" aria-hidden="true">
             ↗
           </span>
         </button>
       </section>
-
       <dialog
         ref={dialogRef}
         className="tool-dialog"
@@ -49,7 +48,7 @@ export function ToolsExperience() {
           <header className="tool-workspace-header">
             <div>
               <p className="eyebrow">JNSW.DE / Tools / PDF</p>
-              <h2 id="pdf-workspace-title">PDF zusammenfügen</h2>
+              <h2 id="pdf-workspace-title">PDF-Werkbank</h2>
             </div>
             <p className="workspace-privacy">
               <span aria-hidden="true">●</span> Verarbeitung lokal im Browser
@@ -65,7 +64,7 @@ export function ToolsExperience() {
             </button>
           </header>
           <div className="tool-workspace-body">
-            <PdfMergeTool />
+            <PdfWorkbench />
           </div>
         </div>
       </dialog>

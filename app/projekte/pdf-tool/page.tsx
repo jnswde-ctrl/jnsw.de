@@ -4,15 +4,15 @@ import { PdfToolLauncher } from "../../tools/PdfToolLauncher";
 const parts = [
   [
     "Problem",
-    "Viele Dienste verlangen für das Zusammenführen von PDFs einen Upload oder ein Konto.",
+    "Viele PDF-Dienste verlangen für das Zusammenführen oder Aufbereiten von Dateien einen Upload oder ein Konto.",
   ],
   [
     "Datenschutzentscheidung",
-    "Die Verarbeitung findet ausschließlich lokal im Browser statt. Inhalte, Dateinamen und Ergebnis verlassen das Gerät nicht.",
+    "Die Verarbeitung findet ausschließlich lokal im Browser statt. Inhalte, Dateinamen, ZIP-Archive und Ergebnisse verlassen das Gerät nicht.",
   ],
   [
     "Technische Umsetzung",
-    "Die Dateien bleiben im Arbeitsspeicher; eine PDF-Bibliothek kopiert ihre Seiten in der gewählten Reihenfolge. Dabei gibt es keine Netzwerkanfragen.",
+    "Die Werkbank beginnt mit einer Funktionswahl: PDFs verbinden oder umbenennen. Beim Verbinden wird die Reihenfolge festgelegt und ein Downloadname vergeben; beim Umbenennen bündelt ein ZIP-Archiv die Dateien mit ihren neuen Namen.",
   ],
   [
     "Grenzen",
@@ -28,7 +28,7 @@ export default function PdfToolCaseStudy() {
         <div className="case-study-grid">
           <p className="eyebrow">JNSW.DE / PROJEKTE / 01</p>
           <h1>
-            Ein PDF-Tool,
+            Eine PDF-Werkbank,
             <br />
             das <em>nicht</em> hochlädt.
           </h1>
@@ -74,7 +74,7 @@ export default function PdfToolCaseStudy() {
       <footer className="site-footer">
         <span>© 2026 JNSW.DE</span>
         <span>Case Study 01</span>
-        <PdfToolLauncher className="button" label="PDF-Tool öffnen" />
+        <PdfToolLauncher className="button" label="PDF-Werkbank öffnen" />
       </footer>
     </main>
   );

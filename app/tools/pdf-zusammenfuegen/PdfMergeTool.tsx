@@ -14,18 +14,27 @@ import {
 type Status = "idle" | "processing" | "success" | "error";
 type Step = 1 | 2 | 3;
 
+const downloadName = (value: string) => {
+  const stem = value.replace(/\.pdf$/i, "").replace(/[\\/:*?"<>|]/g, "-").trim();
+  return `${stem || "zusammengefuehrt"}.pdf`;
+};
+
 const steps = [
-  { number: 1, label: "Auswählen" },
   { number: 2, label: "Sortieren" },
   { number: 3, label: "Ergebnis" },
 ] as const;
 
-export function PdfMergeTool() {
-  const [items, setItems] = useState<PdfItem[]>([]);
-  const [step, setStep] = useState<Step>(1);
+type PdfMergeToolProps = {
+  items: PdfItem[];
+  setItems: React.Dispatch<React.SetStateAction<PdfItem[]>>;
+};
+
+export function PdfMergeTool({ items, setItems }: PdfMergeToolProps) {
+  const [step, setStep] = useState<Step>(2);
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [fileName, setFileName] = useState("zusammengefuehrt");
   const inputRef = useRef<HTMLInputElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const urlRef = useRef<string | null>(null);
@@ -196,7 +205,9 @@ export function PdfMergeTool() {
               Die Reihenfolge von oben nach unten wird in die neue PDF
               übernommen.
             </p>
-            <ol
+            <details className="merge-order">
+              <summary>Reihenfolge prüfen und ändern <span>{items.length} Dateien</span></summary>
+              <ol
               className="wizard-file-list"
               aria-label="Ausgewählte PDF-Dateien"
             >
@@ -246,15 +257,9 @@ export function PdfMergeTool() {
                   </span>
                 </li>
               ))}
-            </ol>
+              </ol>
+            </details>
             <div className="wizard-actions wizard-actions-split">
-              <button
-                type="button"
-                className="button button-secondary"
-                onClick={() => goTo(1)}
-              >
-                Zurück
-              </button>
               <button
                 type="button"
                 className="button button-primary"
@@ -289,6 +294,23 @@ export function PdfMergeTool() {
                 <small>Keine Übertragung · keine Speicherung</small>
               </div>
             </div>
+            <details className="merge-order merge-order-result">
+              <summary>Reihenfolge anzeigen oder ändern <span>{items.length} Dateien</span></summary>
+              <ol className="wizard-file-list" aria-label="Gewählte PDF-Reihenfolge">
+                {items.map((item, index) => <li key={item.id}><span className="file-position">{String(index + 1).padStart(2, "0")}</span><span className="file-name"><strong>{item.file.name}</strong><small>{formatBytes(item.file.size)}</small></span></li>)}
+              </ol>
+              <button type="button" className="button button-secondary" onClick={() => goTo(2)} disabled={status === "processing"}>Reihenfolge bearbeiten</button>
+            </details>
+            <label className="merge-file-name">
+              <span>Dateiname für den Download</span>
+              <input
+                value={fileName}
+                onChange={(event) => setFileName(event.target.value)}
+                placeholder="zusammengefuehrt"
+                disabled={status === "processing"}
+              />
+              <small>{downloadName(fileName)}</small>
+            </label>
             <div
               className={`merge-status merge-status-${status}`}
               role={status === "error" ? "alert" : "status"}
@@ -313,7 +335,7 @@ export function PdfMergeTool() {
                 <a
                   className="button button-primary"
                   href={downloadUrl}
-                  download="zusammengefuehrt.pdf"
+                  download={downloadName(fileName)}
                 >
                   PDF herunterladen
                 </a>

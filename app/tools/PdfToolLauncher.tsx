@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { PdfMergeTool } from "./pdf-zusammenfuegen/PdfMergeTool";
+import { PdfWorkbench } from "./pdf-zusammenfuegen/PdfWorkbench";
 
 export function PdfToolLauncher({
   className = "",
@@ -38,7 +38,7 @@ export function PdfToolLauncher({
           <header className="tool-workspace-header">
             <div>
               <p className="eyebrow">JNSW.DE / Tools / PDF</p>
-              <h2 id="project-pdf-tool-title">PDF zusammenfügen</h2>
+              <h2 id="project-pdf-tool-title">PDF-Werkbank</h2>
             </div>
             <p className="workspace-privacy">
               <span aria-hidden="true">●</span> Verarbeitung lokal im Browser
@@ -54,7 +54,7 @@ export function PdfToolLauncher({
             </button>
           </header>
           <div className="tool-workspace-body">
-            <PdfMergeTool />
+            <PdfWorkbench />
           </div>
         </div>
       </dialog>
