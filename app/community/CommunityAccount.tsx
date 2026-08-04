@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 
-type User = { displayName: string; status: "active" | "suspended" };
+type User = { displayName: string; status: "active" | "suspended"; emailVerifiedAt: string | null };
 export function CommunityAccount({ initialUser }: { initialUser: User | null }) {
   const [user, setUser] = useState(initialUser);
   const [mode, setMode] = useState<"login" | "register">("register");
@@ -14,6 +14,11 @@ export function CommunityAccount({ initialUser }: { initialUser: User | null }) 
     const response = await fetch(`/api/auth/${mode}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
     const result = await response.json(); setBusy(false);
     if (!response.ok) return setMessage(result.error ?? "Bitte erneut versuchen.");
+    if (mode === "register") {
+      event.currentTarget.reset(); setMode("login");
+      return setMessage(result.message ?? "Bitte bestätige deine E-Mail-Adresse.");
+    }
+    if (!result.user) return setMessage(result.message ?? "Bitte prüfe dein Postfach.");
     setUser(result.user); setMessage("");
   }
   async function logout() { await fetch("/api/auth/logout", { method: "POST" }); setUser(null); }

@@ -1,11 +1,10 @@
-import { createSession } from "../../../../db/sessions";
 import {
   createPasswordUser,
   findUserByEmail,
   normalizeEmail,
-  updatePassword,
 } from "../../../../db/users";
-import { publicUser, sessionCookie } from "../../../auth";
+import { createEmailVerificationToken } from "../../../../db/email-verification";
+import { sendVerificationEmail } from "../../../mail";
 import { isSameOrigin } from "../../../request-security";
 import { hashPassword, isValidPassword } from "../../../passwords";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -42,14 +41,15 @@ export async function POST(request: Request) {
       { status: 409 },
     );
   const passwordHash = await hashPassword(password);
-  const user = existing
-    ? await updatePassword(existing.id, passwordHash)
-    : await createPasswordUser({ email, displayName, passwordHash });
-  const session = await createSession(user.id);
-  const response = Response.json({ user: publicUser(user) }, { status: 201 });
-  response.headers.append(
-    "Set-Cookie",
-    sessionCookie(session.token, session.expiresAt),
-  );
-  return response;
+  const user = await createPasswordUser({ email, displayName, passwordHash });
+  const { token } = await createEmailVerificationToken(user.id);
+  const verificationUrl = new URL("/verify-email", request.url);
+  verificationUrl.searchParams.set("token", token);
+  try {
+    await sendVerificationEmail({ to: user.email, verificationUrl: verificationUrl.toString() });
+  } catch (error) {
+    console.error("Unable to send verification email", error);
+    return Response.json({ error: "Dein Konto wurde angelegt, aber die Bestätigungs-E-Mail konnte nicht gesendet werden. Bitte versuche die Anmeldung später erneut." }, { status: 503 });
+  }
+  return Response.json({ message: "Dein Konto ist angelegt. Bitte bestätige jetzt die E-Mail-Adresse über den Link in deinem Postfach." }, { status: 201 });
 }

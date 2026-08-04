@@ -10,7 +10,7 @@ export function isActiveAdmin(user: AppUser) {
   return user.role === "admin" && user.status === "active";
 }
 export function publicUser(user: AppUser) {
-  return { id: user.id, displayName: user.displayName, role: user.role, status: user.status, createdAt: user.createdAt, updatedAt: user.updatedAt, lastSignedInAt: user.lastSignedInAt };
+  return { id: user.id, displayName: user.displayName, role: user.role, status: user.status, emailVerifiedAt: user.emailVerifiedAt, createdAt: user.createdAt, updatedAt: user.updatedAt, lastSignedInAt: user.lastSignedInAt };
 }
 export function sessionCookie(token: string, expiresAt: string) {
   return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Expires=${new Date(expiresAt).toUTCString()}`;

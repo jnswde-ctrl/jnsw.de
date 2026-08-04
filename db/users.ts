@@ -20,7 +20,7 @@ export async function findOrCreateUser(identity: {
   if (existing) {
     const [user] = await db
       .update(users)
-      .set({ lastSignedInAt: now, updatedAt: now })
+      .set({ lastSignedInAt: now, emailVerifiedAt: now, updatedAt: now })
       .where(eq(users.id, existing.id))
       .returning();
     return user;
@@ -31,6 +31,7 @@ export async function findOrCreateUser(identity: {
       id: crypto.randomUUID(),
       email,
       displayName: identity.displayName.trim().slice(0, 100) || email,
+      emailVerifiedAt: now,
       lastSignedInAt: now,
     })
     .returning();
