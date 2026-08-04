@@ -1,5 +1,6 @@
 const encoder = new TextEncoder();
-const iterations = 600000;
+// Cloudflare Workers support PBKDF2 with at most 100,000 iterations.
+const iterations = 100000;
 function bytesToBase64(bytes: Uint8Array) {
   let text = "";
   for (const byte of bytes) text += String.fromCharCode(byte);
