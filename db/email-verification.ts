@@ -1,4 +1,4 @@
-import { eq, lt } from "drizzle-orm";
+import { and, eq, gt, lt } from "drizzle-orm";
 import { getDb } from ".";
 import { hashToken, randomToken } from "./sessions";
 import { emailVerificationTokens, users } from "./schema";
@@ -16,14 +16,18 @@ export async function createEmailVerificationToken(userId: string) {
 
 export async function verifyEmailAddress(token: string) {
   const db = getDb();
-  const record = await db.query.emailVerificationTokens.findFirst({ where: eq(emailVerificationTokens.tokenHash, await hashToken(token)) });
-  if (!record || record.expiresAt <= new Date().toISOString()) {
-    if (record) await db.delete(emailVerificationTokens).where(eq(emailVerificationTokens.id, record.id));
-    return false;
-  }
   const now = new Date().toISOString();
+  const [record] = await db
+    .delete(emailVerificationTokens)
+    .where(
+      and(
+        eq(emailVerificationTokens.tokenHash, await hashToken(token)),
+        gt(emailVerificationTokens.expiresAt, now),
+      ),
+    )
+    .returning({ userId: emailVerificationTokens.userId });
+  if (!record) return false;
   await db.update(users).set({ emailVerifiedAt: now, updatedAt: now }).where(eq(users.id, record.userId));
-  await db.delete(emailVerificationTokens).where(eq(emailVerificationTokens.id, record.id));
   return true;
 }
 
