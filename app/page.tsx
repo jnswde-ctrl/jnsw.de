@@ -17,7 +17,7 @@ export default async function Home() {
           <h1>Kleine Produkte.<br />Klar <em>gemacht.</em><span>.</span></h1>
           <div className="hero-note"><p>JNSW.DE entwickelt nützliche digitale Werkzeuge und dokumentiert die Entscheidungen dahinter.</p><a href="#tools">Entdecken →</a></div>
         </div>
-        <div className="hero-footer"><span>© 2026 JNSW.DE</span><span>Berlin / Germany</span><a href="mailto:hello@jnsw.de">hello@jnsw.de</a></div>
+        <div className="hero-footer"><span>© 2026 JNSW.DE</span><span>Berlin / Germany</span><a href="mailto:hello@jnsw.de">hello@jnsw.de</a><a href="https://github.com/jnswde-ctrl" target="_blank" rel="noreferrer">GitHub</a></div>
       </section>
 
       <section className="platform-section platform-tools" id="tools" aria-labelledby="tools-title">
@@ -30,7 +30,7 @@ export default async function Home() {
       </section>
 
       <section className="platform-section community-section" id="community" aria-label="Community"><CommunityAccount initialUser={user ? { displayName: user.displayName, status: user.status } : null} /></section>
-      <footer className="site-footer platform-footer"><span>© 2026 JNSW.DE</span><span>Produkte, Werkzeuge, Informationen</span><a href="mailto:hello@jnsw.de">hello@jnsw.de</a></footer>
+      <footer className="site-footer platform-footer"><span>© 2026 JNSW.DE</span><span>Produkte, Werkzeuge, Informationen</span><a href="mailto:hello@jnsw.de">hello@jnsw.de</a><a href="https://github.com/jnswde-ctrl" target="_blank" rel="noreferrer">GitHub</a></footer>
     </main>
   );
 }

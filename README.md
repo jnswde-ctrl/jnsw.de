@@ -2,6 +2,10 @@
 
 JNSW.DE ist eine deutschsprachige Portfolio- und Community-Website für digitale Produkte, Markenidentitäten, Werkzeuge und Informationen.
 
+Die Anwendung ist zugleich ein öffentliches Praxisprojekt für moderne Webentwicklung: eine TypeScript-/Next.js-Anwendung auf Cloudflare Workers mit D1-Datenbank, versionierten Migrationen, automatisierten Prüfungen und dokumentierten Sicherheitsentscheidungen.
+
+Website: [jnsw.de](https://jnsw.de) · GitHub: [jnswde-ctrl](https://github.com/jnswde-ctrl)
+
 ## Voraussetzungen
 
 - Node.js `>=22.13.0`
@@ -17,6 +21,12 @@ npm test
 ```
 
 `npm run dev` startet die lokale vinext-Entwicklung. `npm run build` erzeugt den Produktions-Build. `npm test` führt die verlässlichen Node-Unit-Tests aus; Worker-Render-Integrationstests werden erst mit einer Cloudflare-kompatiblen Testlaufzeit ergänzt.
+
+## Qualitätsworkflow
+
+Jede Änderung an `main` und jeder Pull Request wird automatisch geprüft. Die CI installiert die Abhängigkeiten reproduzierbar und führt Lint, Produktions-Build sowie die Test-Suite aus.
+
+Für Änderungen wird der Ablauf **Issue → Branch → Pull Request → CI → Review → Merge** verwendet. KI-gestützte Vorschläge sind dabei Ausgangspunkt, nicht Freigabe: Änderungen werden gegen Anforderungen, Sicherheitsregeln, Tests und den tatsächlichen Diff geprüft.
 
 ## Projektstruktur
 
