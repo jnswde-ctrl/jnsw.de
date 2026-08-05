@@ -43,3 +43,5 @@ next-env.d.ts
 *.log
 *.zone
 /.vscode
+
+.dev.vars

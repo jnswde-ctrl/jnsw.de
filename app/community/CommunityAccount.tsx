@@ -10,12 +10,13 @@ export function CommunityAccount({ initialUser }: { initialUser: User | null }) 
   const [busy, setBusy] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setMessage("");
-    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const form = event.currentTarget;
+    const data = Object.fromEntries(new FormData(form));
     const response = await fetch(`/api/auth/${mode}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
     const result = await response.json(); setBusy(false);
     if (!response.ok) return setMessage(result.error ?? "Bitte erneut versuchen.");
     if (mode === "register") {
-      event.currentTarget.reset(); setMode("login");
+      form.reset(); setMode("login");
       return setMessage(result.message ?? "Bitte bestätige deine E-Mail-Adresse.");
     }
     if (!result.user) return setMessage(result.message ?? "Bitte prüfe dein Postfach.");
