@@ -72,6 +72,10 @@ export async function updatePassword(id: string, passwordHash: string) {
     .returning();
   return user;
 }
+export async function markVerificationEmailSent(id: string, sentAt = new Date().toISOString()) {
+  const [user] = await getDb().update(users).set({ lastVerificationEmailSentAt: sentAt, updatedAt: sentAt }).where(eq(users.id, id)).returning();
+  return user;
+}
 export async function updateOwnProfile(
   id: string,
   displayName: string,

@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `last_verification_email_sent_at` text;

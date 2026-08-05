@@ -1,6 +1,7 @@
 import {
   createPasswordUser,
   findUserByEmail,
+  markVerificationEmailSent,
   normalizeEmail,
 } from "../../../../db/users";
 import { createEmailVerificationToken } from "../../../../db/email-verification";
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
   verificationUrl.searchParams.set("token", token);
   try {
     await sendVerificationEmail({ to: user.email, verificationUrl: verificationUrl.toString() });
+    await markVerificationEmailSent(user.id);
   } catch (error) {
     console.error("Unable to send verification email", error);
     return Response.json({ error: "Dein Konto wurde angelegt, aber die Bestätigungs-E-Mail konnte nicht gesendet werden. Bitte versuche die Anmeldung später erneut." }, { status: 503 });
