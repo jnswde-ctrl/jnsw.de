@@ -107,12 +107,13 @@ Vor Abschluss einer Änderung mindestens die relevanten Prüfungen ausführen:
 - `npm run build`
 - `npm test`, wenn Build, gerendertes HTML oder getestete Komponenten betroffen sind
 - `npm run db:generate`, wenn `db/schema.ts` geändert wurde; die Migration anschließend prüfen
+- Funktionsänderungen erhalten passende neue oder angepasste automatisierte Tests; ist das nicht sinnvoll möglich, wird der Grund im PR dokumentiert.
 
 Frontend-Änderungen auf Desktop und Mobil visuell prüfen. Für die Scroll-Plattform zusätzlich kontrollieren: Menü bleibt sichtbar, aktive Abschnittsmarkierung folgt dem Scrollen, jeder Menüpunkt fokussiert den korrekten Abschnitt und es entstehen keine Seitenwechsel.
 
 ## Definition of Done
 
-Eine Änderung ist abgeschlossen, wenn der beauftragte Umfang umgesetzt ist, Architektur- und Sicherheitsgrenzen eingehalten sind, relevante Dokumentation aktualisiert wurde, die anwendbaren Prüfungen erfolgreich sind und bekannte nicht ausgeführte Prüfungen dokumentiert sind.
+Eine Änderung ist abgeschlossen, wenn der beauftragte Umfang umgesetzt ist, Architektur- und Sicherheitsgrenzen eingehalten sind, relevante Dokumentation aktualisiert wurde, die anwendbaren Prüfungen erfolgreich sind und bekannte nicht ausgeführte Prüfungen dokumentiert sind. Vor einem Merge nach `main` müssen Informationsdateien, Kommentare und Projektanweisungen auf notwendigen Aktualisierungsbedarf geprüft und das Ergebnis im PR festgehalten werden.
 
 ## Offene Punkte
 
