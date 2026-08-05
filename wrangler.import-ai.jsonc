@@ -1,0 +1,7 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "jnsw-import-ai-v2",
+  "main": "./worker/import-ai.ts",
+  "compatibility_date": "2026-08-05",
+  "ai": { "binding": "AI" }
+}
