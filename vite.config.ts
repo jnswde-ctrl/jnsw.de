@@ -7,6 +7,7 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 
 const localBindingConfig = {
   main: "./worker/index.ts",
+  ai: { binding: "AI", remote: true },
 };
 
 export default defineConfig(async () => {
