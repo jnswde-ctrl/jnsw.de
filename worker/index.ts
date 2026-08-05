@@ -10,6 +10,7 @@ interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
   APPLICATION_DOCUMENTS: R2Bucket;
+  AI: { run(model: string, input: Record<string, unknown>): Promise<unknown> };
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
