@@ -66,7 +66,7 @@ test("resets the registration form after a successful asynchronous request", asy
     form.reset = () => { resetCount++; reset(); };
     await submitRegistration(container);
     assert.equal(resetCount, 1);
-    assert.equal(container.querySelector('input[name="email"]')?.value, "");
+    assert.equal(container.querySelector('input[name="email"]'), null);
     assert.match(container.textContent ?? "", /Bestätigungs-E-Mail gesendet/);
     assert.equal(errors.length, 0);
     await act(async () => { root.unmount(); });

@@ -696,7 +696,7 @@ footer {
 .community-tabs { display: flex; gap: 18px; margin-top: 30px; }
 .community-tabs button { border: 0; border-bottom: 2px solid transparent; background: transparent; padding: 0 0 7px; font: 11px "DM Mono", monospace; text-transform: uppercase; cursor: pointer; }
 .community-tabs button[aria-pressed="true"] { border-color: var(--blue); }
-.community-button { border: 1px solid var(--acid); background: var(--acid); color: var(--ink); padding: 15px 18px; justify-self: start; font: 11px "DM Mono", monospace; text-transform: uppercase; cursor: pointer; }
+.community-button { min-height: 44px; border: 1px solid var(--acid); background: var(--acid); color: var(--ink); padding: 15px 18px; justify-self: start; font: 11px "DM Mono", monospace; text-transform: uppercase; cursor: pointer; }
 .community-button:hover, .community-button:focus-visible { background: var(--acid); color: var(--ink); outline: 2px solid var(--blue); outline-offset: 2px; }
 .community-button.secondary { border-color: var(--line); background: transparent; color: var(--paper); margin-top: 20px; }
 .community-error { color: #ff9f8a; margin: 0; }

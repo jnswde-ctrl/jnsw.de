@@ -10,6 +10,7 @@ export const users = sqliteTable(
     displayName: text("display_name").notNull(),
     passwordHash: text("password_hash"),
     emailVerifiedAt: text("email_verified_at"),
+    lastVerificationEmailSentAt: text("last_verification_email_sent_at"),
     role: text("role", { enum: userRoleValues }).notNull().default("member"),
     status: text("status", { enum: userStatusValues })
       .notNull()
