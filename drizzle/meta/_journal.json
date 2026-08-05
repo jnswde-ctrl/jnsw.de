@@ -50,6 +50,13 @@
       "when": 1785950164441,
       "tag": "0006_sweet_overlord",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1785960000000,
+      "tag": "0007_clear_user_data",
+      "breakpoints": true
     }
   ]
 }
