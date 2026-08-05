@@ -12,6 +12,11 @@ export function isActiveAdmin(user: AppUser) {
 export function publicUser(user: AppUser) {
   return { id: user.id, displayName: user.displayName, role: user.role, status: user.status, emailVerifiedAt: user.emailVerifiedAt, createdAt: user.createdAt, updatedAt: user.updatedAt, lastSignedInAt: user.lastSignedInAt };
 }
+/** Use this guard for private product data, never just the presence of a session. */
+export async function requireActiveUser(): Promise<AppUser | null> {
+  const user = await requireAppUser();
+  return user?.status === "active" ? user : null;
+}
 export function sessionCookie(token: string, expiresAt: string) {
   return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Expires=${new Date(expiresAt).toUTCString()}`;
 }
