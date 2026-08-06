@@ -111,6 +111,13 @@ Vor Abschluss einer Änderung mindestens die relevanten Prüfungen ausführen:
 
 Frontend-Änderungen auf Desktop und Mobil visuell prüfen. Für die Scroll-Plattform zusätzlich kontrollieren: Menü bleibt sichtbar, aktive Abschnittsmarkierung folgt dem Scrollen, jeder Menüpunkt fokussiert den korrekten Abschnitt und es entstehen keine Seitenwechsel.
 
+## GitHub-Workflow
+
+- Jede nicht-triviale Änderung ist einem GitHub-Issue zugeordnet.
+- Vor Beginn wird der im Issue referenzierte Branch ausgecheckt. Fehlt die Branch-Referenz, wird das Issue zuerst ergänzt; bis dahin beginnt keine Umsetzung.
+- Das Issue dokumentiert vor und während der Umsetzung das Vorgehen, die Gründe für wesentliche Entscheidungen, den betroffenen Umfang sowie die ausgeführten oder bewusst nicht ausgeführten Prüfungen.
+- Commits und Pull Requests referenzieren das zugehörige Issue; nicht zusammenhängende Änderungen bleiben außerhalb des Branches.
+
 ## Definition of Done
 
 Eine Änderung ist abgeschlossen, wenn der beauftragte Umfang umgesetzt ist, Architektur- und Sicherheitsgrenzen eingehalten sind, relevante Dokumentation aktualisiert wurde, die anwendbaren Prüfungen erfolgreich sind und bekannte nicht ausgeführte Prüfungen dokumentiert sind. Vor einem Merge nach `main` müssen Informationsdateien, Kommentare und Projektanweisungen auf notwendigen Aktualisierungsbedarf geprüft und das Ergebnis im PR festgehalten werden.
