@@ -15,6 +15,8 @@ Website: [jnsw.de](https://jnsw.de) · GitHub: [jnswde-ctrl](https://github.com/
 
 ```bash
 npm run dev
+npm run format
+npm run format:check
 npm run lint
 npm run build
 npm test
@@ -25,6 +27,8 @@ npm test
 ## Qualitätsworkflow
 
 Jede Änderung an `main` und jeder Pull Request wird automatisch geprüft. Die CI installiert die Abhängigkeiten reproduzierbar und führt Lint, Produktions-Build sowie die Test-Suite aus.
+
+`npm run format` formatiert den handgeschriebenen Quellcode mit Prettier. `npm run format:check` prüft die Formatierung in der CI. Die Produktionsoptimierung bleibt getrennt: vinext/Vite erzeugt beim Build die auslieferungsoptimierten Dateien; Quellcode wird nicht beim Speichern minifiziert.
 
 Für Änderungen wird der Ablauf **Issue → Branch → Pull Request → CI → Review → Merge** verwendet. KI-gestützte Vorschläge sind dabei Ausgangspunkt, nicht Freigabe: Änderungen werden gegen Anforderungen, Sicherheitsregeln, Tests und den tatsächlichen Diff geprüft.
 

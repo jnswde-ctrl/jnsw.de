@@ -21,9 +21,12 @@ export default function PdfMergePage() {
             <em>Werkbank.</em>
           </h1>
           <p>
-            Wähle zuerst die Aufgabe: Dokumente verbinden oder Dateien einheitlich umbenennen und als ZIP bündeln.
+            Wähle zuerst die Aufgabe: Dokumente verbinden oder Dateien einheitlich umbenennen und
+            als ZIP bündeln.
           </p>
-          <a className="pdf-case-link" href="/projekte/pdf-tool">Zur Case Study →</a>
+          <a className="pdf-case-link" href="/projekte/pdf-tool">
+            Zur Case Study →
+          </a>
         </div>
       </section>
       <section className="pdf-tool-section" aria-labelledby="pdf-tool-title">
@@ -33,13 +36,13 @@ export default function PdfMergePage() {
             <h2 id="pdf-tool-title">Deine Dateien bleiben bei dir.</h2>
             <p>
               <strong>
-                Deine PDF-Dateien werden ausschließlich in deinem Browser
-                verarbeitet und nicht hochgeladen.
+                Deine PDF-Dateien werden ausschließlich in deinem Browser verarbeitet und nicht
+                hochgeladen.
               </strong>
             </p>
             <p>
-              PDF-Inhalte, Dateinamen und das Ergebnis werden an keinen externen
-              Dienst übertragen oder dauerhaft im Browser gespeichert.
+              PDF-Inhalte, Dateinamen und das Ergebnis werden an keinen externen Dienst übertragen
+              oder dauerhaft im Browser gespeichert.
             </p>
           </div>
         </div>
@@ -47,9 +50,8 @@ export default function PdfMergePage() {
         <aside className="device-note">
           <p className="eyebrow">Hinweis zur Dateigröße</p>
           <p>
-            Wie große Dateien verarbeitet werden können, hängt von deinem Gerät
-            und dem verfügbaren Arbeitsspeicher ab. Es gibt deshalb kein
-            pauschales Größenversprechen.
+            Wie große Dateien verarbeitet werden können, hängt von deinem Gerät und dem verfügbaren
+            Arbeitsspeicher ab. Es gibt deshalb kein pauschales Größenversprechen.
           </p>
         </aside>
       </section>

@@ -33,7 +33,10 @@ export async function extractJobSuggestion(source: string, jobUrl: string | null
     return suggestion;
   } catch (error) {
     console.error("Job import worker failed", error);
-    throw new JobImportError("Die KI-Auswertung ist derzeit nicht verfügbar. Bitte versuche es später erneut.", 503);
+    throw new JobImportError(
+      "Die KI-Auswertung ist derzeit nicht verfügbar. Bitte versuche es später erneut.",
+      503,
+    );
   } finally {
     clearTimeout(timeout);
   }

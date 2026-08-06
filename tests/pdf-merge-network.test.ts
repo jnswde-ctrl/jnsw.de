@@ -24,10 +24,7 @@ test("merging PDF data performs no fetch requests", async () => {
         ) as ArrayBuffer;
       },
     });
-    const result = await mergePdfSources([
-      makeSource("eins.pdf"),
-      makeSource("zwei.pdf"),
-    ]);
+    const result = await mergePdfSources([makeSource("eins.pdf"), makeSource("zwei.pdf")]);
     assert.equal((await PDFDocument.load(result)).getPageCount(), 2);
     assert.equal(fetchCalls, 0);
   } finally {

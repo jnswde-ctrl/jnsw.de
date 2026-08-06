@@ -35,17 +35,36 @@ export function SiteNav() {
 
   return (
     <nav className="nav" aria-label="Hauptnavigation">
-      <Link className="wordmark" href="/#top" onClick={(event) => { if (document.getElementById("top")) { event.preventDefault(); scrollToSection("top"); } }}>
+      <Link
+        className="wordmark"
+        href="/#top"
+        onClick={(event) => {
+          if (document.getElementById("top")) {
+            event.preventDefault();
+            scrollToSection("top");
+          }
+        }}
+      >
         JNSW<span>.DE</span>
       </Link>
       <div className="nav-links">
         {links.map(([label, id]) => (
-          <a href={`#${id}`} key={id} aria-current={activeSection === id ? "page" : undefined} onClick={(event) => { event.preventDefault(); scrollToSection(id); }}>
+          <a
+            href={`#${id}`}
+            key={id}
+            aria-current={activeSection === id ? "page" : undefined}
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToSection(id);
+            }}
+          >
             {label}
           </a>
         ))}
       </div>
-      <span className="availability"><i /> Verfügbar für ausgewählte Projekte</span>
+      <span className="availability">
+        <i /> Verfügbar für ausgewählte Projekte
+      </span>
     </nav>
   );
 }

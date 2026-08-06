@@ -6,13 +6,13 @@ Stand: 28. Juli 2026
 
 JNSW.DE nutzt Next.js 16 mit App Router und React 19. vinext baut die Anwendung für Cloudflare Workers; `worker/index.ts` delegiert reguläre Requests an vinext. D1 ist über das Binding `DB` angebunden, der Datenzugriff liegt in `db/` und die versionierten Migrationen in `drizzle/`.
 
-| Bereich | Verantwortung |
-| --- | --- |
-| `app/` | Seiten, gemeinsame UI und Route Handler |
-| `db/` | Drizzle-Schema sowie Benutzer- und Sitzungszugriff |
-| `drizzle/` | D1-/SQLite-Migrationen |
-| `worker/` | Cloudflare-Worker-Einstiegspunkt |
-| `tests/` | Node.js-Tests für PDF-Logik und Sicherheitsfunktionen |
+| Bereich    | Verantwortung                                         |
+| ---------- | ----------------------------------------------------- |
+| `app/`     | Seiten, gemeinsame UI und Route Handler               |
+| `db/`      | Drizzle-Schema sowie Benutzer- und Sitzungszugriff    |
+| `drizzle/` | D1-/SQLite-Migrationen                                |
+| `worker/`  | Cloudflare-Worker-Einstiegspunkt                      |
+| `tests/`   | Node.js-Tests für PDF-Logik und Sicherheitsfunktionen |
 
 ## Qualitäts- und Sicherheitslage
 

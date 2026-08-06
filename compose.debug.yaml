@@ -8,5 +8,4 @@ services:
       NODE_ENV: development
     ports:
       - 127.0.0.1:3000:3000
-    command:
-      ["npm", "exec", "vite", "--", "--host", "0.0.0.0", "--port", "3000"]
+    command: ["npm", "exec", "vite", "--", "--host", "0.0.0.0", "--port", "3000"]

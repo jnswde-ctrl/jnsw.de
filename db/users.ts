@@ -73,13 +73,14 @@ export async function updatePassword(id: string, passwordHash: string) {
   return user;
 }
 export async function markVerificationEmailSent(id: string, sentAt = new Date().toISOString()) {
-  const [user] = await getDb().update(users).set({ lastVerificationEmailSentAt: sentAt, updatedAt: sentAt }).where(eq(users.id, id)).returning();
+  const [user] = await getDb()
+    .update(users)
+    .set({ lastVerificationEmailSentAt: sentAt, updatedAt: sentAt })
+    .where(eq(users.id, id))
+    .returning();
   return user;
 }
-export async function updateOwnProfile(
-  id: string,
-  displayName: string,
-): Promise<AppUser> {
+export async function updateOwnProfile(id: string, displayName: string): Promise<AppUser> {
   const [user] = await getDb()
     .update(users)
     .set({ displayName, updatedAt: new Date().toISOString() })
@@ -90,12 +91,7 @@ export async function updateOwnProfile(
 export async function listUsers({ limit = 50, offset = 0 } = {}) {
   const db = getDb();
   const [items, result] = await Promise.all([
-    db
-      .select()
-      .from(users)
-      .orderBy(asc(users.createdAt))
-      .limit(limit)
-      .offset(offset),
+    db.select().from(users).orderBy(asc(users.createdAt)).limit(limit).offset(offset),
     db.select({ total: count() }).from(users),
   ]);
   return { items, total: result[0]?.total ?? 0 };

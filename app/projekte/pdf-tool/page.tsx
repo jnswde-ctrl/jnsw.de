@@ -34,10 +34,7 @@ export default function PdfToolCaseStudy() {
           </h1>
           <div className="case-study-intro">
             <p>Case Study · Produkt, Datenschutz und Umsetzung</p>
-            <PdfToolLauncher
-              className="button button-primary"
-              label="Tool ausprobieren →"
-            />
+            <PdfToolLauncher className="button button-primary" label="Tool ausprobieren →" />
           </div>
         </div>
       </section>
@@ -45,8 +42,8 @@ export default function PdfToolCaseStudy() {
         <p className="eyebrow">ENTSCHEIDUNGEN SICHTBAR MACHEN</p>
         <div className="case-study-summary">
           <p>
-            Ein kleines Werkzeug ist dann gut, wenn es eine konkrete Aufgabe
-            zuverlässig erledigt und seine Versprechen verständlich macht.
+            Ein kleines Werkzeug ist dann gut, wenn es eine konkrete Aufgabe zuverlässig erledigt
+            und seine Versprechen verständlich macht.
           </p>
           <dl>
             <div>

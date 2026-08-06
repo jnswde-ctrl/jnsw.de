@@ -13,15 +13,10 @@ export function removeItem(items: PdfItem[], id: string) {
 }
 
 export function isPdfFile(file: Pick<File, "name" | "type">) {
-  return (
-    file.type === "application/pdf" ||
-    (/\.pdf$/i.test(file.name) && file.type === "")
-  );
+  return file.type === "application/pdf" || (/\.pdf$/i.test(file.name) && file.type === "");
 }
 
-export function fileIdentity(
-  file: Pick<File, "name" | "size" | "lastModified">,
-) {
+export function fileIdentity(file: Pick<File, "name" | "size" | "lastModified">) {
   return `${file.name}:${file.size}:${file.lastModified}`;
 }
 

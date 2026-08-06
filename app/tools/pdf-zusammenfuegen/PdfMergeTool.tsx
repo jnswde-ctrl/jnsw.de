@@ -15,7 +15,10 @@ type Status = "idle" | "processing" | "success" | "error";
 type Step = 1 | 2 | 3;
 
 const downloadName = (value: string) => {
-  const stem = value.replace(/\.pdf$/i, "").replace(/[\\/:*?"<>|]/g, "-").trim();
+  const stem = value
+    .replace(/\.pdf$/i, "")
+    .replace(/[\\/:*?"<>|]/g, "-")
+    .trim();
   return `${stem || "zusammengefuehrt"}.pdf`;
 };
 
@@ -73,9 +76,13 @@ export function PdfMergeTool({ items, setItems }: PdfMergeToolProps) {
       setStatus("error");
       setMessage(
         [
-          invalid > 0 && `${invalid} Datei${invalid === 1 ? "" : "en"} wurde${invalid === 1 ? "" : "n"} nicht hinzugefügt, weil ${invalid === 1 ? "sie keine PDF-Datei ist" : "es keine PDF-Dateien sind"}.`,
-          result.duplicates > 0 && `${result.duplicates} bereits ausgewählte Datei${result.duplicates === 1 ? " wurde" : "en wurden"} nicht doppelt hinzugefügt.`,
-        ].filter(Boolean).join(" "),
+          invalid > 0 &&
+            `${invalid} Datei${invalid === 1 ? "" : "en"} wurde${invalid === 1 ? "" : "n"} nicht hinzugefügt, weil ${invalid === 1 ? "sie keine PDF-Datei ist" : "es keine PDF-Dateien sind"}.`,
+          result.duplicates > 0 &&
+            `${result.duplicates} bereits ausgewählte Datei${result.duplicates === 1 ? " wurde" : "en wurden"} nicht doppelt hinzugefügt.`,
+        ]
+          .filter(Boolean)
+          .join(" "),
       );
     }
     event.target.value = "";
@@ -98,22 +105,14 @@ export function PdfMergeTool({ items, setItems }: PdfMergeToolProps) {
     setMessage("PDFs werden gelesen und zusammengeführt …");
     try {
       const bytes = await mergePdfSources(items.map(({ file }) => file));
-      const url = URL.createObjectURL(
-        new Blob([bytes as BlobPart], { type: "application/pdf" }),
-      );
+      const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: "application/pdf" }));
       urlRef.current = url;
       setDownloadUrl(url);
       setStatus("success");
-      setMessage(
-        `Fertig: ${items.length} PDFs wurden erfolgreich zusammengeführt.`,
-      );
+      setMessage(`Fertig: ${items.length} PDFs wurden erfolgreich zusammengeführt.`);
     } catch (error) {
       setStatus("error");
-      setMessage(
-        error instanceof Error && error.cause
-          ? error.message
-          : pdfErrorMessage(error),
-      );
+      setMessage(error instanceof Error && error.cause ? error.message : pdfErrorMessage(error));
     }
   };
 
@@ -124,16 +123,12 @@ export function PdfMergeTool({ items, setItems }: PdfMergeToolProps) {
           <button
             key={number}
             type="button"
-            className={
-              step === number ? "is-active" : step > number ? "is-complete" : ""
-            }
+            className={step === number ? "is-active" : step > number ? "is-complete" : ""}
             onClick={() => number < step && goTo(number)}
             disabled={number > step || status === "processing"}
             aria-current={step === number ? "step" : undefined}
           >
-            <span className="wizard-step-number">
-              {String(number).padStart(2, "0")}
-            </span>
+            <span className="wizard-step-number">{String(number).padStart(2, "0")}</span>
             <span className="wizard-step-label">{label}</span>
           </button>
         ))}
@@ -147,8 +142,8 @@ export function PdfMergeTool({ items, setItems }: PdfMergeToolProps) {
               Welche PDFs möchtest du verbinden?
             </h3>
             <p>
-              Wähle mindestens zwei Dateien aus. Sie bleiben auf deinem Gerät
-              und werden nicht hochgeladen.
+              Wähle mindestens zwei Dateien aus. Sie bleiben auf deinem Gerät und werden nicht
+              hochgeladen.
             </p>
             <input
               ref={inputRef}
@@ -164,15 +159,9 @@ export function PdfMergeTool({ items, setItems }: PdfMergeToolProps) {
               onClick={() => inputRef.current?.click()}
             >
               <span aria-hidden="true">＋</span>
-              <strong>
-                {items.length
-                  ? "Weitere PDFs auswählen"
-                  : "PDF-Dateien auswählen"}
-              </strong>
+              <strong>{items.length ? "Weitere PDFs auswählen" : "PDF-Dateien auswählen"}</strong>
               <small>
-                {items.length
-                  ? `${items.length} Dateien ausgewählt`
-                  : "Mehrfachauswahl möglich"}
+                {items.length ? `${items.length} Dateien ausgewählt` : "Mehrfachauswahl möglich"}
               </small>
             </button>
             <div className="wizard-actions">
@@ -181,7 +170,18 @@ export function PdfMergeTool({ items, setItems }: PdfMergeToolProps) {
                   ? `Wähle noch ${filesNeeded} PDF-Datei${filesNeeded === 1 ? "" : "en"} aus.`
                   : `${items.length} Dateien bereit`}
               </span>
-              {items.length > 0 && <button type="button" className="button button-secondary" onClick={() => { resetFeedback(); setItems([]); }}>Auswahl leeren</button>}
+              {items.length > 0 && (
+                <button
+                  type="button"
+                  className="button button-secondary"
+                  onClick={() => {
+                    resetFeedback();
+                    setItems([]);
+                  }}
+                >
+                  Auswahl leeren
+                </button>
+              )}
               <button
                 type="button"
                 className="button button-primary"
@@ -201,62 +201,56 @@ export function PdfMergeTool({ items, setItems }: PdfMergeToolProps) {
             <h3 ref={headingRef} tabIndex={-1} id="wizard-step-2">
               In welcher Reihenfolge?
             </h3>
-            <p>
-              Die Reihenfolge von oben nach unten wird in die neue PDF
-              übernommen.
-            </p>
+            <p>Die Reihenfolge von oben nach unten wird in die neue PDF übernommen.</p>
             <details className="merge-order">
-              <summary>Reihenfolge prüfen und ändern <span>{items.length} Dateien</span></summary>
-              <ol
-              className="wizard-file-list"
-              aria-label="Ausgewählte PDF-Dateien"
-            >
-              {items.map((item, index) => (
-                <li key={item.id}>
-                  <span className="file-position">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className="file-name">
-                    <strong>{item.file.name}</strong>
-                    <small>{formatBytes(item.file.size)}</small>
-                  </span>
-                  <span className="file-actions">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        resetFeedback();
-                        setItems((current) => moveItem(current, index, -1));
-                      }}
-                      disabled={index === 0}
-                      aria-label={`${item.file.name} nach oben verschieben`}
-                    >
-                      ↑
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        resetFeedback();
-                        setItems((current) => moveItem(current, index, 1));
-                      }}
-                      disabled={index === items.length - 1}
-                      aria-label={`${item.file.name} nach unten verschieben`}
-                    >
-                      ↓
-                    </button>
-                    <button
-                      type="button"
-                      className="remove-file"
-                      onClick={() => {
-                        resetFeedback();
-                        setItems((current) => removeItem(current, item.id));
-                      }}
-                      aria-label={`${item.file.name} entfernen`}
-                    >
-                      Entfernen
-                    </button>
-                  </span>
-                </li>
-              ))}
+              <summary>
+                Reihenfolge prüfen und ändern <span>{items.length} Dateien</span>
+              </summary>
+              <ol className="wizard-file-list" aria-label="Ausgewählte PDF-Dateien">
+                {items.map((item, index) => (
+                  <li key={item.id}>
+                    <span className="file-position">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="file-name">
+                      <strong>{item.file.name}</strong>
+                      <small>{formatBytes(item.file.size)}</small>
+                    </span>
+                    <span className="file-actions">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          resetFeedback();
+                          setItems((current) => moveItem(current, index, -1));
+                        }}
+                        disabled={index === 0}
+                        aria-label={`${item.file.name} nach oben verschieben`}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          resetFeedback();
+                          setItems((current) => moveItem(current, index, 1));
+                        }}
+                        disabled={index === items.length - 1}
+                        aria-label={`${item.file.name} nach unten verschieben`}
+                      >
+                        ↓
+                      </button>
+                      <button
+                        type="button"
+                        className="remove-file"
+                        onClick={() => {
+                          resetFeedback();
+                          setItems((current) => removeItem(current, item.id));
+                        }}
+                        aria-label={`${item.file.name} entfernen`}
+                      >
+                        Entfernen
+                      </button>
+                    </span>
+                  </li>
+                ))}
               </ol>
             </details>
             <div className="wizard-actions wizard-actions-split">
@@ -273,19 +267,13 @@ export function PdfMergeTool({ items, setItems }: PdfMergeToolProps) {
         )}
 
         {step === 3 && (
-          <section
-            className="wizard-step wizard-result"
-            aria-labelledby="wizard-step-3"
-          >
+          <section className="wizard-step wizard-result" aria-labelledby="wizard-step-3">
             <p className="eyebrow">Schritt 03 / Ergebnis</p>
             <h3 ref={headingRef} tabIndex={-1} id="wizard-step-3">
-              {downloadUrl
-                ? "Deine PDF ist bereit."
-                : "Bereit zum Zusammenfügen."}
+              {downloadUrl ? "Deine PDF ist bereit." : "Bereit zum Zusammenfügen."}
             </h3>
             <p>
-              {items.length} PDF-Dateien werden lokal in der festgelegten
-              Reihenfolge verarbeitet.
+              {items.length} PDF-Dateien werden lokal in der festgelegten Reihenfolge verarbeitet.
             </p>
             <div className="merge-summary">
               <span>{String(items.length).padStart(2, "0")}</span>
@@ -295,11 +283,28 @@ export function PdfMergeTool({ items, setItems }: PdfMergeToolProps) {
               </div>
             </div>
             <details className="merge-order merge-order-result">
-              <summary>Reihenfolge anzeigen oder ändern <span>{items.length} Dateien</span></summary>
+              <summary>
+                Reihenfolge anzeigen oder ändern <span>{items.length} Dateien</span>
+              </summary>
               <ol className="wizard-file-list" aria-label="Gewählte PDF-Reihenfolge">
-                {items.map((item, index) => <li key={item.id}><span className="file-position">{String(index + 1).padStart(2, "0")}</span><span className="file-name"><strong>{item.file.name}</strong><small>{formatBytes(item.file.size)}</small></span></li>)}
+                {items.map((item, index) => (
+                  <li key={item.id}>
+                    <span className="file-position">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="file-name">
+                      <strong>{item.file.name}</strong>
+                      <small>{formatBytes(item.file.size)}</small>
+                    </span>
+                  </li>
+                ))}
               </ol>
-              <button type="button" className="button button-secondary" onClick={() => goTo(2)} disabled={status === "processing"}>Reihenfolge bearbeiten</button>
+              <button
+                type="button"
+                className="button button-secondary"
+                onClick={() => goTo(2)}
+                disabled={status === "processing"}
+              >
+                Reihenfolge bearbeiten
+              </button>
             </details>
             <label className="merge-file-name">
               <span>Dateiname für den Download</span>
@@ -317,9 +322,7 @@ export function PdfMergeTool({ items, setItems }: PdfMergeToolProps) {
               aria-live="polite"
               aria-busy={status === "processing"}
             >
-              {status === "processing" && (
-                <span className="status-spinner" aria-hidden="true" />
-              )}
+              {status === "processing" && <span className="status-spinner" aria-hidden="true" />}
               <p>{message || "Starte die Verarbeitung, wenn alles passt."}</p>
             </div>
             <div className="wizard-actions wizard-actions-split">
@@ -346,9 +349,7 @@ export function PdfMergeTool({ items, setItems }: PdfMergeToolProps) {
                   onClick={merge}
                   disabled={status === "processing"}
                 >
-                  {status === "processing"
-                    ? "Wird verarbeitet …"
-                    : "PDFs zusammenfügen"}
+                  {status === "processing" ? "Wird verarbeitet …" : "PDFs zusammenfügen"}
                 </button>
               )}
             </div>

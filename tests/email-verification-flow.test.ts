@@ -5,7 +5,10 @@ import {
   isVerificationToken,
   maxVerificationTokenLength,
 } from "../app/verify-email/verification-flow.ts";
-import { isVerificationEmailSendAllowed, verificationResendCooldownMs } from "../db/email-verification-flow.ts";
+import {
+  isVerificationEmailSendAllowed,
+  verificationResendCooldownMs,
+} from "../db/email-verification-flow.ts";
 
 test("accepts a bounded non-empty verification token", () => {
   assert.equal(isVerificationToken("valid-token"), true);
@@ -29,12 +32,27 @@ test("verifies a valid link once and safely rejects a repeated link", async () =
 
 test("does not pass malformed tokens to the verification store", async () => {
   let calls = 0;
-  assert.equal(await completeEmailVerification("", async () => { calls += 1; return true; }), false);
+  assert.equal(
+    await completeEmailVerification("", async () => {
+      calls += 1;
+      return true;
+    }),
+    false,
+  );
   assert.equal(calls, 0);
 });
 
 test("allows another verification email only after the cooldown", () => {
   const now = Date.now();
-  assert.equal(isVerificationEmailSendAllowed(new Date(now - verificationResendCooldownMs + 1).toISOString(), now), false);
-  assert.equal(isVerificationEmailSendAllowed(new Date(now - verificationResendCooldownMs).toISOString(), now), true);
+  assert.equal(
+    isVerificationEmailSendAllowed(
+      new Date(now - verificationResendCooldownMs + 1).toISOString(),
+      now,
+    ),
+    false,
+  );
+  assert.equal(
+    isVerificationEmailSendAllowed(new Date(now - verificationResendCooldownMs).toISOString(), now),
+    true,
+  );
 });

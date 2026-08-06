@@ -14,11 +14,7 @@ export function randomToken() {
     .replaceAll("=", "");
 }
 export async function hashToken(token: string) {
-  return toBase64(
-    new Uint8Array(
-      await crypto.subtle.digest("SHA-256", encoder.encode(token)),
-    ),
-  );
+  return toBase64(new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(token))));
 }
 export async function createSession(userId: string) {
   const token = randomToken(),
@@ -40,8 +36,7 @@ export async function getSessionUser(token: string) {
     .innerJoin(users, eq(sessions.userId, users.id))
     .where(eq(sessions.tokenHash, await hashToken(token)));
   if (!result || result.session.expiresAt <= new Date().toISOString()) {
-    if (result)
-      await getDb().delete(sessions).where(eq(sessions.id, result.session.id));
+    if (result) await getDb().delete(sessions).where(eq(sessions.id, result.session.id));
     return null;
   }
   return result.user;
@@ -52,7 +47,5 @@ export async function revokeSession(token: string) {
     .where(eq(sessions.tokenHash, await hashToken(token)));
 }
 export async function removeExpiredSessions() {
-  await getDb()
-    .delete(sessions)
-    .where(lt(sessions.expiresAt, new Date().toISOString()));
+  await getDb().delete(sessions).where(lt(sessions.expiresAt, new Date().toISOString()));
 }
