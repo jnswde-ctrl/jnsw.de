@@ -139,3 +139,25 @@ Eine Änderung ist abgeschlossen, wenn der beauftragte Umfang umgesetzt ist, Arc
 - Ergebnisse knapp zusammenfassen; keine vollständigen Dateiinhalte wiedergeben.
 - Standardmäßig höchstens einen Subagent einsetzen. Parallelisierung nur bei tatsächlich unabhängigen Aufgaben.
 - Hohe Reasoning-Stufen nur für komplexe Architektur-, Sicherheits- oder Fehleranalysen verwenden.
+
+### Auswahl von Subagents
+
+- Keinen Subagent einsetzen, wenn die Aufgabe klein, eindeutig oder direkt selbst umsetzbar ist.
+- `explorer` für eine eng abgegrenzte, lesende Frage zur Codebasis einsetzen.
+- `worker` für eine klar abgegrenzte Umsetzung mit benannten Dateien oder Verantwortungsbereich einsetzen.
+- `auth_reviewer` ausschließlich für lesende Prüfungen von Authentifizierung, Sitzungen und Berechtigungen einsetzen.
+- `design_researcher` für lesende UX-, Responsive- und Accessibility-Reviews einsetzen.
+- `prompt_coach` nur verwenden, wenn ein größerer Auftrag vor der Umsetzung sinnvoll geschärft werden muss.
+- `default` nur wählen, wenn keine spezialisierte Rolle passt; der Auftrag bleibt trotzdem klar eingegrenzt.
+
+### Auswahl von Skills
+
+- Einen Skill nur einsetzen, wenn seine Aufgabenbeschreibung unmittelbar zur Aufgabe passt; ansonsten die normale Projektkonvention anwenden.
+- Bei Repository-Änderungen `git-officer` für Issue-, Branch- und PR-Disziplin verwenden.
+- Wenn `.openai/hosting.json` vorhanden ist oder eine Site gebaut beziehungsweise veröffentlicht wird, die passenden `sites`-Skills verwenden.
+- Für Cloudflare Workers, D1, Wrangler oder Cloudflare-Konfiguration die passenden Cloudflare- oder Wrangler-Skills verwenden.
+- Bei OpenAI-Produkten und -APIs `openai-docs` verwenden; aktuelle Aussagen daraus ableiten.
+- Für GitHub-Issues, Pull Requests, Reviews oder Actions die zugehörigen GitHub-Skills verwenden.
+- Für Browsersteuerung, visuelle Frontend-Prüfungen oder Performance-Messungen die Browser-, Chrome- oder `web-perf`-Skills verwenden.
+- Für eigenständige Dokumente, PDFs, Präsentationen, Tabellen oder Bildmaterial die jeweiligen Artefakt- oder Bild-Skills verwenden.
+- Keine Skill-Liste in dieser Datei pflegen: maßgeblich ist die zur Laufzeit verfügbare Skill-Beschreibung.
