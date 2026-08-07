@@ -18,10 +18,10 @@ Die Vorschau ist erreichbar, sobald vinext die lokale URL ausgibt (üblicherweis
 
 Bei jeder betroffenen Oberfläche werden mindestens diese Ansichten kontrolliert:
 
-| Ansicht | Breite | Prüfpunkte |
-| --- | ---: | --- |
-| Desktop | 1440 px | Lesbarkeit, Flächenhierarchie, Abstände, vollständige Interaktionszustände |
-| Mobil | 390 px | Kein horizontaler Überlauf, mindestens 44 px große Bedienelemente, keine überdeckten Inhalte |
+| Ansicht |  Breite | Prüfpunkte                                                                                   |
+| ------- | ------: | -------------------------------------------------------------------------------------------- |
+| Desktop | 1440 px | Lesbarkeit, Flächenhierarchie, Abstände, vollständige Interaktionszustände                   |
+| Mobil   |  390 px | Kein horizontaler Überlauf, mindestens 44 px große Bedienelemente, keine überdeckten Inhalte |
 
 Zusätzlich prüfen, sofern vorhanden:
 
