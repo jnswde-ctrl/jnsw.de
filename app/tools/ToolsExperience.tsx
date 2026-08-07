@@ -10,15 +10,10 @@ export function ToolsExperience() {
 
   return (
     <>
-      <section
-        className="tools-directory"
-        aria-labelledby="tools-directory-title"
-      >
+      <section className="tools-directory" aria-labelledby="tools-directory-title">
         <div className="tools-directory-heading">
           <p className="eyebrow">01 / Verfügbar</p>
-          <p id="tools-directory-title">
-            Werkzeuge, die eine konkrete Aufgabe lösen.
-          </p>
+          <p id="tools-directory-title">Werkzeuge, die eine konkrete Aufgabe lösen.</p>
         </div>
         <button
           ref={triggerRef}

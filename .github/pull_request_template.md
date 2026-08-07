@@ -4,7 +4,7 @@ Closes #
 
 ## Änderung
 
-- 
+-
 
 ## Prüfung
 

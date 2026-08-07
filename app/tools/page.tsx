@@ -4,8 +4,7 @@ import { ToolsExperience } from "./ToolsExperience";
 
 export const metadata: Metadata = {
   title: "Tools – JNSW.DE",
-  description:
-    "Kostenlose Werkzeuge für digitale Arbeit – direkt und datensparsam im Browser.",
+  description: "Kostenlose Werkzeuge für digitale Arbeit – direkt und datensparsam im Browser.",
 };
 
 export default function ToolsPage() {
@@ -25,8 +24,7 @@ export default function ToolsPage() {
           <span>.</span>
         </h1>
         <p className="tools-lead">
-          Kleine digitale Helfer, die lokal, verständlich und ohne unnötige
-          Konten funktionieren.
+          Kleine digitale Helfer, die lokal, verständlich und ohne unnötige Konten funktionieren.
         </p>
       </div>
       <ToolsExperience />

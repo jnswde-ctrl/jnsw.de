@@ -4,8 +4,30 @@ import { fetchJobPage, normalizeSuggestion } from "../app/api/bewerbungswerkstat
 import { importRequest } from "../worker/import-ai.ts";
 
 test("normalizes only complete, bounded job suggestions", () => {
-  assert.deepEqual(normalizeSuggestion({ company: " Beispiel GmbH ", role: " Entwicklerin ", salary: "70.000 €", deadlineAt: "2026-09-01", notes: "Remote möglich" }, "https://jobs.example.org/a"), { company: "Beispiel GmbH", role: "Entwicklerin", salary: "70.000 €", deadlineAt: "2026-09-01", notes: "Remote möglich", jobUrl: "https://jobs.example.org/a" });
-  assert.equal(normalizeSuggestion({ company: "Beispiel", role: "Rolle", deadlineAt: "morgen" }, null), null);
+  assert.deepEqual(
+    normalizeSuggestion(
+      {
+        company: " Beispiel GmbH ",
+        role: " Entwicklerin ",
+        salary: "70.000 €",
+        deadlineAt: "2026-09-01",
+        notes: "Remote möglich",
+      },
+      "https://jobs.example.org/a",
+    ),
+    {
+      company: "Beispiel GmbH",
+      role: "Entwicklerin",
+      salary: "70.000 €",
+      deadlineAt: "2026-09-01",
+      notes: "Remote möglich",
+      jobUrl: "https://jobs.example.org/a",
+    },
+  );
+  assert.equal(
+    normalizeSuggestion({ company: "Beispiel", role: "Rolle", deadlineAt: "morgen" }, null),
+    null,
+  );
 });
 
 test("refuses local URLs instead of fetching them", async () => {
@@ -14,8 +36,18 @@ test("refuses local URLs instead of fetching them", async () => {
 });
 
 test("accepts only bounded import-worker payloads", async () => {
-  const accepted = await importRequest(new Request("https://worker.example", { method: "POST", body: JSON.stringify({ source: "Stellenanzeige", jobUrl: null }) }));
+  const accepted = await importRequest(
+    new Request("https://worker.example", {
+      method: "POST",
+      body: JSON.stringify({ source: "Stellenanzeige", jobUrl: null }),
+    }),
+  );
   assert.deepEqual(accepted, { source: "Stellenanzeige", jobUrl: null });
-  const rejected = await importRequest(new Request("https://worker.example", { method: "POST", body: JSON.stringify({ source: "", jobUrl: null }) }));
+  const rejected = await importRequest(
+    new Request("https://worker.example", {
+      method: "POST",
+      body: JSON.stringify({ source: "", jobUrl: null }),
+    }),
+  );
   assert.equal(rejected, null);
 });

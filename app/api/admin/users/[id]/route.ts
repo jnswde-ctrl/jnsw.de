@@ -8,20 +8,12 @@ import { isActiveAdmin, publicUser, requireAppUser } from "../../../../auth";
 import { isSameOrigin } from "../../../../request-security";
 const roles: UserRole[] = ["admin", "member"],
   statuses: UserStatus[] = ["active", "suspended"];
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  if (!isSameOrigin(request))
-    return Response.json({ error: "Invalid origin" }, { status: 403 });
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!isSameOrigin(request)) return Response.json({ error: "Invalid origin" }, { status: 403 });
   const actor = await requireAppUser();
-  if (!actor)
-    return Response.json({ error: "Authentication required" }, { status: 401 });
+  if (!actor) return Response.json({ error: "Authentication required" }, { status: 401 });
   if (!isActiveAdmin(actor))
-    return Response.json(
-      { error: "Administrator access required" },
-      { status: 403 },
-    );
+    return Response.json({ error: "Administrator access required" }, { status: 403 });
   const body = (await request.json().catch(() => null)) as {
     role?: unknown;
     status?: unknown;
@@ -29,16 +21,10 @@ export async function PATCH(
   const changes: { role?: UserRole; status?: UserStatus } = {};
   if (typeof body?.role === "string" && roles.includes(body.role as UserRole))
     changes.role = body.role as UserRole;
-  if (
-    typeof body?.status === "string" &&
-    statuses.includes(body.status as UserStatus)
-  )
+  if (typeof body?.status === "string" && statuses.includes(body.status as UserStatus))
     changes.status = body.status as UserStatus;
   if (!changes.role && !changes.status)
-    return Response.json(
-      { error: "Provide a valid role or status" },
-      { status: 400 },
-    );
+    return Response.json({ error: "Provide a valid role or status" }, { status: 400 });
   const { id } = await params;
   if (
     id === actor.id &&

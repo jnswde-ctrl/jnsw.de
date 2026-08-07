@@ -6,10 +6,18 @@ async function render(pathname) {
   const url = new URL("../dist/server/index.js", import.meta.url);
   url.searchParams.set("test", `${process.pid}-${Date.now()}-${pathname}`);
   const { default: worker } = await import(url.href);
-  return worker.fetch(new Request(`http://localhost${pathname}`, { headers: { accept: "text/html" } }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  return worker.fetch(
+    new Request(`http://localhost${pathname}`, { headers: { accept: "text/html" } }),
+    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+    { waitUntil() {}, passThroughOnException() {} },
+  );
 }
 
-for (const [path, title, content] of [["/", "JNSW.DE", "Digital"], ["/tools", "Tools", "Werkzeuge"], ["/informationen", "Informationen", "Wissen,"]]) {
+for (const [path, title, content] of [
+  ["/", "JNSW.DE", "Digital"],
+  ["/tools", "Tools", "Werkzeuge"],
+  ["/informationen", "Informationen", "Wissen,"],
+]) {
   test(`server-renders ${path}`, async () => {
     const response = await render(path);
     assert.equal(response.status, 200);

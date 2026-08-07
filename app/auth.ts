@@ -10,7 +10,16 @@ export function isActiveAdmin(user: AppUser) {
   return user.role === "admin" && user.status === "active";
 }
 export function publicUser(user: AppUser) {
-  return { id: user.id, displayName: user.displayName, role: user.role, status: user.status, emailVerifiedAt: user.emailVerifiedAt, createdAt: user.createdAt, updatedAt: user.updatedAt, lastSignedInAt: user.lastSignedInAt };
+  return {
+    id: user.id,
+    displayName: user.displayName,
+    role: user.role,
+    status: user.status,
+    emailVerifiedAt: user.emailVerifiedAt,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+    lastSignedInAt: user.lastSignedInAt,
+  };
 }
 /** Use this guard for private product data, never just the presence of a session. */
 export async function requireActiveUser(): Promise<AppUser | null> {

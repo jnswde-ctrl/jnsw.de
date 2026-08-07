@@ -1,18 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { PDFDocument, StandardFonts } from "@cantoo/pdf-lib";
-import {
-  mergePdfSources,
-  pdfErrorMessage,
-} from "../app/tools/pdf-zusammenfuegen/mergePdf.ts";
-import {
-  isPdfFile,
-  moveItem,
-  removeItem,
-} from "../app/tools/pdf-zusammenfuegen/pdfMergeState.ts";
+import { mergePdfSources, pdfErrorMessage } from "../app/tools/pdf-zusammenfuegen/mergePdf.ts";
+import { isPdfFile, moveItem, removeItem } from "../app/tools/pdf-zusammenfuegen/pdfMergeState.ts";
 
-const fakeFile = (name: string, type = "application/pdf") =>
-  ({ name, type }) as File;
+const fakeFile = (name: string, type = "application/pdf") => ({ name, type }) as File;
 const item = (id: string) => ({ id, file: fakeFile(`${id}.pdf`) });
 
 test("accepts PDFs and rejects unrelated file types", () => {
@@ -69,20 +61,14 @@ async function createPdf(label: string, pages: number, password?: string) {
 const source = (name: string, bytes: Uint8Array) => ({
   name,
   async arrayBuffer() {
-    return bytes.buffer.slice(
-      bytes.byteOffset,
-      bytes.byteOffset + bytes.byteLength,
-    ) as ArrayBuffer;
+    return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
   },
 });
 
 test("merges all pages from source PDFs in supplied order", async () => {
   const first = await createPdf("FIRST", 1);
   const second = await createPdf("SECOND", 2);
-  const result = await mergePdfSources([
-    source("first.pdf", first),
-    source("second.pdf", second),
-  ]);
+  const result = await mergePdfSources([source("first.pdf", first), source("second.pdf", second)]);
   assert.equal((await PDFDocument.load(result)).getPageCount(), 3);
 
   const reversed = await mergePdfSources([
@@ -95,16 +81,11 @@ test("merges all pages from source PDFs in supplied order", async () => {
 
 test("reports a damaged PDF and remains callable afterwards", async () => {
   await assert.rejects(
-    mergePdfSources([
-      source("kaputt.pdf", new TextEncoder().encode("%PDF-1.7\nkaputt")),
-    ]),
+    mergePdfSources([source("kaputt.pdf", new TextEncoder().encode("%PDF-1.7\nkaputt"))]),
     /kaputt\.pdf.*beschädigt|kaputt\.pdf.*lesbare PDF/,
   );
   const valid = await createPdf("RECOVERY", 1);
-  const recovered = await mergePdfSources([
-    source("one.pdf", valid),
-    source("two.pdf", valid),
-  ]);
+  const recovered = await mergePdfSources([source("one.pdf", valid), source("two.pdf", valid)]);
   assert.equal((await PDFDocument.load(recovered)).getPageCount(), 2);
 });
 
@@ -117,8 +98,5 @@ test("reports password-protected PDFs clearly", async () => {
 });
 
 test("maps browser memory failures to actionable guidance", () => {
-  assert.match(
-    pdfErrorMessage(new RangeError("Invalid array length")),
-    /Arbeitsspeicher/,
-  );
+  assert.match(pdfErrorMessage(new RangeError("Invalid array length")), /Arbeitsspeicher/);
 });

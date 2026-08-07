@@ -1,7 +1,95 @@
-import { addDocumentVersion, addTimelineEvent, applicationDetail, deleteApplication, replaceEvidence, updateApplication } from "../../../../../db/applications";
+import {
+  addDocumentVersion,
+  addTimelineEvent,
+  applicationDetail,
+  deleteApplication,
+  replaceEvidence,
+  updateApplication,
+} from "../../../../../db/applications";
 import { applicationStatusValues } from "../../../../../db/schema";
-import { activeUser, date, denied, json, mutationAllowed, privateHeaders, text } from "../../support";
-type Context={params:Promise<{id:string}>};
-export async function GET(_:Request,{params}:Context){const user=await activeUser();if(!user)return denied(401,"Authentication required");const detail=await applicationDetail(user.id,(await params).id);return detail?Response.json(detail,{headers:privateHeaders}):denied(404,"Not found");}
-export async function PATCH(request:Request,{params}:Context){if(!mutationAllowed(request))return denied(403,"Invalid origin");const user=await activeUser();if(!user)return denied(401,"Authentication required");const body=await json(request),id=(await params).id;if(body?.action==="document"){const content=text(body.content,20000,true);if(!content)return denied(400,"Invalid document");const item=await addDocumentVersion(user.id,id,content);return item?Response.json({document:item},{headers:privateHeaders}):denied(404,"Not found");}if(body?.action==="timeline"){const type=text(body.type,50,true),occurredAt=typeof body.occurredAt==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(body.occurredAt)?body.occurredAt:null,note=text(body.note,4000)??"";if(!type||!occurredAt||!(await applicationDetail(user.id,id)))return denied(400,"Invalid event");return Response.json({event:await addTimelineEvent(user.id,id,type,occurredAt,note)},{headers:privateHeaders});}if(body?.action==="evidence"){const ids=Array.isArray(body.careerItemIds)&&body.careerItemIds.every(x=>typeof x==="string")?body.careerItemIds:null;if(!ids||!(await applicationDetail(user.id,id)))return denied(400,"Invalid evidence");return (await replaceEvidence(user.id,id,ids))?Response.json({ok:true},{headers:privateHeaders}):denied(400,"Invalid evidence");}const changes={company:text(body?.company,160,true)??undefined,role:text(body?.role,160,true)??undefined,notes:text(body?.notes,8000)??undefined,jobUrl:text(body?.jobUrl,2048)??undefined,salary:text(body?.salary,120)??undefined,deadlineAt:date(body?.deadlineAt),followUpAt:date(body?.followUpAt),status:applicationStatusValues.includes(body?.status as never)?body?.status as never:undefined,archivedAt:body?.status==="archived"?new Date().toISOString():undefined};if(changes.deadlineAt===undefined||changes.followUpAt===undefined||(changes.jobUrl&&!URL.canParse(changes.jobUrl)))return denied(400,"Invalid application data");const item=await updateApplication(user.id,id,changes);return item?Response.json({application:item},{headers:privateHeaders}):denied(404,"Not found");}
-export async function DELETE(request:Request,{params}:Context){if(!mutationAllowed(request))return denied(403,"Invalid origin");const user=await activeUser();if(!user)return denied(401,"Authentication required");return (await deleteApplication(user.id,(await params).id))?new Response(null,{status:204,headers:privateHeaders}):denied(404,"Not found");}
+import {
+  activeUser,
+  date,
+  denied,
+  json,
+  mutationAllowed,
+  privateHeaders,
+  text,
+} from "../../support";
+type Context = { params: Promise<{ id: string }> };
+export async function GET(_: Request, { params }: Context) {
+  const user = await activeUser();
+  if (!user) return denied(401, "Authentication required");
+  const detail = await applicationDetail(user.id, (await params).id);
+  return detail ? Response.json(detail, { headers: privateHeaders }) : denied(404, "Not found");
+}
+export async function PATCH(request: Request, { params }: Context) {
+  if (!mutationAllowed(request)) return denied(403, "Invalid origin");
+  const user = await activeUser();
+  if (!user) return denied(401, "Authentication required");
+  const body = await json(request),
+    id = (await params).id;
+  if (body?.action === "document") {
+    const content = text(body.content, 20000, true);
+    if (!content) return denied(400, "Invalid document");
+    const item = await addDocumentVersion(user.id, id, content);
+    return item
+      ? Response.json({ document: item }, { headers: privateHeaders })
+      : denied(404, "Not found");
+  }
+  if (body?.action === "timeline") {
+    const type = text(body.type, 50, true),
+      occurredAt =
+        typeof body.occurredAt === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.occurredAt)
+          ? body.occurredAt
+          : null,
+      note = text(body.note, 4000) ?? "";
+    if (!type || !occurredAt || !(await applicationDetail(user.id, id)))
+      return denied(400, "Invalid event");
+    return Response.json(
+      { event: await addTimelineEvent(user.id, id, type, occurredAt, note) },
+      { headers: privateHeaders },
+    );
+  }
+  if (body?.action === "evidence") {
+    const ids =
+      Array.isArray(body.careerItemIds) && body.careerItemIds.every((x) => typeof x === "string")
+        ? body.careerItemIds
+        : null;
+    if (!ids || !(await applicationDetail(user.id, id))) return denied(400, "Invalid evidence");
+    return (await replaceEvidence(user.id, id, ids))
+      ? Response.json({ ok: true }, { headers: privateHeaders })
+      : denied(400, "Invalid evidence");
+  }
+  const changes = {
+    company: text(body?.company, 160, true) ?? undefined,
+    role: text(body?.role, 160, true) ?? undefined,
+    notes: text(body?.notes, 8000) ?? undefined,
+    jobUrl: text(body?.jobUrl, 2048) ?? undefined,
+    salary: text(body?.salary, 120) ?? undefined,
+    deadlineAt: date(body?.deadlineAt),
+    followUpAt: date(body?.followUpAt),
+    status: applicationStatusValues.includes(body?.status as never)
+      ? (body?.status as never)
+      : undefined,
+    archivedAt: body?.status === "archived" ? new Date().toISOString() : undefined,
+  };
+  if (
+    changes.deadlineAt === undefined ||
+    changes.followUpAt === undefined ||
+    (changes.jobUrl && !URL.canParse(changes.jobUrl))
+  )
+    return denied(400, "Invalid application data");
+  const item = await updateApplication(user.id, id, changes);
+  return item
+    ? Response.json({ application: item }, { headers: privateHeaders })
+    : denied(404, "Not found");
+}
+export async function DELETE(request: Request, { params }: Context) {
+  if (!mutationAllowed(request)) return denied(403, "Invalid origin");
+  const user = await activeUser();
+  if (!user) return denied(401, "Authentication required");
+  return (await deleteApplication(user.id, (await params).id))
+    ? new Response(null, { status: 204, headers: privateHeaders })
+    : denied(404, "Not found");
+}

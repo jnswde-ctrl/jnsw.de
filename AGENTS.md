@@ -42,6 +42,8 @@ Keine Installation ausführen, sofern sie nicht ausdrücklich beauftragt wurde.
 
 ```bash
 npm run dev
+npm run format
+npm run format:check
 npm run build
 npm run start
 npm test
@@ -50,6 +52,8 @@ npm run db:generate
 ```
 
 - `npm run dev`: lokale vinext-Entwicklung starten
+- `npm run format`: handgeschriebenen Quellcode mit Prettier formatieren
+- `npm run format:check`: Prettier-Formatierung ohne Schreiben prüfen
 - `npm run build`: Produktions-Build erzeugen
 - `npm run start`: gebauten Stand starten
 - `npm test`: baut zuerst und führt die Unit-Tests aus
@@ -104,6 +108,7 @@ Es bestehen zwei Anmeldewege: E-Mail/Passwort sowie „Sign in with ChatGPT“ d
 Vor Abschluss einer Änderung mindestens die relevanten Prüfungen ausführen:
 
 - `npm run lint`
+- `npm run format:check`
 - `npm run build`
 - `npm test`, wenn Build, gerendertes HTML oder getestete Komponenten betroffen sind
 - `npm run db:generate`, wenn `db/schema.ts` geändert wurde; die Migration anschließend prüfen

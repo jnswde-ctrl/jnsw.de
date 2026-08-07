@@ -6,8 +6,7 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto minmax(24px, 1fr);
   background:
-    radial-gradient(circle at 88% 4%, rgba(49, 87, 255, 0.55), transparent 31%),
-    var(--ink);
+    radial-gradient(circle at 88% 4%, rgba(49, 87, 255, 0.55), transparent 31%), var(--ink);
   color: var(--paper);
 }
 .tools-page:after {
@@ -224,12 +223,291 @@
   text-transform: uppercase;
   text-align: left;
 }
-.workspace-modes { display:flex; gap:8px; padding:16px 20px 0; border-bottom:1px solid var(--line); overflow-x:auto; }.workspace-modes button { flex:0 0 auto; min-height:38px; padding:0 13px; border:1px solid var(--line); background:transparent; color:var(--paper); font:9px "DM Mono", monospace; text-transform:uppercase; cursor:pointer; }.workspace-modes button.is-active,.workspace-modes button:hover,.workspace-modes button:focus-visible { background:var(--acid); border-color:var(--acid); color:var(--ink); }.workspace-modes button:focus-visible { outline:3px solid var(--blue); outline-offset:2px; }
-.workspace-choice { max-width:920px; margin:0 auto; padding:clamp(28px,5vh,58px) clamp(25px,6vw,90px); }.workspace-choice h3 { max-width:760px; margin:12px 0 18px; font-size:clamp(2.6rem,5vw,6rem); line-height:.9; letter-spacing:-.08em; }.workspace-choice > p:not(.eyebrow) { max-width:620px; margin:0 0 30px; color:rgba(244,240,231,.68); font-size:14px; line-height:1.55; }.workspace-choice-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }.workspace-choice-grid button { min-height:230px; padding:22px; border:1px solid var(--line); display:grid; grid-template-columns:1fr auto; grid-template-rows:auto 1fr auto; gap:16px; text-align:left; background:var(--surface); color:var(--paper); cursor:pointer; }.workspace-choice-grid button:hover,.workspace-choice-grid button:focus-visible { border-color:var(--acid); background:var(--surface-raised); }.workspace-choice-grid button:focus-visible { outline:3px solid var(--blue); outline-offset:2px; }.workspace-choice-grid .eyebrow { grid-column:1/-1; margin:0; color:rgba(244,240,231,.58); }.workspace-choice-grid strong { align-self:end; font-size:clamp(1.55rem,2.7vw,2.5rem); letter-spacing:-.06em; }.workspace-choice-grid span:not(.eyebrow) { grid-column:1/-1; max-width:31ch; color:rgba(244,240,231,.66); font-size:13px; line-height:1.5; }.workspace-choice-grid b { align-self:end; font-size:26px; color:var(--acid); }
-.workspace-file-selection { max-width:920px; margin:0 auto; padding:clamp(28px,5vh,58px) clamp(25px,6vw,40px); }.workspace-file-selection h3 { max-width:760px; margin:12px 0 18px; font-size:clamp(2.6rem,5vw,6rem); line-height:.9; letter-spacing:-.08em; }.workspace-file-selection > p:not(.eyebrow) { max-width:620px; margin:0 0 30px; color:rgba(244,240,231,.68); font-size:14px; line-height:1.55; }.workspace-file-selection .file-drop-button { min-height:110px; }.workspace-selected-summary { margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:12px; color:rgba(244,240,231,.62); font:9px "DM Mono",monospace; text-transform:uppercase; }.workspace-selected-summary button { border:0; background:transparent; color:var(--paper); font:inherit; text-decoration:underline; cursor:pointer; }
-.workspace-story { max-width:920px; margin:0 auto; padding:clamp(28px,5vh,58px) clamp(25px,6vw,90px); }.workspace-story h3 { max-width:760px; margin:12px 0 18px; font-size:clamp(2.6rem,5vw,6rem); line-height:.9; letter-spacing:-.08em; }.workspace-story-lead { max-width:620px; margin:0 0 34px; color:rgba(244,240,231,.68); font-size:14px; line-height:1.55; }.workspace-story dl { margin:0; border-top:1px solid var(--line); }.workspace-story dl > div { display:grid; grid-template-columns:minmax(150px,.28fr) 1fr; gap:24px; padding:20px 0; border-bottom:1px solid var(--line); }.workspace-story dt { color:var(--acid); font:10px "DM Mono",monospace; text-transform:uppercase; }.workspace-story dd { margin:0; max-width:600px; color:rgba(244,240,231,.76); font-size:14px; line-height:1.55; }
-.pdf-wizard #pdf-files,.pdf-wizard #pdf-files + .file-drop-button,.pdf-rename-tool #rename-files,.pdf-rename-tool #rename-files + .file-drop-button { display:none; }
-.pdf-rename-tool { max-width:920px; margin:0 auto; padding:clamp(28px,5vh,58px) clamp(25px,6vw,90px); }.rename-intro h3 { max-width:760px; margin:12px 0 18px; font-size:clamp(2.6rem,5vw,6rem); line-height:.9; letter-spacing:-.08em; }.rename-intro > p:not(.eyebrow) { max-width:640px; margin:0 0 30px; color:rgba(244,240,231,.68); font-size:14px; line-height:1.55; }.visually-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }.rename-fields { display:grid; grid-template-columns:minmax(130px,.45fr) 1fr; gap:16px; margin:24px 0; }.rename-fields label { display:grid; gap:8px; color:rgba(244,240,231,.7); font:9px "DM Mono", monospace; text-transform:uppercase; }.rename-fields input { min-height:45px; box-sizing:border-box; padding:10px 12px; border:1px solid var(--line); background:var(--surface-raised); color:var(--paper); font:14px Manrope,sans-serif; }.rename-preview { list-style:none; margin:0; padding:0; border-top:1px solid var(--line); }.rename-preview li { display:grid; grid-template-columns:40px 1fr auto; gap:14px; align-items:center; min-height:66px; border-bottom:1px solid var(--line); }.rename-preview li > span,.rename-preview small { font:9px "DM Mono", monospace; color:rgba(244,240,231,.55); }.rename-preview div { min-width:0; display:grid; gap:5px; }.rename-preview strong { overflow-wrap:anywhere; font-size:13px; }.rename-preview button { min-height:38px; padding:0 10px; border:1px solid var(--line); background:transparent; color:var(--paper); font:9px "DM Mono", monospace; text-transform:uppercase; cursor:pointer; }
+.workspace-modes {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px 0;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+.workspace-modes button {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--paper);
+  font:
+    9px "DM Mono",
+    monospace;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.workspace-modes button.is-active,
+.workspace-modes button:hover,
+.workspace-modes button:focus-visible {
+  background: var(--acid);
+  border-color: var(--acid);
+  color: var(--ink);
+}
+.workspace-modes button:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+.workspace-choice {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vh, 58px) clamp(25px, 6vw, 90px);
+}
+.workspace-choice h3 {
+  max-width: 760px;
+  margin: 12px 0 18px;
+  font-size: clamp(2.6rem, 5vw, 6rem);
+  line-height: 0.9;
+  letter-spacing: -0.08em;
+}
+.workspace-choice > p:not(.eyebrow) {
+  max-width: 620px;
+  margin: 0 0 30px;
+  color: rgba(244, 240, 231, 0.68);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.workspace-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.workspace-choice-grid button {
+  min-height: 230px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  gap: 16px;
+  text-align: left;
+  background: var(--surface);
+  color: var(--paper);
+  cursor: pointer;
+}
+.workspace-choice-grid button:hover,
+.workspace-choice-grid button:focus-visible {
+  border-color: var(--acid);
+  background: var(--surface-raised);
+}
+.workspace-choice-grid button:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+.workspace-choice-grid .eyebrow {
+  grid-column: 1/-1;
+  margin: 0;
+  color: rgba(244, 240, 231, 0.58);
+}
+.workspace-choice-grid strong {
+  align-self: end;
+  font-size: clamp(1.55rem, 2.7vw, 2.5rem);
+  letter-spacing: -0.06em;
+}
+.workspace-choice-grid span:not(.eyebrow) {
+  grid-column: 1/-1;
+  max-width: 31ch;
+  color: rgba(244, 240, 231, 0.66);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.workspace-choice-grid b {
+  align-self: end;
+  font-size: 26px;
+  color: var(--acid);
+}
+.workspace-file-selection {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vh, 58px) clamp(25px, 6vw, 40px);
+}
+.workspace-file-selection h3 {
+  max-width: 760px;
+  margin: 12px 0 18px;
+  font-size: clamp(2.6rem, 5vw, 6rem);
+  line-height: 0.9;
+  letter-spacing: -0.08em;
+}
+.workspace-file-selection > p:not(.eyebrow) {
+  max-width: 620px;
+  margin: 0 0 30px;
+  color: rgba(244, 240, 231, 0.68);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.workspace-file-selection .file-drop-button {
+  min-height: 110px;
+}
+.workspace-selected-summary {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: rgba(244, 240, 231, 0.62);
+  font:
+    9px "DM Mono",
+    monospace;
+  text-transform: uppercase;
+}
+.workspace-selected-summary button {
+  border: 0;
+  background: transparent;
+  color: var(--paper);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.workspace-story {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vh, 58px) clamp(25px, 6vw, 90px);
+}
+.workspace-story h3 {
+  max-width: 760px;
+  margin: 12px 0 18px;
+  font-size: clamp(2.6rem, 5vw, 6rem);
+  line-height: 0.9;
+  letter-spacing: -0.08em;
+}
+.workspace-story-lead {
+  max-width: 620px;
+  margin: 0 0 34px;
+  color: rgba(244, 240, 231, 0.68);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.workspace-story dl {
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+.workspace-story dl > div {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.28fr) 1fr;
+  gap: 24px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+.workspace-story dt {
+  color: var(--acid);
+  font:
+    10px "DM Mono",
+    monospace;
+  text-transform: uppercase;
+}
+.workspace-story dd {
+  margin: 0;
+  max-width: 600px;
+  color: rgba(244, 240, 231, 0.76);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.pdf-wizard #pdf-files,
+.pdf-wizard #pdf-files + .file-drop-button,
+.pdf-rename-tool #rename-files,
+.pdf-rename-tool #rename-files + .file-drop-button {
+  display: none;
+}
+.pdf-rename-tool {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: clamp(28px, 5vh, 58px) clamp(25px, 6vw, 90px);
+}
+.rename-intro h3 {
+  max-width: 760px;
+  margin: 12px 0 18px;
+  font-size: clamp(2.6rem, 5vw, 6rem);
+  line-height: 0.9;
+  letter-spacing: -0.08em;
+}
+.rename-intro > p:not(.eyebrow) {
+  max-width: 640px;
+  margin: 0 0 30px;
+  color: rgba(244, 240, 231, 0.68);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+.rename-fields {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.45fr) 1fr;
+  gap: 16px;
+  margin: 24px 0;
+}
+.rename-fields label {
+  display: grid;
+  gap: 8px;
+  color: rgba(244, 240, 231, 0.7);
+  font:
+    9px "DM Mono",
+    monospace;
+  text-transform: uppercase;
+}
+.rename-fields input {
+  min-height: 45px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-raised);
+  color: var(--paper);
+  font:
+    14px Manrope,
+    sans-serif;
+}
+.rename-preview {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.rename-preview li {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  min-height: 66px;
+  border-bottom: 1px solid var(--line);
+}
+.rename-preview li > span,
+.rename-preview small {
+  font:
+    9px "DM Mono",
+    monospace;
+  color: rgba(244, 240, 231, 0.55);
+}
+.rename-preview div {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+.rename-preview strong {
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+.rename-preview button {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--paper);
+  font:
+    9px "DM Mono",
+    monospace;
+  text-transform: uppercase;
+  cursor: pointer;
+}
 .wizard-step-number {
   color: inherit;
 }
@@ -350,8 +628,67 @@
   cursor: not-allowed;
   opacity: 0.35;
 }
-.merge-file-name { max-width:560px; margin:24px 0; display:grid; gap:8px; color:rgba(244,240,231,.7); font:9px "DM Mono",monospace; text-transform:uppercase; }.merge-file-name input { min-height:45px; box-sizing:border-box; padding:10px 12px; border:1px solid var(--line); background:var(--surface-raised); color:var(--paper); font:14px Manrope,sans-serif; text-transform:none; }.merge-file-name small { color:rgba(244,240,231,.52); font:9px "DM Mono",monospace; text-transform:none; }
-.merge-order { max-width:920px; margin:24px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }.merge-order summary { min-height:52px; display:flex; align-items:center; justify-content:space-between; gap:16px; cursor:pointer; color:var(--paper); font:10px "DM Mono",monospace; text-transform:uppercase; }.merge-order summary span { color:rgba(244,240,231,.55); }.merge-order[open] summary { border-bottom:1px solid var(--line); }.merge-order-result { margin:18px 0; }.merge-order-result .button { margin:16px 0; }
+.merge-file-name {
+  max-width: 560px;
+  margin: 24px 0;
+  display: grid;
+  gap: 8px;
+  color: rgba(244, 240, 231, 0.7);
+  font:
+    9px "DM Mono",
+    monospace;
+  text-transform: uppercase;
+}
+.merge-file-name input {
+  min-height: 45px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-raised);
+  color: var(--paper);
+  font:
+    14px Manrope,
+    sans-serif;
+  text-transform: none;
+}
+.merge-file-name small {
+  color: rgba(244, 240, 231, 0.52);
+  font:
+    9px "DM Mono",
+    monospace;
+  text-transform: none;
+}
+.merge-order {
+  max-width: 920px;
+  margin: 24px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.merge-order summary {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  color: var(--paper);
+  font:
+    10px "DM Mono",
+    monospace;
+  text-transform: uppercase;
+}
+.merge-order summary span {
+  color: rgba(244, 240, 231, 0.55);
+}
+.merge-order[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+.merge-order-result {
+  margin: 18px 0;
+}
+.merge-order-result .button {
+  margin: 16px 0;
+}
 .button-primary:disabled {
   border-color: #354c21;
   background: #354c21;
@@ -515,8 +852,7 @@
 .pdf-tool-hero {
   padding: 26px 3.2vw 45px;
   background:
-    radial-gradient(circle at 90% 5%, rgba(49, 87, 255, 0.58), transparent 35%),
-    var(--ink);
+    radial-gradient(circle at 90% 5%, rgba(49, 87, 255, 0.58), transparent 35%), var(--ink);
 }
 .pdf-tool-heading {
   display: grid;
@@ -540,7 +876,17 @@
   font-size: 14px;
   line-height: 1.55;
 }
-.pdf-case-link { grid-column: 3; justify-self: start; margin-top: 24px; border-bottom: 1px solid var(--paper); padding-bottom: 6px; font: 10px "DM Mono", monospace; text-transform: uppercase; }
+.pdf-case-link {
+  grid-column: 3;
+  justify-self: start;
+  margin-top: 24px;
+  border-bottom: 1px solid var(--paper);
+  padding-bottom: 6px;
+  font:
+    10px "DM Mono",
+    monospace;
+  text-transform: uppercase;
+}
 .pdf-tool-section {
   padding: 55px 3.2vw 90px;
 }
@@ -680,19 +1026,33 @@
     gap: 7px;
     font-size: 0.75rem;
   }
-  .wizard-progress button:disabled { opacity: 1; }
+  .wizard-progress button:disabled {
+    opacity: 1;
+  }
   .wizard-step-label {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   .wizard-panel {
-    padding: 40px max(20px, env(safe-area-inset-right)) max(50px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+    padding: 40px max(20px, env(safe-area-inset-right)) max(50px, env(safe-area-inset-bottom))
+      max(20px, env(safe-area-inset-left));
   }
-  .workspace-choice { padding:40px max(20px, env(safe-area-inset-right)) 50px max(20px, env(safe-area-inset-left)); }
-  .workspace-choice h3 { max-width:11ch; font-size:clamp(2.75rem,13vw,4rem); line-height:.92; letter-spacing:-.055em; }
-  .workspace-choice-grid { grid-template-columns:1fr; }
-  .workspace-choice-grid button { min-height:190px; }
+  .workspace-choice {
+    padding: 40px max(20px, env(safe-area-inset-right)) 50px max(20px, env(safe-area-inset-left));
+  }
+  .workspace-choice h3 {
+    max-width: 11ch;
+    font-size: clamp(2.75rem, 13vw, 4rem);
+    line-height: 0.92;
+    letter-spacing: -0.055em;
+  }
+  .workspace-choice-grid {
+    grid-template-columns: 1fr;
+  }
+  .workspace-choice-grid button {
+    min-height: 190px;
+  }
   .wizard-step h3 {
     max-width: 10ch;
     font-size: clamp(2.75rem, 13vw, 4rem);
@@ -741,7 +1101,9 @@
   .pdf-tool-heading > p:last-child {
     margin-top: 35px;
   }
-  .pdf-case-link { display: inline-block; }
+  .pdf-case-link {
+    display: inline-block;
+  }
   .pdf-tool-section {
     padding: 45px 20px 70px;
   }

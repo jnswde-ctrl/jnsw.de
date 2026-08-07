@@ -10,7 +10,7 @@
       "binding": "DB",
       "database_name": "jwx_db01",
       "database_id": "2b1176dc-bbd1-4a0f-bd2d-0714bcfff1e6",
-      "migrations_dir": "drizzle"
-    }
-  ]
+      "migrations_dir": "drizzle",
+    },
+  ],
 }

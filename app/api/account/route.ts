@@ -3,25 +3,21 @@ import { isSameOrigin } from "../../request-security";
 import { updateOwnProfile } from "../../../db/users";
 export async function GET() {
   const user = await requireAppUser();
-  if (!user)
-    return Response.json({ error: "Authentication required" }, { status: 401 });
+  if (!user) return Response.json({ error: "Authentication required" }, { status: 401 });
   if (user.status !== "active")
     return Response.json({ error: "Account suspended" }, { status: 403 });
   return Response.json({ user: publicUser(user) });
 }
 export async function PATCH(request: Request) {
-  if (!isSameOrigin(request))
-    return Response.json({ error: "Invalid origin" }, { status: 403 });
+  if (!isSameOrigin(request)) return Response.json({ error: "Invalid origin" }, { status: 403 });
   const user = await requireAppUser();
-  if (!user)
-    return Response.json({ error: "Authentication required" }, { status: 401 });
+  if (!user) return Response.json({ error: "Authentication required" }, { status: 401 });
   if (user.status !== "active")
     return Response.json({ error: "Account suspended" }, { status: 403 });
   const body = (await request.json().catch(() => null)) as {
     displayName?: unknown;
   } | null;
-  const displayName =
-    typeof body?.displayName === "string" ? body.displayName.trim() : "";
+  const displayName = typeof body?.displayName === "string" ? body.displayName.trim() : "";
   if (!displayName || displayName.length > 100)
     return Response.json(
       { error: "displayName must contain 1 to 100 characters" },

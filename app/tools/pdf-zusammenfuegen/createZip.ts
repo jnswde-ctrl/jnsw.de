@@ -25,8 +25,15 @@ function writeUint32(target: Uint8Array, offset: number, value: number) {
 
 /** Creates a standards-compliant ZIP archive without changing the source PDFs. */
 export function createZipArchive(entries: ZipEntry[]) {
-  const prepared = entries.map((entry) => ({ ...entry, nameBytes: encoder.encode(entry.name), crc: crc32(entry.bytes) }));
-  const localSize = prepared.reduce((size, entry) => size + 30 + entry.nameBytes.length + entry.bytes.length, 0);
+  const prepared = entries.map((entry) => ({
+    ...entry,
+    nameBytes: encoder.encode(entry.name),
+    crc: crc32(entry.bytes),
+  }));
+  const localSize = prepared.reduce(
+    (size, entry) => size + 30 + entry.nameBytes.length + entry.bytes.length,
+    0,
+  );
   const centralSize = prepared.reduce((size, entry) => size + 46 + entry.nameBytes.length, 0);
   const archive = new Uint8Array(localSize + centralSize + 22);
   const offsets: number[] = [];
