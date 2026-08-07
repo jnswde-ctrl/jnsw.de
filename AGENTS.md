@@ -118,6 +118,8 @@ Frontend-Änderungen auf Desktop und Mobil visuell prüfen. Für die Scroll-Plat
 - Das Issue dokumentiert vor und während der Umsetzung das Vorgehen, die Gründe für wesentliche Entscheidungen, den betroffenen Umfang sowie die ausgeführten oder bewusst nicht ausgeführten Prüfungen.
 - Commits und Pull Requests referenzieren das zugehörige Issue; nicht zusammenhängende Änderungen bleiben außerhalb des Branches.
 
+Der verbindliche Ablauf, die lokalen Voraussetzungen und Prüfpunkte stehen in `docs/visuelle-pruefung.md`. Für eine Sichtprüfung muss ein lokaler Entwicklungsserver in einem persistenten Terminal laufen.
+
 ## Definition of Done
 
 Eine Änderung ist abgeschlossen, wenn der beauftragte Umfang umgesetzt ist, Architektur- und Sicherheitsgrenzen eingehalten sind, relevante Dokumentation aktualisiert wurde, die anwendbaren Prüfungen erfolgreich sind und bekannte nicht ausgeführte Prüfungen dokumentiert sind. Vor einem Merge nach `main` müssen Informationsdateien, Kommentare und Projektanweisungen auf notwendigen Aktualisierungsbedarf geprüft und das Ergebnis im PR festgehalten werden.
