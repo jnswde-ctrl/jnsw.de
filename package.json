@@ -12,6 +12,8 @@
     "test": "npm run build && node --import tsx --test tests/*.test.ts",
     "validate:yaml": "node scripts/validate-yaml.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
