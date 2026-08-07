@@ -25,6 +25,9 @@ jobs:
       - name: Abhängigkeiten installieren
         run: npm ci
 
+      - name: Validate YAML files
+        run: npm run validate:yaml
+
       - name: Code prüfen
         run: npm run lint
 

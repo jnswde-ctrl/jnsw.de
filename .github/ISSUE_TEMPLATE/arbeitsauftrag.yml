@@ -1,0 +1,75 @@
+name: Arbeitsauftrag
+description: Plane und dokumentiere eine umsetzbare Änderung an JNSW.DE.
+title: "Kurze Beschreibung"
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Beschreibe eine abgegrenzte Änderung. Nach dem Anlegen wird der Arbeitsbranch anhand der Issue-Nummer erstellt und hier eingetragen, bevor die Umsetzung beginnt.
+
+  - type: dropdown
+    id: art
+    attributes:
+      label: Art der Änderung
+      options:
+        - Feature
+        - Fehlerbehebung
+        - Technische Aufgabe
+        - Dokumentation
+    validations:
+      required: true
+
+  - type: textarea
+    id: ziel
+    attributes:
+      label: Ziel und Nutzerwirkung
+      description: Welches Problem wird gelöst und was ist danach für Nutzer oder das Projekt besser?
+      placeholder: "Als … kann ich …, damit …"
+    validations:
+      required: true
+
+  - type: textarea
+    id: akzeptanzkriterien
+    attributes:
+      label: Akzeptanzkriterien
+      description: Woran lässt sich objektiv erkennen, dass die Änderung fertig ist?
+      placeholder: |
+        - [ ] …
+        - [ ] …
+    validations:
+      required: true
+
+  - type: input
+    id: arbeitsbranch
+    attributes:
+      label: Arbeitsbranch
+      description: Nach dem Anlegen mit der Issue-Nummer ergänzen; vor dem ersten Code-Commit muss ein konkreter Branch eingetragen sein.
+      placeholder: "feature/123-kurztitel"
+    validations:
+      required: false
+
+  - type: textarea
+    id: nicht_im_umfang
+    attributes:
+      label: Nicht im Umfang
+      description: Was wird bewusst nicht gelöst, damit die Änderung fokussiert bleibt?
+      placeholder: |
+        - …
+    validations:
+      required: true
+
+  - type: textarea
+    id: kontext_risiken
+    attributes:
+      label: Kontext, Abhängigkeiten oder Risiken
+      description: Optional – nur ausfüllen, wenn es für die Umsetzung relevant ist, z. B. Sicherheit, Migrationen oder externe Abhängigkeiten.
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Nach der Umsetzung ergänzen
+
+        Dokumentiere im Issue, wie das Problem im oben genannten Branch gelöst wurde, warum dieser Ansatz gewählt wurde und welche Prüfungen mit welchem Ergebnis gelaufen sind. Keine reine Prozessbeschreibung.

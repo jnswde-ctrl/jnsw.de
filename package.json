@@ -10,6 +10,7 @@
     "build": "vinext build",
     "start": "wrangler dev --config dist/server/wrangler.json --port 3000",
     "test": "npm run build && node --import tsx --test tests/*.test.ts",
+    "validate:yaml": "node scripts/validate-yaml.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },
@@ -39,7 +40,8 @@
     "typescript": "5.9.3",
     "vinext": "0.0.50",
     "vite": "8.2.1",
-    "wrangler": "4.119.0"
+    "wrangler": "4.119.0",
+    "yaml": "^2.9.0"
   },
   "type": "module",
   "allowScripts": {
