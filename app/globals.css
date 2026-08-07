@@ -1442,3 +1442,30 @@ footer {
     padding-bottom: 78px;
   }
 }
+
+.admin-workspace { min-height: 100svh; padding: 30px 3.2vw 90px; background: radial-gradient(circle at 88% 3%, rgba(49, 87, 255, .25), transparent 26%), var(--surface); color: var(--paper); }
+.admin-header, .admin-users { max-width: 1280px; margin: 0 auto; }
+.admin-header { display: grid; grid-template-columns: 22% 1fr 22%; gap: 20px; padding: 25px 0 45px; border-bottom: 1px solid var(--line); }
+.admin-header h1 { margin: 12px 0 0; font-size: clamp(3.5rem, 8vw, 8rem); line-height: .8; letter-spacing: -.095em; }
+.admin-header h1 em { font-family: Georgia, serif; font-weight: 400; }
+.admin-header h1 span { color: var(--blue); }
+.admin-header > p:last-child { margin: 42px 0 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.admin-users { margin-top: 55px; }
+.admin-users-heading, .admin-pagination { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.admin-users-heading { align-items: end; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.admin-users-heading h2 { margin: 10px 0 0; font-size: clamp(2.2rem, 4vw, 4rem); line-height: .9; letter-spacing: -.07em; }
+.admin-secondary-button { min-height: 44px; border: 1px solid var(--line); background: transparent; color: var(--paper); padding: 10px 14px; font: 10px "DM Mono", monospace; text-transform: uppercase; cursor: pointer; }
+.admin-secondary-button:hover, .admin-secondary-button:focus-visible { border-color: var(--acid); outline: 2px solid var(--blue); outline-offset: 2px; }
+.admin-message, .admin-loading { margin: 20px 0; padding: 12px; border: 1px solid var(--line); background: var(--surface-raised); font-size: 13px; }
+.admin-user-list { margin-top: 28px; border-top: 1px solid var(--line); }
+.admin-user-row { display: grid; grid-template-columns: minmax(220px, 1fr) 150px 150px 120px; gap: 14px; align-items: end; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.admin-user-meta b, .admin-user-meta span, .admin-user-meta small { display: block; }
+.admin-user-meta b { font-size: 17px; }
+.admin-user-meta span, .admin-user-meta small { margin-top: 5px; color: var(--muted); font: 10px "DM Mono", monospace; }
+.admin-user-meta span { max-width: 28ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-user-row label { display: grid; gap: 7px; font: 10px "DM Mono", monospace; text-transform: uppercase; }
+.admin-user-row select { min-height: 44px; border: 1px solid var(--line); background: var(--surface-raised); color: var(--paper); padding: 10px; font: 14px Manrope, sans-serif; }
+.admin-user-row .community-button { width: 100%; padding: 10px; }
+.admin-pagination { margin-top: 25px; font: 10px "DM Mono", monospace; text-transform: uppercase; }
+.admin-secondary-button:disabled, .admin-user-row .community-button:disabled { cursor: not-allowed; opacity: .5; }
+@media (max-width: 720px) { .admin-workspace { padding: 20px max(20px, env(safe-area-inset-right)) 65px max(20px, env(safe-area-inset-left)); } .admin-header { display: block; padding-top: 12px; } .admin-header h1 { margin-top: 42px; font-size: clamp(2.75rem, 13vw, 4rem); line-height: .92; text-wrap: balance; } .admin-header > p:last-child { margin-top: 28px; } .admin-users { margin-top: 38px; } .admin-users-heading { align-items: start; flex-direction: column; } .admin-secondary-button { width: 100%; } .admin-user-row { grid-template-columns: 1fr 1fr; padding: 22px 0; } .admin-user-meta, .admin-user-row .community-button { grid-column: 1 / -1; } .admin-pagination { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; } .admin-pagination span { grid-row: 1; grid-column: 1 / -1; text-align: center; } .admin-pagination button:first-child { grid-column: 1; } .admin-pagination button:last-child { grid-column: 2; } }

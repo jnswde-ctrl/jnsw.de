@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
@@ -70,6 +70,11 @@ export function CommunityAccount({ initialUser }: { initialUser: User | null }) 
         <Link className="community-button" href="/community/bewerbungswerkstatt">
           Bewerbungswerkstatt öffnen
         </Link>
+        {user.role === "admin" && (
+          <Link className="community-button secondary" href="/admin">
+            Administration öffnen
+          </Link>
+        )}
         <button className="community-button secondary" onClick={logout}>
           Abmelden
         </button>

@@ -78,7 +78,9 @@ export default async function Home() {
 
       <section className="platform-section community-section" id="community" aria-label="Community">
         <CommunityAccount
-          initialUser={user ? { displayName: user.displayName, status: user.status } : null}
+          initialUser={
+            user ? { displayName: user.displayName, role: user.role, status: user.status } : null
+          }
         />
       </section>
       <footer className="site-footer platform-footer">

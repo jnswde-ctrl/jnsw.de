@@ -1,4 +1,4 @@
-﻿import { requireAppUser } from "../auth";
+import { requireAppUser } from "../auth";
 import { SiteNav } from "../SiteNav";
 import { CommunityAccount } from "./CommunityAccount";
 export const dynamic = "force-dynamic";
@@ -41,6 +41,7 @@ export default async function CommunityPage() {
             user
               ? {
                   displayName: user.displayName,
+                  role: user.role,
                   status: user.status,
                   emailVerifiedAt: user.emailVerifiedAt,
                 }
