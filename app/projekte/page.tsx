@@ -5,6 +5,8 @@ import { PdfToolLauncher } from "../tools/PdfToolLauncher";
 
 export const metadata: Metadata = {
   title: "Projekte und Case Studies | JNSW.DE",
+  description:
+    "Case Studies von JNSW.DE zeigen Problem, Entscheidung und Umsetzung hinter digitalen Produkten und Werkzeugen.",
 };
 
 export default function ProjectsPage() {
