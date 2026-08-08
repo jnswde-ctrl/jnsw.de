@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import { SiteNav } from "../../SiteNav";
 import { PdfToolLauncher } from "../../tools/PdfToolLauncher";
+
+export const metadata: Metadata = {
+  title: "PDF-Werkbank: Case Study | JNSW.DE",
+};
 
 const parts = [
   [

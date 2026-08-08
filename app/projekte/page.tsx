@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteNav } from "../SiteNav";
 import { PdfToolLauncher } from "../tools/PdfToolLauncher";
+
+export const metadata: Metadata = {
+  title: "Projekte und Case Studies | JNSW.DE",
+};
 
 export default function ProjectsPage() {
   return (
