@@ -3,7 +3,7 @@ import { SiteNav } from "../SiteNav";
 import { ToolsExperience } from "./ToolsExperience";
 
 export const metadata: Metadata = {
-  title: "Tools – JNSW.DE",
+  title: "Digitale Tools für klare Aufgaben | JNSW.DE",
   description: "Kostenlose Werkzeuge für digitale Arbeit – direkt und datensparsam im Browser.",
 };
 
