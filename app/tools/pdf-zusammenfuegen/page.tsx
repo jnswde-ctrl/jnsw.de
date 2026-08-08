@@ -5,7 +5,7 @@ import { PdfWorkbench } from "./PdfWorkbench";
 export const metadata: Metadata = {
   title: "PDF-Werkbank: PDFs lokal bearbeiten | JNSW.DE",
   description:
-    "PDF-Dateien lokal verbinden, benennen und gesammelt als ZIP exportieren. Ohne Upload, Konto oder Serververarbeitung.",
+    "PDF-Dateien lokal verbinden oder umbenennen und als ZIP exportieren – ohne Upload, Konto oder Serververarbeitung.",
 };
 
 export default function PdfMergePage() {
