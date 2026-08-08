@@ -1,10 +1,15 @@
 ﻿# Technische Ausgangslage
 
-Stand: 28. Juli 2026
+Stand: 9. August 2026
 
 ## Architektur
 
 JNSW.DE nutzt Next.js 16 mit App Router und React 19. vinext baut die Anwendung für Cloudflare Workers; `worker/index.ts` delegiert reguläre Requests an vinext. D1 ist über das Binding `DB` angebunden, der Datenzugriff liegt in `db/` und die versionierten Migrationen in `drizzle/`.
+
+Verbindliche Architekturentscheidungen werden als ADR unter `docs/architecture/` dokumentiert. Für
+die Bewerbungswerkstatt trennt
+[ADR 0001](architecture/0001-opportunity-und-bewerbung-trennen.md) eine gefundene und geprüfte
+Stellen-Opportunity von der erst später entstehenden Bewerbung.
 
 | Bereich    | Verantwortung                                         |
 | ---------- | ----------------------------------------------------- |
