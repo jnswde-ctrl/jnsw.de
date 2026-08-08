@@ -81,8 +81,9 @@ export async function PATCH(request: Request, { params }: Context) {
   )
     return denied(400, "Invalid application data");
   const item = await updateApplication(user.id, id, changes);
-  return item
-    ? Response.json({ application: item }, { headers: privateHeaders })
+  if (item.kind === "invalid_transition") return denied(400, "Invalid status transition");
+  return item.kind === "ok"
+    ? Response.json({ application: item.value }, { headers: privateHeaders })
     : denied(404, "Not found");
 }
 export async function DELETE(request: Request, { params }: Context) {
