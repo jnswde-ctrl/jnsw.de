@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 export const userRoleValues = ["admin", "member"] as const;
 export const userStatusValues = ["active", "suspended"] as const;
 export const users = sqliteTable(
@@ -70,6 +70,16 @@ export const applicationStatusValues = [
   "withdrawn",
   "archived",
 ] as const;
+export const opportunitySourceTypeValues = ["manual", "url", "import"] as const;
+export const opportunityRemoteModelValues = ["unknown", "on_site", "hybrid", "remote"] as const;
+export const opportunityListingStatusValues = ["unknown", "open", "closed"] as const;
+export const opportunityReviewStatusValues = [
+  "unreviewed",
+  "reviewing",
+  "recommended",
+  "on_hold",
+  "not_recommended",
+] as const;
 export const careerItemKindValues = ["experience", "project"] as const;
 export const careerItems = sqliteTable(
   "career_items",
@@ -92,6 +102,47 @@ export const careerItems = sqliteTable(
   },
   (table) => [index("career_items_user_id_idx").on(table.userId)],
 );
+export const jobOpportunities = sqliteTable(
+  "job_opportunities",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    sourceKey: text("source_key").notNull(),
+    sourceType: text("source_type", { enum: opportunitySourceTypeValues }).notNull(),
+    company: text("company").notNull(),
+    role: text("role").notNull(),
+    jobUrl: text("job_url"),
+    location: text("location"),
+    remoteModel: text("remote_model", { enum: opportunityRemoteModelValues })
+      .notNull()
+      .default("unknown"),
+    advertisedSalary: text("advertised_salary"),
+    deadlineAt: text("deadline_at"),
+    applicationMethod: text("application_method"),
+    sourceCheckedAt: text("source_checked_at"),
+    listingStatus: text("listing_status", { enum: opportunityListingStatusValues })
+      .notNull()
+      .default("unknown"),
+    reviewStatus: text("review_status", { enum: opportunityReviewStatusValues })
+      .notNull()
+      .default("unreviewed"),
+    notes: text("notes").notNull().default(""),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    archivedAt: text("archived_at"),
+  },
+  (table) => [
+    uniqueIndex("job_opportunities_user_source_key_unique").on(table.userId, table.sourceKey),
+    index("job_opportunities_user_id_idx").on(table.userId),
+    index("job_opportunities_user_review_status_idx").on(table.userId, table.reviewStatus),
+  ],
+);
 export const jobApplications = sqliteTable(
   "job_applications",
   {
@@ -99,11 +150,16 @@ export const jobApplications = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    opportunityId: text("opportunity_id").references(() => jobOpportunities.id, {
+      onDelete: "cascade",
+    }),
     company: text("company").notNull(),
     role: text("role").notNull(),
     jobUrl: text("job_url"),
     salary: text("salary"),
     deadlineAt: text("deadline_at"),
+    applicationMethod: text("application_method"),
+    appliedAt: text("applied_at"),
     status: text("status", { enum: applicationStatusValues }).notNull().default("draft"),
     notes: text("notes").notNull().default(""),
     followUpAt: text("follow_up_at"),
@@ -118,6 +174,29 @@ export const jobApplications = sqliteTable(
   (table) => [
     index("job_applications_user_id_idx").on(table.userId),
     index("job_applications_user_status_idx").on(table.userId, table.status),
+    uniqueIndex("job_applications_opportunity_id_unique").on(table.opportunityId),
+  ],
+);
+export const opportunityTimelineEvents = sqliteTable(
+  "opportunity_timeline_events",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    opportunityId: text("opportunity_id")
+      .notNull()
+      .references(() => jobOpportunities.id, { onDelete: "cascade" }),
+    type: text("type").notNull(),
+    occurredAt: text("occurred_at").notNull(),
+    note: text("note").notNull().default(""),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("opportunity_timeline_events_user_id_idx").on(table.userId),
+    index("opportunity_timeline_events_opportunity_id_idx").on(table.opportunityId),
   ],
 );
 export const applicationEvidence = sqliteTable(
