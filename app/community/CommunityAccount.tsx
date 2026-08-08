@@ -3,7 +3,12 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 
-type User = { displayName: string; role?: "admin" | "member"; status: "active" | "suspended"; emailVerifiedAt?: string | null };
+type User = {
+  displayName: string;
+  role?: "admin" | "member";
+  status: "active" | "suspended";
+  emailVerifiedAt?: string | null;
+};
 export function CommunityAccount({ initialUser }: { initialUser: User | null }) {
   const [user, setUser] = useState(initialUser);
   const [mode, setMode] = useState<"login" | "register">("register");

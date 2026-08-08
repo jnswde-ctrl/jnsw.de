@@ -11,12 +11,22 @@ export default async function AdminPage() {
   return (
     <main className="admin-workspace">
       <header className="admin-header">
-        <a className="workbench-back" href="/community">← Zur Community</a>
+        <a className="workbench-back" href="/community">
+          ← Zur Community
+        </a>
         <div>
           <p className="eyebrow">JNSW.DE / Administration</p>
-          <h1>Konten<br /><em>verwalten.</em><span>.</span></h1>
+          <h1>
+            Konten
+            <br />
+            <em>verwalten.</em>
+            <span>.</span>
+          </h1>
         </div>
-        <p>Rollen und Kontostatus zentral verwalten. Änderungen werden erst nach dem Speichern wirksam.</p>
+        <p>
+          Rollen und Kontostatus zentral verwalten. Änderungen werden erst nach dem Speichern
+          wirksam.
+        </p>
       </header>
       <AdminUsers />
     </main>
