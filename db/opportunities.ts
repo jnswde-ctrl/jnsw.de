@@ -5,6 +5,7 @@ import {
   jobApplications,
   jobOpportunities,
   opportunityAnalyses,
+  opportunityAnalysisConfirmations,
   opportunityTimelineEvents,
   type opportunityListingStatusValues,
   type opportunityRemoteModelValues,
@@ -213,13 +214,21 @@ export async function convertOpportunityToApplication(
 }
 
 async function hasOpportunityAnalysis(userId: string, opportunityId: string) {
+  const analysis = await getDb().query.opportunityAnalyses.findFirst({
+    where: and(
+      eq(opportunityAnalyses.userId, userId),
+      eq(opportunityAnalyses.opportunityId, opportunityId),
+    ),
+    orderBy: desc(opportunityAnalyses.version),
+  });
   return Boolean(
-    await getDb().query.opportunityAnalyses.findFirst({
+    analysis &&
+    (await getDb().query.opportunityAnalysisConfirmations.findFirst({
       where: and(
-        eq(opportunityAnalyses.userId, userId),
-        eq(opportunityAnalyses.opportunityId, opportunityId),
+        eq(opportunityAnalysisConfirmations.analysisId, analysis.id),
+        eq(opportunityAnalysisConfirmations.userId, userId),
       ),
-    }),
+    })),
   );
 }
 
