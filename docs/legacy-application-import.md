@@ -1,22 +1,12 @@
 # Altbestandsimport Bewerbungswerkstatt
 
-Das lokale Kommando importiert den strukturierten Altbestand aus `bewerbungen.json` kontrolliert in D1. Die Quelldatei bleibt außerhalb des Repositories. `bewerbungen.md` ist eine lesbare Übersicht ohne stabile Vorgangs-ID und wird deshalb nicht als Schreibquelle verwendet.
+Die Bewerbungswerkstatt importiert den strukturierten Altbestand aus `bewerbungen.json` kontrolliert in die Datenbank des angemeldeten Kontos. Die Quelldatei bleibt außerhalb des Repositories. `bewerbungen.md` ist eine lesbare Übersicht ohne stabile Vorgangs-ID und wird deshalb nicht als Schreibquelle verwendet.
 
 ## Sicherer Ablauf
 
-Der Standard ist ein Dry-Run. Er liest nur bereits importierte Vorgänge des angegebenen Kontos und gibt ausschließlich Zähler aus.
+Nach der Anmeldung in der Bewerbungswerkstatt wählst du `bewerbungen.json` aus und startest den Probelauf. Die Datei wird im Browser gelesen. Anschreiben können optional gewählt werden und fließen nur als Zähler in den Bericht ein.
 
-```bash
-npm run import:legacy-applications -- --applications <lokaler-pfad>/bewerbungen.json --letters <lokaler-pfad>/anschreiben_jobs.json --user-id <zielkonto-id> --remote
-```
-
-Erst nach einem konfliktfreien Dry-Run schreibt `--apply` in die bewusst angegebene Datenbank:
-
-```bash
-npm run import:legacy-applications -- --applications <lokaler-pfad>/bewerbungen.json --letters <lokaler-pfad>/anschreiben_jobs.json --user-id <zielkonto-id> --remote --apply
-```
-
-Das Werkzeug erzeugt beim Schreiben eine temporäre SQL-Datei und entfernt sie anschließend. Weder Quelldateien noch Freitexte oder Konfliktkennungen werden ausgegeben.
+Der Probelauf gibt ausschließlich Zähler aus. Erst die separate Aktion `Jetzt … Einträge übernehmen` schreibt in die Datenbank. Die Route verwendet das Sites-D1-Binding `DB`; ein direkter `wrangler d1 --remote`-Import ist absichtlich nicht vorgesehen, weil er nicht die Sites-Produktionsdatenbank adressiert.
 
 ## Mapping
 
@@ -33,6 +23,6 @@ Das Versanddatum bleibt unabhängig vom Quellenstatus erhalten. Fehlende oder ni
 
 ## Idempotenz und Konflikte
 
-Der Schlüssel `legacy-json:<alte-id>` ist pro Zielkonto stabil. Bei identischem Bestand wird der Vorgang übersprungen. Fehlt bei einer ansonsten identischen Opportunity nur die erwartete Bewerbung, wird sie nachgetragen. Abweichungen bei Unternehmen, Rolle, URL, Prüfdatum, Status oder Notiz gelten als Konflikt: Das Kommando beendet sich mit Fehlercode `2` und führt keine Schreiboperation aus.
+Der Schlüssel `legacy-json:<alte-id>` ist pro Zielkonto stabil. Bei identischem Bestand wird der Vorgang übersprungen. Fehlt bei einer ansonsten identischen Opportunity nur die erwartete Bewerbung, wird sie nachgetragen. Abweichungen bei Unternehmen, Rolle, URL, Prüfdatum, Status oder Notiz gelten als Konflikt: Der Import stoppt vor der Schreiboperation.
 
-Dokument- und Nachweisreferenzen bleiben getrennt: Sie werden gezählt, aber weder hochgeladen noch in Git übernommen. Anschreiben werden nur gezählt; ohne einen belastbaren gemeinsamen Schlüssel werden sie nicht automatisch einer Bewerbung zugeordnet.
+Dokument- und Nachweisreferenzen bleiben getrennt: Der Browser reduziert sie vor dem Request auf einen Zähler; Namen und Pfade werden weder hochgeladen noch in Git übernommen. Anschreiben werden nur gezählt; ohne einen belastbaren gemeinsamen Schlüssel werden sie nicht automatisch einer Bewerbung zugeordnet.

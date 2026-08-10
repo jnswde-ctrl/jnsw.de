@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   createImportPlan,
-  sqlForPlan,
   toImportRecord,
   type LegacyApplication,
 } from "../scripts/legacy-application-import";
@@ -42,7 +41,7 @@ test("maps legacy states onto independent opportunity and application states", (
   );
 });
 
-test("is idempotent and reports mismatches without generating SQL for them", () => {
+test("is idempotent and reports mismatches without scheduling writes for them", () => {
   const first = createImportPlan([applied], []);
   assert.equal(first.report.new, 1);
   const record = toImportRecord(applied);
@@ -75,10 +74,11 @@ test("is idempotent and reports mismatches without generating SQL for them", () 
       .conflicts,
     1,
   );
-  assert.equal(sqlForPlan(conflict, "user-1"), "BEGIN IMMEDIATE;\nCOMMIT;");
+  assert.equal(conflict.inserts.length, 0);
+  assert.equal(conflict.applicationBackfills.length, 0);
 });
 
-test("keeps source text out of diagnostic data but preserves it in the private SQL payload", () => {
+test("keeps document references out of the import payload while counting them", () => {
   const plan = createImportPlan(
     [{ ...applied, documents: ["private.pdf"], evidenceDocuments: ["cv.pdf"] }],
     [],
@@ -86,5 +86,5 @@ test("keeps source text out of diagnostic data but preserves it in the private S
   );
   assert.equal(plan.report.privateReferences, 2);
   assert.equal(plan.report.unlinkedLetters, 3);
-  assert.match(sqlForPlan(plan, "user-1"), /Private note/);
+  assert.equal(JSON.stringify(plan.report).includes("private.pdf"), false);
 });

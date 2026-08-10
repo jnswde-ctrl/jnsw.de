@@ -19,6 +19,7 @@ export type LegacyApplication = {
   statusUpdatedAt?: string;
   documents?: string[];
   evidenceDocuments?: string[];
+  privateReferenceCount?: number;
 };
 
 export type ExistingOpportunity = {
@@ -154,7 +155,9 @@ export function toImportRecord(item: LegacyApplication): ImportRecord {
           updatedAt,
         }
       : null,
-    privateReferenceCount: (item.documents?.length ?? 0) + (item.evidenceDocuments?.length ?? 0),
+    privateReferenceCount:
+      item.privateReferenceCount ??
+      (item.documents?.length ?? 0) + (item.evidenceDocuments?.length ?? 0),
   };
 }
 
@@ -232,33 +235,4 @@ export function createImportPlan(
     report.skipped++;
   }
   return { inserts, applicationBackfills, conflicts, report };
-}
-
-export function sqlLiteral(value: string | null) {
-  return value === null ? "NULL" : `'${value.replaceAll("'", "''")}'`;
-}
-
-export function sqlForPlan(plan: ReturnType<typeof createImportPlan>, userId: string) {
-  const statements: string[] = ["BEGIN IMMEDIATE;"];
-  const addOpportunity = (record: ImportRecord) => {
-    const value = record.opportunity;
-    statements.push(
-      `INSERT INTO job_opportunities (id, user_id, source_key, source_type, company, role, job_url, source_checked_at, listing_status, review_status, notes, created_at, updated_at) VALUES (${sqlLiteral(value.id)}, ${sqlLiteral(userId)}, ${sqlLiteral(record.sourceKey)}, 'import', ${sqlLiteral(value.company)}, ${sqlLiteral(value.role)}, ${sqlLiteral(value.jobUrl)}, ${sqlLiteral(value.sourceCheckedAt)}, ${sqlLiteral(value.listingStatus)}, ${sqlLiteral(value.reviewStatus)}, ${sqlLiteral(value.notes)}, COALESCE(${sqlLiteral(value.createdAt)}, CURRENT_TIMESTAMP), COALESCE(${sqlLiteral(value.updatedAt)}, CURRENT_TIMESTAMP));`,
-    );
-  };
-  const addApplication = (record: ImportRecord) => {
-    if (!record.application) return;
-    const value = record.application;
-    const opportunity = record.opportunity;
-    statements.push(
-      `INSERT INTO job_applications (id, user_id, opportunity_id, company, role, job_url, applied_at, status, notes, created_at, updated_at) VALUES (${sqlLiteral(value.id)}, ${sqlLiteral(userId)}, ${sqlLiteral(opportunity.id)}, ${sqlLiteral(opportunity.company)}, ${sqlLiteral(opportunity.role)}, ${sqlLiteral(opportunity.jobUrl)}, ${sqlLiteral(value.appliedAt)}, ${sqlLiteral(value.status)}, ${sqlLiteral(opportunity.notes)}, COALESCE(${sqlLiteral(value.createdAt)}, CURRENT_TIMESTAMP), COALESCE(${sqlLiteral(value.updatedAt)}, CURRENT_TIMESTAMP));`,
-    );
-  };
-  for (const record of plan.inserts) {
-    addOpportunity(record);
-    addApplication(record);
-  }
-  for (const record of plan.applicationBackfills) addApplication(record);
-  statements.push("COMMIT;");
-  return statements.join("\n");
 }

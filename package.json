@@ -14,8 +14,7 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:generate": "drizzle-kit generate",
-    "import:legacy-applications": "tsx scripts/import-legacy-applications.mts"
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@cantoo/pdf-lib": "2.7.4",
