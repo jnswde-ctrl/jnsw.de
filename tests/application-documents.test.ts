@@ -8,6 +8,7 @@ import {
   isAttachmentContentType,
   nextDocumentVersion,
 } from "../db/application-documents";
+import { isOwnedAttachment } from "../db/application-documents";
 
 test("keeps cover letters, emails and form responses as separate document types", () => {
   assert.equal(isApplicationDocumentType("cover_letter"), true);
@@ -49,4 +50,11 @@ test("accepts only signed PDF or DOCX attachment payloads", () => {
     true,
   );
   assert.equal(hasValidAttachmentSignature("application/pdf", docx), false);
+});
+
+test("does not expose a private attachment across users or applications", () => {
+  const attachment = { userId: "user-a", applicationId: "application-a" };
+  assert.equal(isOwnedAttachment(attachment, "user-a", "application-a"), true);
+  assert.equal(isOwnedAttachment(attachment, "user-b", "application-a"), false);
+  assert.equal(isOwnedAttachment(attachment, "user-a", "application-b"), false);
 });
