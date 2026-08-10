@@ -37,6 +37,14 @@ export function canFinalizeDocument(status: ApplicationDocumentStatus, confirmed
   return status !== "final" || confirmed;
 }
 
+export function isOwnedAttachment(
+  attachment: { userId: string; applicationId: string },
+  userId: string,
+  applicationId: string,
+) {
+  return attachment.userId === userId && attachment.applicationId === applicationId;
+}
+
 export const attachmentFileTypes = {
   "application/pdf": { extension: "pdf", signature: "%PDF-" },
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {

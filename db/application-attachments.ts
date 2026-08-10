@@ -1,7 +1,11 @@
 import { and, desc, eq } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import { getDb } from ".";
-import { attachmentFileTypes, type AttachmentContentType } from "./application-documents";
+import {
+  attachmentFileTypes,
+  isOwnedAttachment,
+  type AttachmentContentType,
+} from "./application-documents";
 import { applicationAttachments, jobApplications } from "./schema";
 
 export const attachmentKinds = [
@@ -77,7 +81,7 @@ export async function getAttachment(userId: string, applicationId: string, attac
       eq(applicationAttachments.applicationId, applicationId),
     ),
   });
-  if (!item) return null;
+  if (!item || !isOwnedAttachment(item, userId, applicationId)) return null;
   const object = await bucket().get(item.objectKey);
   return object ? { item, object } : null;
 }
