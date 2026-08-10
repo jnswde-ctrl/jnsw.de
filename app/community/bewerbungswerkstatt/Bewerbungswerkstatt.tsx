@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { applicationStatusLabels } from "../../../db/workflow";
 type Application = {
   id: string;
@@ -18,6 +18,18 @@ type Suggestion = {
   salary: string | null;
   deadlineAt: string | null;
   notes: string;
+};
+type LegacyImportPayload = {
+  applications: Array<Record<string, unknown>>;
+  unlinkedLetters: number;
+};
+type LegacyImportReport = {
+  new: number;
+  updated: number;
+  skipped: number;
+  conflicts: number;
+  privateReferences: number;
+  unlinkedLetters: number;
 };
 async function request(path: string, options?: RequestInit) {
   const response = await fetch(path, {
@@ -37,6 +49,10 @@ export function Bewerbungswerkstatt() {
   const [mode, setMode] = useState<"url" | "text">("url");
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const [loading, setLoading] = useState(false);
+  const [legacyPayload, setLegacyPayload] = useState<LegacyImportPayload | null>(null);
+  const [legacyReport, setLegacyReport] = useState<LegacyImportReport | null>(null);
+  const [legacyFileName, setLegacyFileName] = useState("");
+  const legacyApplicationsFile = useRef<HTMLInputElement>(null);
   async function load() {
     try {
       const [a, p] = await Promise.all([
@@ -81,6 +97,86 @@ export function Bewerbungswerkstatt() {
         body: JSON.stringify(mode === "url" ? { url: source } : { text: source }),
       });
       setSuggestion(result.suggestion);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Import fehlgeschlagen.");
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function selectLegacyFiles(applicationFile?: File, lettersFile?: File) {
+    if (!applicationFile) return;
+    setMessage("");
+    setLegacyReport(null);
+    if (applicationFile.size > 512_000 || (lettersFile && lettersFile.size > 128_000)) {
+      setMessage("Die ausgewählten Dateien sind für den lokalen Import zu groß.");
+      return;
+    }
+    try {
+      const source = JSON.parse(await applicationFile.text()) as { applications?: unknown };
+      if (!Array.isArray(source.applications))
+        throw new Error("bewerbungen.json enthält keine Liste von Bewerbungen.");
+      let unlinkedLetters = 0;
+      if (lettersFile) {
+        const letters = JSON.parse(await lettersFile.text()) as { jobs?: unknown };
+        if (!Array.isArray(letters.jobs))
+          throw new Error("anschreiben_jobs.json enthält keine Liste von Anschreiben.");
+        unlinkedLetters = letters.jobs.length;
+      }
+      const applications = source.applications.map((item) => {
+        if (!item || typeof item !== "object")
+          throw new Error("Eine Bewerbung hat ein ungültiges Format.");
+        const record = item as Record<string, unknown>;
+        return {
+          id: record.id,
+          company: record.company,
+          role: record.role,
+          sourceUrl: record.sourceUrl,
+          reviewedAt: record.reviewedAt,
+          appliedAt: record.appliedAt,
+          status: record.status,
+          notes: record.notes,
+          statusUpdatedAt: record.statusUpdatedAt,
+          privateReferenceCount:
+            (Array.isArray(record.documents) ? record.documents.length : 0) +
+            (Array.isArray(record.evidenceDocuments) ? record.evidenceDocuments.length : 0),
+        };
+      });
+      setLegacyPayload({ applications, unlinkedLetters });
+      setLegacyFileName(applicationFile.name);
+    } catch (error) {
+      setLegacyPayload(null);
+      setMessage(error instanceof Error ? error.message : "Datei konnte nicht gelesen werden.");
+    }
+  }
+  async function previewLegacyImport() {
+    if (!legacyPayload) return;
+    setLoading(true);
+    setMessage("");
+    try {
+      const result = await request("/api/bewerbungswerkstatt/legacy-import", {
+        method: "POST",
+        body: JSON.stringify({ ...legacyPayload, mode: "dry-run" }),
+      });
+      setLegacyReport(result.report);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Probelauf fehlgeschlagen.");
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function applyLegacyImport() {
+    if (!legacyPayload || !legacyReport) return;
+    setLoading(true);
+    setMessage("");
+    try {
+      const result = await request("/api/bewerbungswerkstatt/legacy-import", {
+        method: "POST",
+        body: JSON.stringify({ ...legacyPayload, mode: "apply" }),
+      });
+      setLegacyReport(result.report);
+      setLegacyPayload(null);
+      setMessage("Altbestand importiert.");
+      await load();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Import fehlgeschlagen.");
     } finally {
@@ -155,6 +251,67 @@ export function Bewerbungswerkstatt() {
             <p className="eyebrow">Nächste Schritte</p>
             <h2>{applications.filter((app) => app.followUpAt).length} Follow-ups</h2>
             <p>Fristen und Follow-ups bleiben pro Bewerbung dokumentiert.</p>
+            <div className="legacy-import">
+              <p className="eyebrow">Altbestand</p>
+              <h3>Bewerbungen übernehmen.</h3>
+              <p>
+                Die JSON-Dateien werden zuerst nur in diesem Browser gelesen. Dokumentnamen und
+                Anschreiben werden nicht hochgeladen.
+              </p>
+              <label>
+                bewerbungen.json
+                <input
+                  ref={legacyApplicationsFile}
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={(event) =>
+                    void selectLegacyFiles(event.currentTarget.files?.[0], undefined)
+                  }
+                />
+              </label>
+              <label>
+                anschreiben_jobs.json <small>(optional, nur für den Bericht)</small>
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={(event) => {
+                    void selectLegacyFiles(
+                      legacyApplicationsFile.current?.files?.[0],
+                      event.currentTarget.files?.[0],
+                    );
+                  }}
+                />
+              </label>
+              {legacyPayload && <p>{legacyFileName} bereit. Erst Probelauf starten.</p>}
+              <button
+                type="button"
+                className="community-button"
+                disabled={!legacyPayload || loading}
+                onClick={() => void previewLegacyImport()}
+              >
+                {loading ? "Wird geprüft …" : "Probelauf"}
+              </button>
+              {legacyReport && (
+                <div className="legacy-report" role="status">
+                  <p>
+                    {legacyReport.new} neu, {legacyReport.updated} ergänzbar, {legacyReport.skipped}{" "}
+                    unverändert, {legacyReport.conflicts} Konflikte.
+                  </p>
+                  <p>
+                    {legacyReport.privateReferences} private Dokumentreferenzen und{" "}
+                    {legacyReport.unlinkedLetters} Anschreiben werden nicht übernommen.
+                  </p>
+                  <button
+                    type="button"
+                    className="community-button"
+                    disabled={loading || legacyReport.conflicts > 0}
+                    onClick={() => void applyLegacyImport()}
+                  >
+                    Jetzt {legacyReport.new + legacyReport.updated} Einträge übernehmen
+                  </button>
+                </div>
+              )}
+            </div>
           </aside>
         </section>
       )}
