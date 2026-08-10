@@ -81,6 +81,11 @@ export const opportunityReviewStatusValues = [
   "not_recommended",
 ] as const;
 export const careerItemKindValues = ["experience", "project"] as const;
+export const profileSkillKindValues = ["experience", "learning"] as const;
+export const profileSkillLevelValues = ["basic", "working", "advanced", "expert"] as const;
+export const opportunityRequirementKindValues = ["must", "nice_to_have"] as const;
+export const requirementAssessmentValues = ["met", "partial", "not_met", "unknown"] as const;
+export const analysisRecommendationValues = ["recommended", "on_hold", "not_recommended"] as const;
 export const careerItems = sqliteTable(
   "career_items",
   {
@@ -101,6 +106,47 @@ export const careerItems = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [index("career_items_user_id_idx").on(table.userId)],
+);
+export const profileSkills = sqliteTable(
+  "profile_skills",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    kind: text("kind", { enum: profileSkillKindValues }).notNull(),
+    level: text("level", { enum: profileSkillLevelValues }).notNull(),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex("profile_skills_user_name_unique").on(table.userId, table.name),
+    index("profile_skills_user_id_idx").on(table.userId),
+  ],
+);
+export const profileSkillEvidence = sqliteTable(
+  "profile_skill_evidence",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    skillId: text("skill_id")
+      .notNull()
+      .references(() => profileSkills.id, { onDelete: "cascade" }),
+    careerItemId: text("career_item_id")
+      .notNull()
+      .references(() => careerItems.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    uniqueIndex("profile_skill_evidence_unique").on(table.skillId, table.careerItemId),
+    index("profile_skill_evidence_user_id_idx").on(table.userId),
+  ],
 );
 export const jobOpportunities = sqliteTable(
   "job_opportunities",
@@ -197,6 +243,80 @@ export const opportunityTimelineEvents = sqliteTable(
   (table) => [
     index("opportunity_timeline_events_user_id_idx").on(table.userId),
     index("opportunity_timeline_events_opportunity_id_idx").on(table.opportunityId),
+  ],
+);
+export const opportunityRequirements = sqliteTable(
+  "opportunity_requirements",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    opportunityId: text("opportunity_id")
+      .notNull()
+      .references(() => jobOpportunities.id, { onDelete: "cascade" }),
+    text: text("text").notNull(),
+    kind: text("kind", { enum: opportunityRequirementKindValues }).notNull(),
+    assessment: text("assessment", { enum: requirementAssessmentValues })
+      .notNull()
+      .default("unknown"),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("opportunity_requirements_user_id_idx").on(table.userId),
+    index("opportunity_requirements_opportunity_id_idx").on(table.opportunityId),
+  ],
+);
+export const opportunityAnalyses = sqliteTable(
+  "opportunity_analyses",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    opportunityId: text("opportunity_id")
+      .notNull()
+      .references(() => jobOpportunities.id, { onDelete: "cascade" }),
+    version: text("version").notNull(),
+    score: text("score").notNull(),
+    scoreScale: text("score_scale").notNull().default("0-100"),
+    recommendation: text("recommendation", { enum: analysisRecommendationValues }).notNull(),
+    strengths: text("strengths").notNull().default("[]"),
+    gaps: text("gaps").notNull().default("[]"),
+    risks: text("risks").notNull().default("[]"),
+    modelVersion: text("model_version"),
+    promptVersion: text("prompt_version"),
+    confirmedAt: text("confirmed_at"),
+    correctionNote: text("correction_note"),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex("opportunity_analyses_version_unique").on(table.opportunityId, table.version),
+    index("opportunity_analyses_user_id_idx").on(table.userId),
+    index("opportunity_analyses_opportunity_id_idx").on(table.opportunityId),
+  ],
+);
+export const opportunityAnalysisEvidence = sqliteTable(
+  "opportunity_analysis_evidence",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    analysisId: text("analysis_id")
+      .notNull()
+      .references(() => opportunityAnalyses.id, { onDelete: "cascade" }),
+    careerItemId: text("career_item_id")
+      .notNull()
+      .references(() => careerItems.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    uniqueIndex("opportunity_analysis_evidence_unique").on(table.analysisId, table.careerItemId),
+    index("opportunity_analysis_evidence_user_id_idx").on(table.userId),
   ],
 );
 export const applicationEvidence = sqliteTable(

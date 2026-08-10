@@ -31,6 +31,7 @@ type LegacyImportReport = {
   privateReferences: number;
   unlinkedLetters: number;
 };
+type ProfileSkill = { id: string; name: string; kind: "experience" | "learning"; level: string };
 async function request(path: string, options?: RequestInit) {
   const response = await fetch(path, {
     ...options,
@@ -43,6 +44,7 @@ async function request(path: string, options?: RequestInit) {
 export function Bewerbungswerkstatt() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [items, setItems] = useState<Item[]>([]);
+  const [skills, setSkills] = useState<ProfileSkill[]>([]);
   const [message, setMessage] = useState("");
   const [step, setStep] = useState<"overview" | "application" | "profile">("overview");
   const [source, setSource] = useState("");
@@ -55,12 +57,14 @@ export function Bewerbungswerkstatt() {
   const legacyApplicationsFile = useRef<HTMLInputElement>(null);
   async function load() {
     try {
-      const [a, p] = await Promise.all([
+      const [a, p, s] = await Promise.all([
         request("/api/bewerbungswerkstatt/applications"),
         request("/api/bewerbungswerkstatt/profile"),
+        request("/api/bewerbungswerkstatt/skills"),
       ]);
       setApplications(a.applications);
       setItems(p.items);
+      setSkills(s.skills);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Laden fehlgeschlagen.");
     }
@@ -75,7 +79,12 @@ export function Bewerbungswerkstatt() {
     try {
       await request(path, {
         method: "POST",
-        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        body: JSON.stringify({
+          ...Object.fromEntries(new FormData(form)),
+          ...(path.endsWith("/skills")
+            ? { careerItemIds: new FormData(form).getAll("careerItemIds") }
+            : {}),
+        }),
       });
       form.reset();
       setMessage(success);
@@ -455,6 +464,58 @@ export function Bewerbungswerkstatt() {
               </article>
             ))}
           </div>
+          <section className="skill-form">
+            <p className="eyebrow">Kompetenzen</p>
+            <h2>Belegte Erfahrung.</h2>
+            <p className="workbench-intro">
+              Lernfelder bleiben ausdrücklich getrennt. Erfahrung braucht mindestens einen Beleg.
+            </p>
+            <form
+              onSubmit={(event) =>
+                void submit(event, "/api/bewerbungswerkstatt/skills", "Kompetenz gespeichert.")
+              }
+            >
+              <label>
+                Name
+                <input name="name" required maxLength={120} />
+              </label>
+              <label>
+                Art
+                <select name="kind">
+                  <option value="experience">Erfahrung</option>
+                  <option value="learning">Lernfeld</option>
+                </select>
+              </label>
+              <label>
+                Niveau
+                <select name="level">
+                  <option value="basic">Grundlagen</option>
+                  <option value="working">Praxis</option>
+                  <option value="advanced">Fortgeschritten</option>
+                  <option value="expert">Expertise</option>
+                </select>
+              </label>
+              <label className="workbench-wide">
+                Belege (bei Erfahrung mindestens einer)
+                <select name="careerItemIds" multiple>
+                  {items.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button className="community-button">Kompetenz speichern</button>
+            </form>
+            {skills.map((skill) => (
+              <article className="editor-entry" key={skill.id}>
+                <b>{skill.name}</b>
+                <small>
+                  {skill.kind === "learning" ? "Lernfeld" : "Erfahrung"} · {skill.level}
+                </small>
+              </article>
+            ))}
+          </section>
         </section>
       )}
     </main>

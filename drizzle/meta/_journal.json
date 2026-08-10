@@ -64,6 +64,13 @@
       "when": 1786229288096,
       "tag": "0008_wealthy_goblin_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1786375048897,
+      "tag": "0009_bent_dragon_lord",
+      "breakpoints": true
     }
   ]
 }
