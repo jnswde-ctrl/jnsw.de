@@ -26,6 +26,7 @@ type Analysis = {
   }>;
   evidence: unknown[];
 };
+type ConfirmedAction = { body: Record<string, unknown>; success: string; label: string };
 const request = async (path: string, options?: RequestInit) => {
   const response = await fetch(path, {
     ...options,
@@ -38,7 +39,8 @@ const request = async (path: string, options?: RequestInit) => {
 export function OpportunityEditor({ id }: { id: string }) {
   const [detail, setDetail] = useState<Detail | null>(null),
     [analysis, setAnalysis] = useState<Analysis | null>(null),
-    [message, setMessage] = useState("");
+    [message, setMessage] = useState(""),
+    [confirmation, setConfirmation] = useState<ConfirmedAction | null>(null);
   const load = async () => {
     try {
       const [d, a] = await Promise.all([
@@ -73,6 +75,10 @@ export function OpportunityEditor({ id }: { id: string }) {
       </main>
     );
   const latest = analysis?.analyses[0];
+  const needsAnalysis = detail.opportunity.reviewStatus === "reviewing" && !latest;
+  const canConvert = detail.opportunity.reviewStatus === "recommended" && Boolean(latest);
+  const requestConfirmation = (body: Record<string, unknown>, success: string, label: string) =>
+    setConfirmation({ body, success, label });
   return (
     <main className="workbench">
       <Link className="workbench-back" href="/community/bewerbungswerkstatt">
@@ -90,6 +96,32 @@ export function OpportunityEditor({ id }: { id: string }) {
         <p className="workbench-message" role="status">
           {message}
         </p>
+      )}
+      {confirmation && (
+        <section
+          className="workbench-confirmation"
+          role="alertdialog"
+          aria-modal="true"
+          aria-label="Aktion bestätigen"
+        >
+          <p className="eyebrow">Bestätigung erforderlich</p>
+          <h2>{confirmation.label}?</h2>
+          <p>Die Änderung wird in der Timeline dieser Stelle dokumentiert.</p>
+          <div>
+            <button className="community-button secondary" onClick={() => setConfirmation(null)}>
+              Abbrechen
+            </button>
+            <button
+              className="community-button"
+              onClick={() => {
+                void action(confirmation.body, confirmation.success);
+                setConfirmation(null);
+              }}
+            >
+              Bestätigen
+            </button>
+          </div>
+        </section>
       )}
       <section className="editor-grid">
         <div>
@@ -121,30 +153,79 @@ export function OpportunityEditor({ id }: { id: string }) {
         </div>
         <aside>
           <p className="eyebrow">Entscheidung</p>
+          {detail.opportunity.reviewStatus === "reviewing" ? (
+            <>
+              {needsAnalysis && (
+                <p className="editor-hint">
+                  Lege und bestätige zuerst eine Analyse, bevor du entscheidest.
+                </p>
+              )}
+              <button
+                className="community-button"
+                disabled={needsAnalysis}
+                onClick={() =>
+                  requestConfirmation(
+                    { reviewStatus: "recommended" },
+                    "Als empfehlenswert markiert.",
+                    "Stelle empfehlen",
+                  )
+                }
+              >
+                Empfehlen
+              </button>
+              <button
+                className="community-button"
+                disabled={needsAnalysis}
+                onClick={() =>
+                  requestConfirmation(
+                    { reviewStatus: "on_hold" },
+                    "Zurückgestellt.",
+                    "Stelle zurückstellen",
+                  )
+                }
+              >
+                Zurückstellen
+              </button>
+              <button
+                className="community-button"
+                disabled={needsAnalysis}
+                onClick={() =>
+                  requestConfirmation(
+                    { reviewStatus: "not_recommended" },
+                    "Nicht empfohlen.",
+                    "Stelle nicht empfehlen",
+                  )
+                }
+              >
+                Nicht empfehlen
+              </button>
+            </>
+          ) : (
+            <button
+              className="community-button"
+              onClick={() =>
+                requestConfirmation(
+                  { reviewStatus: "reviewing" },
+                  "Prüfung gestartet.",
+                  detail.opportunity.reviewStatus === "unreviewed"
+                    ? "Prüfung starten"
+                    : "Prüfung erneut starten",
+                )
+              }
+            >
+              {detail.opportunity.reviewStatus === "unreviewed"
+                ? "Prüfung starten"
+                : "Erneut prüfen"}
+            </button>
+          )}
           <button
             className="community-button"
             onClick={() =>
-              void action({ reviewStatus: "recommended" }, "Als empfehlenswert markiert.")
-            }
-          >
-            Empfehlen
-          </button>
-          <button
-            className="community-button"
-            onClick={() => void action({ reviewStatus: "on_hold" }, "Zurückgestellt.")}
-          >
-            Zurückstellen
-          </button>
-          <button
-            className="community-button"
-            onClick={() => void action({ reviewStatus: "not_recommended" }, "Nicht empfohlen.")}
-          >
-            Nicht empfehlen
-          </button>
-          <button
-            className="community-button"
-            onClick={() =>
-              void action({ listingStatus: "closed" }, "Anzeige als geschlossen markiert.")
+              requestConfirmation(
+                { listingStatus: "closed" },
+                "Anzeige als geschlossen markiert.",
+                "Anzeige als geschlossen markieren",
+              )
             }
           >
             Anzeige geschlossen
@@ -159,10 +240,22 @@ export function OpportunityEditor({ id }: { id: string }) {
           ) : (
             <button
               className="community-button"
-              onClick={() => void action({ action: "convert" }, "Bewerbung angelegt.")}
+              disabled={!canConvert}
+              onClick={() =>
+                requestConfirmation(
+                  { action: "convert" },
+                  "Bewerbung angelegt.",
+                  "In Bewerbung überführen",
+                )
+              }
             >
               In Bewerbung überführen
             </button>
+          )}
+          {!canConvert && !detail.application && (
+            <p className="editor-hint">
+              Eine bestätigte Analyse und Empfehlung sind vor der Überführung erforderlich.
+            </p>
           )}
         </aside>
       </section>

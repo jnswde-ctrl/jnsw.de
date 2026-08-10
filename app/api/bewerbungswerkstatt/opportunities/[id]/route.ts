@@ -37,6 +37,8 @@ export async function PATCH(request: Request, { params }: Context) {
   if (body?.action === "convert") {
     const result = await convertOpportunityToApplication(user.id, id);
     if (result.kind === "not_found") return denied(404, "Not found");
+    if (result.kind === "analysis_required")
+      return denied(409, "Analyse und Empfehlung müssen vor der Überführung bestätigt sein");
     if (result.kind === "already_converted")
       return Response.json(
         { application: result.application, alreadyConverted: true },
@@ -44,15 +46,16 @@ export async function PATCH(request: Request, { params }: Context) {
       );
     return Response.json({ application: result.value }, { status: 201, headers: privateHeaders });
   }
-  const deadlineAt = date(body?.deadlineAt);
-  const sourceCheckedAt = timestamp(body?.sourceCheckedAt);
+  const deadlineAt = body?.deadlineAt === undefined ? undefined : date(body.deadlineAt);
+  const sourceCheckedAt =
+    body?.sourceCheckedAt === undefined ? undefined : timestamp(body.sourceCheckedAt);
   const jobUrl = text(body?.jobUrl, 2048);
   const remoteModel = body?.remoteModel;
   const listingStatus = body?.listingStatus;
   const reviewStatus = body?.reviewStatus;
   if (
-    deadlineAt === undefined ||
-    sourceCheckedAt === undefined ||
+    (body?.deadlineAt !== undefined && deadlineAt === undefined) ||
+    (body?.sourceCheckedAt !== undefined && sourceCheckedAt === undefined) ||
     (jobUrl && !URL.canParse(jobUrl)) ||
     (remoteModel !== undefined && !opportunityRemoteModelValues.includes(remoteModel as never)) ||
     (listingStatus !== undefined &&
@@ -76,6 +79,8 @@ export async function PATCH(request: Request, { params }: Context) {
     archivedAt: body?.action === "archive" ? new Date().toISOString() : undefined,
   });
   if (result.kind === "invalid_transition") return denied(400, "Invalid review status transition");
+  if (result.kind === "analysis_required")
+    return denied(409, "Eine Analyse ist vor dieser Entscheidung erforderlich");
   return result.kind === "ok"
     ? Response.json({ opportunity: result.value }, { headers: privateHeaders })
     : denied(404, "Not found");

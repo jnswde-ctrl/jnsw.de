@@ -6,6 +6,7 @@ import {
   canTransitionOpportunityReviewStatus,
   opportunityListingStatusLabels,
   opportunityReviewStatusLabels,
+  requiresOpportunityAnalysis,
 } from "../db/workflow";
 
 test("uses German labels for every persisted workflow status", () => {
@@ -28,4 +29,11 @@ test("allows only the documented opportunity review transitions", () => {
   assert.equal(canTransitionOpportunityReviewStatus("recommended", "reviewing"), true);
   assert.equal(canTransitionOpportunityReviewStatus("unreviewed", "recommended"), false);
   assert.equal(canTransitionOpportunityReviewStatus("not_recommended", "on_hold"), false);
+});
+
+test("requires an analysis before a final opportunity decision", () => {
+  assert.equal(requiresOpportunityAnalysis("reviewing"), false);
+  assert.equal(requiresOpportunityAnalysis("recommended"), true);
+  assert.equal(requiresOpportunityAnalysis("on_hold"), true);
+  assert.equal(requiresOpportunityAnalysis("not_recommended"), true);
 });

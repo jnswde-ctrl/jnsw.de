@@ -1050,6 +1050,9 @@ footer {
 .application-list {
   border-top: 1px solid var(--line);
 }
+.workbench-list-heading {
+  margin-top: 55px;
+}
 .application-list article,
 .profile-list article {
   display: flex;
@@ -1270,6 +1273,32 @@ footer {
 .editor-grid aside {
   border-left: 1px solid var(--line);
   padding-left: 24px;
+}
+.editor-hint {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.workbench-confirmation {
+  max-width: 720px;
+  margin: 25px auto 0;
+  padding: 24px;
+  border: 1px solid var(--blue);
+  background: var(--surface-raised);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+}
+.workbench-confirmation h2 {
+  margin: 10px 0;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+}
+.workbench-confirmation p:not(.eyebrow) {
+  color: var(--muted);
+  line-height: 1.5;
+}
+.workbench-confirmation > div {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
 }
 .editor-label {
   margin-top: 55px !important;
