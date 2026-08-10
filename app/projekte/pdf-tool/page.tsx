@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import { SiteNav } from "../../SiteNav";
 import { PdfToolLauncher } from "../../tools/PdfToolLauncher";
+
+export const metadata: Metadata = {
+  title: "PDF-Werkbank: Case Study | JNSW.DE",
+  description:
+    "Die Case Study zur PDF-Werkbank erklärt, wie ein lokales PDF-Tool ohne Upload, Konto und Serververarbeitung entsteht.",
+};
 
 const parts = [
   [

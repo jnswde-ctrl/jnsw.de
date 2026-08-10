@@ -1,9 +1,17 @@
-﻿import { requireAppUser } from "../auth";
+import type { Metadata } from "next";
+import { requireAppUser } from "../auth";
 import { SiteNav } from "../SiteNav";
 import { CommunityAccount } from "./CommunityAccount";
+
+export const metadata: Metadata = {
+  title: "Community für digitale Arbeit | JNSW.DE",
+};
+
 export const dynamic = "force-dynamic";
+
 export default async function CommunityPage() {
   const user = await requireAppUser();
+
   return (
     <main className="subpage">
       <section className="subpage-hero">

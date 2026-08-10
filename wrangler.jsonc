@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "jnsw-de",
+  "name": "jnswde",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-05-22",
   "compatibility_flags": ["nodejs_compat"],
@@ -8,8 +8,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "jwx_db01",
-      "database_id": "2b1176dc-bbd1-4a0f-bd2d-0714bcfff1e6",
+      "database_name": "jnswde-db",
+      "database_id": "3fc26441-8c14-4f66-a29b-eefd11ad9d14",
       "migrations_dir": "drizzle",
     },
   ],

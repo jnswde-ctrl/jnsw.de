@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import { requireAppUser } from "./auth";
 import { CommunityAccount } from "./community/CommunityAccount";
 import { SiteNav } from "./SiteNav";
 import { ToolsExperience } from "./tools/ToolsExperience";
+
+export const metadata: Metadata = {
+  title: "Digitale Produkte, Tools und Dokumentation | JNSW.DE",
+  description:
+    "JNSW.DE entwickelt nützliche digitale Tools und dokumentiert Entscheidungen zu Produkten, Gestaltung und Umsetzung.",
+};
 
 export const dynamic = "force-dynamic";
 
