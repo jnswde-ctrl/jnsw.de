@@ -10,7 +10,11 @@ import {
   type opportunityReviewStatusValues,
   type opportunitySourceTypeValues,
 } from "./schema";
-import { canTransitionOpportunityReviewStatus } from "./workflow";
+import {
+  canTransitionOpportunityReviewStatus,
+  opportunityListingStatusLabels,
+  opportunityReviewStatusLabels,
+} from "./workflow";
 
 export type OpportunitySourceType = (typeof opportunitySourceTypeValues)[number];
 export type OpportunityRemoteModel = (typeof opportunityRemoteModelValues)[number];
@@ -125,7 +129,7 @@ export async function updateOpportunity(
       id,
       "review_status_changed",
       now(),
-      `Prüfstatus: ${current.reviewStatus} → ${changes.reviewStatus}.`,
+      `Prüfstatus: ${opportunityReviewStatusLabels[current.reviewStatus]} → ${opportunityReviewStatusLabels[changes.reviewStatus]}.`,
     );
   if (changes.listingStatus && changes.listingStatus !== current.listingStatus)
     await addOpportunityTimelineEvent(
@@ -133,7 +137,7 @@ export async function updateOpportunity(
       id,
       "source_checked",
       now(),
-      "Quellenstatus aktualisiert.",
+      `Quellenstatus: ${opportunityListingStatusLabels[current.listingStatus]} → ${opportunityListingStatusLabels[changes.listingStatus]}.`,
     );
   if (changes.archivedAt && !current.archivedAt)
     await addOpportunityTimelineEvent(userId, id, "archived", now(), "Stelle archiviert.");

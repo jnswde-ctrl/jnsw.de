@@ -1,5 +1,31 @@
 import type { ApplicationStatus } from "./applications";
-import type { OpportunityReviewStatus } from "./opportunities";
+import type { OpportunityListingStatus, OpportunityReviewStatus } from "./opportunities";
+
+export const applicationStatusLabels: Record<ApplicationStatus, string> = {
+  draft: "Entwurf",
+  ready: "Bereit",
+  sent: "Versendet",
+  waiting: "Rückmeldung offen",
+  interview: "Interview",
+  offer: "Angebot",
+  rejected: "Abgesagt",
+  withdrawn: "Zurückgezogen",
+  archived: "Archiviert",
+};
+
+export const opportunityReviewStatusLabels: Record<OpportunityReviewStatus, string> = {
+  unreviewed: "Noch nicht geprüft",
+  reviewing: "In Prüfung",
+  recommended: "Empfohlen",
+  on_hold: "Zurückgestellt",
+  not_recommended: "Nicht empfohlen",
+};
+
+export const opportunityListingStatusLabels: Record<OpportunityListingStatus, string> = {
+  unknown: "Unbekannt",
+  open: "Offen",
+  closed: "Geschlossen",
+};
 
 const applicationTransitions: Record<ApplicationStatus, readonly ApplicationStatus[]> = {
   draft: ["ready", "withdrawn", "archived"],

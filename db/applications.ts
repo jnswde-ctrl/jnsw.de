@@ -10,7 +10,7 @@ import {
   type careerItemKindValues,
 } from "./schema";
 import { listAttachments } from "./application-attachments";
-import { canTransitionApplicationStatus } from "./workflow";
+import { applicationStatusLabels, canTransitionApplicationStatus } from "./workflow";
 
 export type ApplicationStatus = (typeof applicationStatusValues)[number];
 export type CareerItemKind = (typeof careerItemKindValues)[number];
@@ -84,7 +84,7 @@ export async function updateApplication(
       id,
       "status_changed",
       now(),
-      `Bewerbungsstatus: ${current.status} → ${changes.status}.`,
+      `Bewerbungsstatus: ${applicationStatusLabels[current.status]} → ${applicationStatusLabels[changes.status]}.`,
     );
   return { kind: "ok" as const, value: item };
 }

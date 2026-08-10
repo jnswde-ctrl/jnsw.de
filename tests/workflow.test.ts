@@ -1,9 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  applicationStatusLabels,
   canTransitionApplicationStatus,
   canTransitionOpportunityReviewStatus,
+  opportunityListingStatusLabels,
+  opportunityReviewStatusLabels,
 } from "../db/workflow";
+
+test("uses German labels for every persisted workflow status", () => {
+  assert.equal(applicationStatusLabels.waiting, "Rückmeldung offen");
+  assert.equal(opportunityReviewStatusLabels.on_hold, "Zurückgestellt");
+  assert.equal(opportunityListingStatusLabels.closed, "Geschlossen");
+});
 
 test("allows only the documented application status transitions", () => {
   assert.equal(canTransitionApplicationStatus("draft", "ready"), true);
