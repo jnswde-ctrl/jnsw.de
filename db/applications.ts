@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, ne } from "drizzle-orm";
 import { getDb } from ".";
 import {
   applicationDocumentVersions,
@@ -6,10 +6,16 @@ import {
   applicationTimelineEvents,
   careerItems,
   jobApplications,
+  opportunityAnalyses,
   type applicationStatusValues,
   type careerItemKindValues,
 } from "./schema";
 import { listAttachments } from "./application-attachments";
+import {
+  type ApplicationDocumentStatus,
+  type ApplicationDocumentType,
+  nextDocumentVersion,
+} from "./application-documents";
 import { applicationStatusLabels, canTransitionApplicationStatus } from "./workflow";
 
 export type ApplicationStatus = (typeof applicationStatusValues)[number];
@@ -221,11 +227,70 @@ export async function replaceEvidence(
       );
   return true;
 }
-export async function addDocumentVersion(userId: string, applicationId: string, content: string) {
+export async function addDocumentVersion(
+  userId: string,
+  applicationId: string,
+  input: {
+    content: string;
+    documentType: ApplicationDocumentType;
+    status: ApplicationDocumentStatus;
+    sourceNote: string;
+  },
+) {
+  const application = await getDb().query.jobApplications.findFirst({
+    where: and(eq(jobApplications.id, applicationId), eq(jobApplications.userId, userId)),
+  });
+  if (!application) return null;
+  const [latest, evidence, analysis] = await Promise.all([
+    getDb().query.applicationDocumentVersions.findFirst({
+      where: and(
+        eq(applicationDocumentVersions.userId, userId),
+        eq(applicationDocumentVersions.applicationId, applicationId),
+        eq(applicationDocumentVersions.documentType, input.documentType),
+      ),
+      orderBy: desc(applicationDocumentVersions.version),
+    }),
+    getDb()
+      .select({ careerItemId: applicationEvidence.careerItemId })
+      .from(applicationEvidence)
+      .where(
+        and(
+          eq(applicationEvidence.userId, userId),
+          eq(applicationEvidence.applicationId, applicationId),
+        ),
+      ),
+    application.opportunityId
+      ? getDb().query.opportunityAnalyses.findFirst({
+          where: and(
+            eq(opportunityAnalyses.userId, userId),
+            eq(opportunityAnalyses.opportunityId, application.opportunityId),
+            isNotNull(opportunityAnalyses.confirmedAt),
+          ),
+          orderBy: desc(opportunityAnalyses.version),
+        })
+      : Promise.resolve(undefined),
+  ]);
   const [item] = await getDb()
     .insert(applicationDocumentVersions)
-    .values({ id: crypto.randomUUID(), userId, applicationId, content })
+    .values({
+      id: crypto.randomUUID(),
+      userId,
+      applicationId,
+      documentType: input.documentType,
+      status: input.status,
+      version: nextDocumentVersion(latest?.version),
+      content: input.content,
+      sourceNote: input.sourceNote,
+      analysisId: analysis?.id ?? null,
+      evidenceSnapshot: JSON.stringify(evidence.map((item) => item.careerItemId)),
+    })
     .returning();
-  await addTimelineEvent(userId, applicationId, "document", now(), "Bewerbungstext gespeichert.");
+  await addTimelineEvent(
+    userId,
+    applicationId,
+    "document",
+    now(),
+    `Bewerbungstext gespeichert: ${input.documentType} v${item.version} (${input.status}).`,
+  );
   return item;
 }

@@ -1,7 +1,22 @@
 "use client";
 /* eslint-disable @next/next/no-html-link-for-pages, react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 import { FormEvent, useEffect, useState } from "react";
+import {
+  applicationDocumentStatusLabels,
+  applicationDocumentTypeLabels,
+  type ApplicationDocumentStatus,
+} from "../../../../db/application-documents";
 type Attachment = { id: string; kind: string; fileName: string; size: string };
+type DocumentVersion = {
+  id: string;
+  documentType: keyof typeof applicationDocumentTypeLabels;
+  status: keyof typeof applicationDocumentStatusLabels;
+  version: string;
+  content: string;
+  sourceNote: string;
+  analysisId: string | null;
+  createdAt: string;
+};
 type Application = {
   company: string;
   role: string;
@@ -12,7 +27,7 @@ type Application = {
   followUpAt: string | null;
   notes: string;
 };
-type Detail = { app: Application; attachments: Attachment[] };
+type Detail = { app: Application; attachments: Attachment[]; documents: DocumentVersion[] };
 const request = async (path: string, options?: RequestInit) => {
   const response = await fetch(path, {
       ...options,
@@ -24,7 +39,8 @@ const request = async (path: string, options?: RequestInit) => {
 };
 export function ApplicationEditor({ id }: { id: string }) {
   const [detail, setDetail] = useState<Detail | null>(null),
-    [message, setMessage] = useState("");
+    [message, setMessage] = useState(""),
+    [documentStatus, setDocumentStatus] = useState<ApplicationDocumentStatus>("draft");
   const load = async () => {
     try {
       setDetail(await request(`/api/bewerbungswerkstatt/applications/${id}`));
@@ -50,18 +66,42 @@ export function ApplicationEditor({ id }: { id: string }) {
   };
   const upload = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.currentTarget;
     try {
       const response = await fetch(`/api/bewerbungswerkstatt/applications/${id}/attachments`, {
           method: "POST",
-          body: new FormData(event.currentTarget),
+          body: new FormData(form),
         }),
         data = await response.json();
       if (!response.ok) throw new Error(data?.error);
-      event.currentTarget.reset();
+      form.reset();
       setMessage("Dokument hochgeladen.");
       await load();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Upload fehlgeschlagen.");
+    }
+  };
+  const saveDocument = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget,
+      values = Object.fromEntries(new FormData(form));
+    try {
+      await request(`/api/bewerbungswerkstatt/applications/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          action: "document",
+          ...values,
+          finalConfirmed: values.finalConfirmed === "on",
+        }),
+      });
+      form.reset();
+      setDocumentStatus("draft");
+      setMessage("Neue Dokumentversion gespeichert.");
+      await load();
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Dokument konnte nicht gespeichert werden.",
+      );
     }
   };
   const remove = async (attachmentId: string) => {
@@ -142,11 +182,76 @@ export function ApplicationEditor({ id }: { id: string }) {
           </form>
         </div>
         <aside>
-          <p className="eyebrow">Dateien</p>
+          <p className="eyebrow">Textversionen</p>
+          <form onSubmit={saveDocument}>
+            <label>
+              Dokumentart
+              <select name="documentType" defaultValue="cover_letter">
+                <option value="cover_letter">Anschreiben</option>
+                <option value="email">Bewerbungs-E-Mail</option>
+                <option value="form_response">Formularantwort</option>
+              </select>
+            </label>
+            <label>
+              Status
+              <select
+                name="status"
+                value={documentStatus}
+                onChange={(event) =>
+                  setDocumentStatus(event.target.value as ApplicationDocumentStatus)
+                }
+              >
+                <option value="draft">Entwurf</option>
+                <option value="reviewed">Geprüft</option>
+                <option value="final">Final</option>
+              </select>
+            </label>
+            <label>
+              Text
+              <textarea name="content" maxLength={20000} required />
+            </label>
+            <label>
+              Quellen und geprüfte Angaben
+              <textarea
+                name="sourceNote"
+                maxLength={4000}
+                required
+                placeholder="Profilbelege, Stellenausschreibung und eigene Ergänzungen festhalten."
+              />
+            </label>
+            <label className="check">
+              <input name="finalConfirmed" type="checkbox" required={documentStatus === "final"} />
+              Ich habe den Text geprüft; er behauptet keine nicht belegten Kenntnisse.
+            </label>
+            <small>
+              Jede Speicherung erzeugt eine neue Version. Es gibt keinen automatischen Versand.
+            </small>
+            <button className="community-button">Textversion speichern</button>
+          </form>
+          {detail.documents.map((document) => (
+            <article className="editor-entry" key={document.id}>
+              <b>
+                {applicationDocumentTypeLabels[document.documentType]} · v{document.version}
+              </b>
+              <small>
+                {applicationDocumentStatusLabels[document.status]} ·{" "}
+                {new Date(document.createdAt).toLocaleString("de-DE")}
+              </small>
+              <p>{document.content}</p>
+              <small>
+                Quellen: {document.sourceNote}
+                {document.analysisId ? " · bestätigte Stellenprüfung verknüpft" : ""}
+              </small>
+            </article>
+          ))}
+          <p className="eyebrow editor-label">Dateien</p>
           <form onSubmit={upload}>
             <label>
               Art
               <select name="kind">
+                <option value="cover_letter">Anschreiben</option>
+                <option value="email">Bewerbungs-E-Mail</option>
+                <option value="form_response">Formularantwort</option>
                 <option value="application">Bewerbungsunterlage</option>
                 <option value="confirmation">Bewerbungsbestätigung</option>
                 <option value="response">Antwortschreiben</option>
@@ -154,10 +259,15 @@ export function ApplicationEditor({ id }: { id: string }) {
               </select>
             </label>
             <label>
-              PDF-Datei
-              <input name="file" type="file" accept="application/pdf,.pdf" required />
+              Datei
+              <input
+                name="file"
+                type="file"
+                accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx"
+                required
+              />
             </label>
-            <small>PDF, maximal 10 MB.</small>
+            <small>PDF oder DOCX, maximal 10 MB.</small>
             <button className="community-button">Dokument hochladen</button>
           </form>
           {detail.attachments.map((attachment) => (
