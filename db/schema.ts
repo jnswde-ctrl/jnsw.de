@@ -86,6 +86,7 @@ export const profileSkillLevelValues = ["basic", "working", "advanced", "expert"
 export const opportunityRequirementKindValues = ["must", "nice_to_have"] as const;
 export const requirementAssessmentValues = ["met", "partial", "not_met", "unknown"] as const;
 export const analysisRecommendationValues = ["recommended", "on_hold", "not_recommended"] as const;
+export const analysisClaimKindValues = ["strength", "requirement"] as const;
 export const careerItems = sqliteTable(
   "career_items",
   {
@@ -255,11 +256,15 @@ export const opportunityRequirements = sqliteTable(
     opportunityId: text("opportunity_id")
       .notNull()
       .references(() => jobOpportunities.id, { onDelete: "cascade" }),
+    analysisId: text("analysis_id")
+      .notNull()
+      .references(() => opportunityAnalyses.id, { onDelete: "cascade" }),
     text: text("text").notNull(),
     kind: text("kind", { enum: opportunityRequirementKindValues }).notNull(),
     assessment: text("assessment", { enum: requirementAssessmentValues })
       .notNull()
       .default("unknown"),
+    evidenceItemIds: text("evidence_item_ids").notNull().default("[]"),
     createdAt: text("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -267,6 +272,7 @@ export const opportunityRequirements = sqliteTable(
   (table) => [
     index("opportunity_requirements_user_id_idx").on(table.userId),
     index("opportunity_requirements_opportunity_id_idx").on(table.opportunityId),
+    index("opportunity_requirements_analysis_id_idx").on(table.analysisId),
   ],
 );
 export const opportunityAnalyses = sqliteTable(
@@ -317,6 +323,26 @@ export const opportunityAnalysisEvidence = sqliteTable(
   (table) => [
     uniqueIndex("opportunity_analysis_evidence_unique").on(table.analysisId, table.careerItemId),
     index("opportunity_analysis_evidence_user_id_idx").on(table.userId),
+  ],
+);
+export const opportunityAnalysisConfirmations = sqliteTable(
+  "opportunity_analysis_confirmations",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    analysisId: text("analysis_id")
+      .notNull()
+      .references(() => opportunityAnalyses.id, { onDelete: "cascade" }),
+    correctionNote: text("correction_note").notNull().default(""),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex("opportunity_analysis_confirmations_analysis_unique").on(table.analysisId),
+    index("opportunity_analysis_confirmations_user_id_idx").on(table.userId),
   ],
 );
 export const applicationEvidence = sqliteTable(

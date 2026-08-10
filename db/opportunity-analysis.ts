@@ -5,12 +5,11 @@ import {
   jobOpportunities,
   opportunityAnalyses,
   opportunityAnalysisEvidence,
+  opportunityAnalysisConfirmations,
   opportunityRequirements,
   profileSkillEvidence,
   profileSkills,
 } from "./schema";
-
-const now = () => new Date().toISOString();
 
 export async function profile(userId: string) {
   const skills = await getDb()
@@ -70,16 +69,7 @@ export async function addProfileSkill(
 }
 
 export async function opportunityAnalysis(userId: string, opportunityId: string) {
-  const [requirements, analyses] = await Promise.all([
-    getDb()
-      .select()
-      .from(opportunityRequirements)
-      .where(
-        and(
-          eq(opportunityRequirements.userId, userId),
-          eq(opportunityRequirements.opportunityId, opportunityId),
-        ),
-      ),
+  const [analyses] = await Promise.all([
     getDb()
       .select()
       .from(opportunityAnalyses)
@@ -92,6 +82,17 @@ export async function opportunityAnalysis(userId: string, opportunityId: string)
       .orderBy(desc(opportunityAnalyses.version)),
   ]);
   const ids = analyses.map((analysis) => analysis.id);
+  const requirements = ids.length
+    ? await getDb()
+        .select()
+        .from(opportunityRequirements)
+        .where(
+          and(
+            eq(opportunityRequirements.userId, userId),
+            inArray(opportunityRequirements.analysisId, ids),
+          ),
+        )
+    : [];
   const evidence = ids.length
     ? await getDb()
         .select()
@@ -114,29 +115,54 @@ export async function addAnalysis(
       text: string;
       kind: "must" | "nice_to_have";
       assessment: "met" | "partial" | "not_met" | "unknown";
+      evidenceItemIds: string[];
     }>;
     score: number;
     recommendation: "recommended" | "on_hold" | "not_recommended";
-    strengths: string[];
+    strengths: Array<{ text: string; evidenceItemIds: string[] }>;
     gaps: string[];
     risks: string[];
     evidenceItemIds: string[];
     modelVersion: string | null;
     promptVersion: string | null;
+    supersedesAnalysisId: string | null;
   },
 ) {
   const opportunity = await getDb().query.jobOpportunities.findFirst({
     where: and(eq(jobOpportunities.id, opportunityId), eq(jobOpportunities.userId, userId)),
   });
   if (!opportunity) return null;
-  if (input.strengths.length && !input.evidenceItemIds.length) return null;
-  const owned = input.evidenceItemIds.length
+  const claimEvidenceIds = [
+    ...input.evidenceItemIds,
+    ...input.strengths.flatMap((strength) => strength.evidenceItemIds),
+    ...input.requirements.flatMap((requirement) => requirement.evidenceItemIds),
+  ];
+  if (
+    input.strengths.some((strength) => !strength.evidenceItemIds.length) ||
+    input.requirements.some(
+      (requirement) =>
+        ["met", "partial"].includes(requirement.assessment) && !requirement.evidenceItemIds.length,
+    )
+  )
+    return null;
+  const uniqueEvidenceIds = [...new Set(claimEvidenceIds)];
+  const owned = uniqueEvidenceIds.length
     ? await getDb()
         .select({ id: careerItems.id })
         .from(careerItems)
-        .where(and(eq(careerItems.userId, userId), inArray(careerItems.id, input.evidenceItemIds)))
+        .where(and(eq(careerItems.userId, userId), inArray(careerItems.id, uniqueEvidenceIds)))
     : [];
-  if (owned.length !== input.evidenceItemIds.length) return null;
+  if (owned.length !== uniqueEvidenceIds.length) return null;
+  if (input.supersedesAnalysisId) {
+    const original = await getDb().query.opportunityAnalyses.findFirst({
+      where: and(
+        eq(opportunityAnalyses.id, input.supersedesAnalysisId),
+        eq(opportunityAnalyses.userId, userId),
+        eq(opportunityAnalyses.opportunityId, opportunityId),
+      ),
+    });
+    if (!original) return null;
+  }
   const latest = await getDb().query.opportunityAnalyses.findFirst({
     where: and(
       eq(opportunityAnalyses.userId, userId),
@@ -147,11 +173,6 @@ export async function addAnalysis(
   const version = String((Number(latest?.version ?? "0") || 0) + 1);
   const analysisId = crypto.randomUUID();
   await getDb().batch([
-    ...input.requirements.map((requirement) =>
-      getDb()
-        .insert(opportunityRequirements)
-        .values({ id: crypto.randomUUID(), userId, opportunityId, ...requirement }),
-    ),
     getDb()
       .insert(opportunityAnalyses)
       .values({
@@ -167,6 +188,18 @@ export async function addAnalysis(
         modelVersion: input.modelVersion,
         promptVersion: input.promptVersion,
       }),
+    ...input.requirements.map((requirement) =>
+      getDb()
+        .insert(opportunityRequirements)
+        .values({
+          id: crypto.randomUUID(),
+          userId,
+          opportunityId,
+          analysisId,
+          ...requirement,
+          evidenceItemIds: JSON.stringify(requirement.evidenceItemIds),
+        }),
+    ),
     ...owned.map(({ id: careerItemId }) =>
       getDb()
         .insert(opportunityAnalysisEvidence)
@@ -184,17 +217,21 @@ export async function confirmAnalysis(
   analysisId: string,
   correctionNote: string,
 ) {
-  const [analysis] = await getDb()
-    .update(opportunityAnalyses)
-    .set({ confirmedAt: now(), correctionNote })
-    .where(
-      and(
-        eq(opportunityAnalyses.id, analysisId),
-        eq(opportunityAnalyses.opportunityId, opportunityId),
-        eq(opportunityAnalyses.userId, userId),
-        eq(opportunityAnalyses.confirmedAt, null),
-      ),
-    )
-    .returning();
-  return analysis ?? null;
+  const analysis = await getDb().query.opportunityAnalyses.findFirst({
+    where: and(
+      eq(opportunityAnalyses.id, analysisId),
+      eq(opportunityAnalyses.opportunityId, opportunityId),
+      eq(opportunityAnalyses.userId, userId),
+    ),
+  });
+  if (!analysis) return null;
+  try {
+    const [confirmation] = await getDb()
+      .insert(opportunityAnalysisConfirmations)
+      .values({ id: crypto.randomUUID(), userId, analysisId, correctionNote })
+      .returning();
+    return confirmation;
+  } catch {
+    return null;
+  }
 }

@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { SectionPage } from "../SectionPage";
+
+export const metadata: Metadata = {
+  title: "Informationen zu digitalen Produkten | JNSW.DE",
+  description:
+    "Offene Notizen und Entscheidungen von JNSW.DE zu digitalen Produkten, Werkzeugen und ihrer Umsetzung.",
+};
 export default function InformationenPage() {
   return (
     <SectionPage

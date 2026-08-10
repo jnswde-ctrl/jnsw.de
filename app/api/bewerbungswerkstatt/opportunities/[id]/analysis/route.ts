@@ -8,6 +8,7 @@ import {
   opportunityRequirementKindValues,
   requirementAssessmentValues,
 } from "../../../../../../db/schema";
+import { scoreScale } from "../../../../../../db/profile-fit";
 import { activeUser, denied, json, mutationAllowed, privateHeaders, text } from "../../../support";
 
 type Context = { params: Promise<{ id: string }> };
@@ -32,12 +33,19 @@ export async function POST(request: Request, { params }: Context) {
   const score = body?.score,
     recommendation = body?.recommendation;
   const requirements =
-    Array.isArray(body?.requirements) && body.requirements.length <= 30
+    Array.isArray(body?.requirements) &&
+    body.requirements.length > 0 &&
+    body.requirements.length <= 30
       ? body.requirements.map((item) =>
           item && typeof item === "object" ? (item as Record<string, unknown>) : null,
         )
       : null;
-  const strengths = stringList(body?.strengths),
+  const strengths =
+      Array.isArray(body?.strengths) && body.strengths.length <= 20
+        ? body.strengths.map((item) =>
+            item && typeof item === "object" ? (item as Record<string, unknown>) : null,
+          )
+        : null,
     gaps = stringList(body?.gaps),
     risks = stringList(body?.risks),
     evidenceItemIds = stringList(body?.evidenceItemIds);
@@ -51,32 +59,45 @@ export async function POST(request: Request, { params }: Context) {
     !gaps ||
     !risks ||
     !evidenceItemIds ||
+    !strengths ||
+    strengths.some(
+      (item) =>
+        !item || !text(item.text, 500, true) || !stringList(item.evidenceItemIds, 20)?.length,
+    ) ||
     requirements.some(
       (item) =>
         !item ||
         !text(item.text, 500, true) ||
         !opportunityRequirementKindValues.includes(item.kind as never) ||
-        !requirementAssessmentValues.includes(item.assessment as never),
+        !requirementAssessmentValues.includes(item.assessment as never) ||
+        !stringList(item.evidenceItemIds, 20) ||
+        (["met", "partial"].includes(item.assessment as string) &&
+          !stringList(item.evidenceItemIds, 20)?.length),
     )
   )
     return denied(400, "Invalid analysis data");
   const analysis = await addAnalysis(user.id, (await params).id, {
     score,
     recommendation: recommendation as never,
-    strengths,
+    strengths: strengths.map((item) => ({
+      text: text(item!.text, 500, true)!,
+      evidenceItemIds: stringList(item!.evidenceItemIds, 20)!,
+    })),
     gaps,
     risks,
     evidenceItemIds,
-    modelVersion: text(body?.modelVersion, 120),
-    promptVersion: text(body?.promptVersion, 120),
+    modelVersion: text(body?.modelVersion, 120, true),
+    promptVersion: text(body?.promptVersion, 120, true),
+    supersedesAnalysisId: text(body?.supersedesAnalysisId, 120),
     requirements: requirements.map((item) => ({
       text: text(item!.text, 500, true)!,
       kind: item!.kind as never,
       assessment: item!.assessment as never,
+      evidenceItemIds: stringList(item!.evidenceItemIds, 20)!,
     })),
   });
   return analysis
-    ? Response.json({ analysis }, { status: 201, headers: privateHeaders })
+    ? Response.json({ analysis, scoreScale }, { status: 201, headers: privateHeaders })
     : denied(422, "Positive claims require owned evidence");
 }
 export async function PATCH(request: Request, { params }: Context) {
