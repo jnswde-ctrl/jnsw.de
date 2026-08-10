@@ -12,6 +12,7 @@ import {
 } from "./schema";
 import { listAttachments } from "./application-attachments";
 import {
+  canFinalizeDocument,
   type ApplicationDocumentStatus,
   type ApplicationDocumentType,
   nextDocumentVersion,
@@ -177,7 +178,7 @@ export async function applicationDetail(userId: string, id: string) {
     where: and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)),
   });
   if (!app) return null;
-  const [evidence, documents, timeline, attachments] = await Promise.all([
+  const [evidence, documents, timeline, attachments, career] = await Promise.all([
     getDb()
       .select()
       .from(applicationEvidence)
@@ -205,8 +206,9 @@ export async function applicationDetail(userId: string, id: string) {
       )
       .orderBy(desc(applicationTimelineEvents.occurredAt)),
     listAttachments(userId, id),
+    listCareerItems(userId),
   ]);
-  return { app, evidence, documents, timeline, attachments };
+  return { app, evidence, documents, timeline, attachments, career };
 }
 export async function replaceEvidence(
   userId: string,
@@ -249,6 +251,8 @@ export async function addDocumentVersion(
     documentType: ApplicationDocumentType;
     status: ApplicationDocumentStatus;
     sourceNote: string;
+    finalConfirmed: boolean;
+    evidenceConfirmed: boolean;
   },
 ) {
   const application = await getDb().query.jobApplications.findFirst({
@@ -284,6 +288,15 @@ export async function addDocumentVersion(
         })
       : Promise.resolve(undefined),
   ]);
+  if (
+    !canFinalizeDocument(
+      input.status,
+      input.finalConfirmed,
+      input.evidenceConfirmed,
+      evidence.length,
+    )
+  )
+    return null;
   const [item] = await getDb()
     .insert(applicationDocumentVersions)
     .values({

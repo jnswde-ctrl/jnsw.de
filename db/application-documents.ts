@@ -33,8 +33,13 @@ export function nextDocumentVersion(latestVersion: string | null | undefined) {
   return String((Number(latestVersion ?? "0") || 0) + 1);
 }
 
-export function canFinalizeDocument(status: ApplicationDocumentStatus, confirmed: boolean) {
-  return status !== "final" || confirmed;
+export function canFinalizeDocument(
+  status: ApplicationDocumentStatus,
+  finalConfirmed: boolean,
+  evidenceConfirmed: boolean,
+  evidenceCount: number,
+) {
+  return status !== "final" || (finalConfirmed && evidenceConfirmed && evidenceCount > 0);
 }
 
 export function isOwnedAttachment(

@@ -31,11 +31,14 @@ type Application = {
   notes: string;
 };
 type TimelineEvent = { id: string; type: string; occurredAt: string; note: string };
+type CareerItem = { id: string; title: string; organization: string; kind: string };
 type Detail = {
   app: Application;
   attachments: Attachment[];
   documents: DocumentVersion[];
   timeline: TimelineEvent[];
+  evidence: { careerItemId: string }[];
+  career: CareerItem[];
 };
 const request = async (path: string, options?: RequestInit) => {
   const response = await fetch(path, {
@@ -101,6 +104,7 @@ export function ApplicationEditor({ id }: { id: string }) {
           action: "document",
           ...values,
           finalConfirmed: values.finalConfirmed === "on",
+          evidenceConfirmed: values.evidenceConfirmed === "on",
         }),
       });
       form.reset();
@@ -110,6 +114,25 @@ export function ApplicationEditor({ id }: { id: string }) {
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Dokument konnte nicht gespeichert werden.",
+      );
+    }
+  };
+  const saveEvidence = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    try {
+      await request(`/api/bewerbungswerkstatt/applications/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          action: "evidence",
+          careerItemIds: new FormData(form).getAll("careerItemIds"),
+        }),
+      });
+      setMessage("Profilbelege gespeichert.");
+      await load();
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Profilbelege konnten nicht gespeichert werden.",
       );
     }
   };
@@ -273,6 +296,35 @@ export function ApplicationEditor({ id }: { id: string }) {
         </div>
         <aside>
           <p className="eyebrow">Textversionen</p>
+          <form onSubmit={saveEvidence}>
+            <label>
+              Profilbelege für fachliche Aussagen
+              <span className="editor-hint">
+                Finale Texte benötigen mindestens einen eigenen, hier zugeordneten Profilbeleg.
+              </span>
+            </label>
+            {detail.career.length ? (
+              detail.career.map((item) => (
+                <label className="check" key={item.id}>
+                  <input
+                    name="careerItemIds"
+                    type="checkbox"
+                    value={item.id}
+                    defaultChecked={detail.evidence.some(
+                      (evidence) => evidence.careerItemId === item.id,
+                    )}
+                  />
+                  {item.title}
+                  {item.organization ? ` · ${item.organization}` : ""}
+                </label>
+              ))
+            ) : (
+              <p className="editor-hint">Lege zuerst einen Profilbaustein in der Werkstatt an.</p>
+            )}
+            <button className="community-button" disabled={!detail.career.length}>
+              Profilbelege speichern
+            </button>
+          </form>
           <form onSubmit={saveDocument}>
             <label>
               Dokumentart
@@ -313,8 +365,17 @@ export function ApplicationEditor({ id }: { id: string }) {
               <input name="finalConfirmed" type="checkbox" required={documentStatus === "final"} />
               Ich habe den Text geprüft; er behauptet keine nicht belegten Kenntnisse.
             </label>
+            <label className="check">
+              <input
+                name="evidenceConfirmed"
+                type="checkbox"
+                required={documentStatus === "final"}
+              />
+              Ich habe die fachlichen Aussagen gegen mindestens einen eigenen Profilbeleg geprüft.
+            </label>
             <small>
-              Jede Speicherung erzeugt eine neue Version. Es gibt keinen automatischen Versand.
+              Finale Texte benötigen zusätzlich einen zugeordneten Profilbeleg. Jede Speicherung
+              erzeugt eine neue Version. Es gibt keinen automatischen Versand.
             </small>
             <button className="community-button">Textversion speichern</button>
           </form>

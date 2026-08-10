@@ -39,13 +39,16 @@ export async function PATCH(request: Request, { params }: Context) {
     const content = text(body.content, 20000, true),
       sourceNote = text(body.sourceNote, 4000, true),
       documentType = body.documentType,
-      status = body.status;
+      status = body.status,
+      finalConfirmed = body.finalConfirmed === true,
+      evidenceConfirmed = body.evidenceConfirmed === true;
+    const detail = await applicationDetail(user.id, id);
     if (
       !content ||
       !sourceNote ||
       !isApplicationDocumentType(documentType) ||
       !isApplicationDocumentStatus(status) ||
-      !canFinalizeDocument(status, body.finalConfirmed === true)
+      !canFinalizeDocument(status, finalConfirmed, evidenceConfirmed, detail?.evidence.length ?? 0)
     )
       return denied(400, "Invalid document");
     const item = await addDocumentVersion(user.id, id, {
@@ -53,6 +56,8 @@ export async function PATCH(request: Request, { params }: Context) {
       sourceNote,
       documentType,
       status,
+      finalConfirmed,
+      evidenceConfirmed,
     });
     return item
       ? Response.json({ document: item }, { headers: privateHeaders })
