@@ -58,6 +58,58 @@ export function canTransitionApplicationStatus(from: ApplicationStatus, to: Appl
   return from === to || applicationTransitions[from].includes(to);
 }
 
+export function nextApplicationStatuses(status: ApplicationStatus) {
+  return [status, ...applicationTransitions[status]];
+}
+
+export type FollowUpState = "overdue" | "due_today" | "upcoming";
+const manualTimelineEventTypes = ["follow_up", "interview", "response", "note"] as const;
+
+export function isManualTimelineEventType(value: unknown) {
+  return typeof value === "string" && manualTimelineEventTypes.includes(value as never);
+}
+
+export function followUpState(
+  followUpAt: string | null,
+  today = new Date().toISOString().slice(0, 10),
+): FollowUpState | null {
+  if (!followUpAt) return null;
+  if (followUpAt < today) return "overdue";
+  if (followUpAt === today) return "due_today";
+  return "upcoming";
+}
+
+export function nextApplicationAction(
+  application: Pick<ApplicationStatusSource, "status" | "followUpAt" | "deadlineAt">,
+  today = new Date().toISOString().slice(0, 10),
+) {
+  const followUp = followUpState(application.followUpAt, today);
+  if (followUp)
+    return {
+      priority: followUp === "overdue" ? 0 : followUp === "due_today" ? 1 : 2,
+      date: application.followUpAt!,
+      label:
+        followUp === "overdue"
+          ? "Follow-up überfällig"
+          : followUp === "due_today"
+            ? "Follow-up heute"
+            : "Follow-up geplant",
+    };
+  if (application.deadlineAt && application.deadlineAt >= today)
+    return { priority: 3, date: application.deadlineAt, label: "Bewerbungsfrist" };
+  if (application.status === "ready")
+    return { priority: 4, date: null, label: "Bewerbung versenden" };
+  if (application.status === "sent" || application.status === "waiting")
+    return { priority: 5, date: null, label: "Follow-up festlegen" };
+  return null;
+}
+
+type ApplicationStatusSource = {
+  status: ApplicationStatus;
+  followUpAt: string | null;
+  deadlineAt: string | null;
+};
+
 export function canTransitionOpportunityReviewStatus(
   from: OpportunityReviewStatus,
   to: OpportunityReviewStatus,

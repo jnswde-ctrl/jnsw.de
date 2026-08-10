@@ -1012,6 +1012,37 @@ footer {
   padding-top: 24px;
   border-top: 1px solid var(--line);
 }
+.next-actions {
+  border-top: 1px solid var(--line);
+}
+.next-action {
+  display: block;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--paper);
+  text-decoration: none;
+}
+.next-action b,
+.next-action span,
+.next-action small {
+  display: block;
+}
+.next-action b {
+  font-size: 14px;
+}
+.next-action span,
+.next-action small,
+.next-actions-empty {
+  margin-top: 5px;
+  color: var(--muted);
+  font:
+    10px "DM Mono",
+    monospace;
+  text-transform: uppercase;
+}
+.next-action.is-overdue b {
+  color: var(--acid);
+}
 .legacy-import h3 {
   margin: 10px 0 12px;
   font-size: 1.35rem;
@@ -1307,6 +1338,39 @@ footer {
   border-top: 1px solid var(--line);
   padding: 15px 0;
 }
+.timeline-section {
+  margin-top: 50px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+.timeline-section h2 {
+  margin: 10px 0 0;
+}
+.timeline-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.timeline-list {
+  border-top: 1px solid var(--line);
+}
+.timeline-list article {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 16px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--line);
+}
+.timeline-list time,
+.timeline-list b {
+  font:
+    10px "DM Mono",
+    monospace;
+  text-transform: uppercase;
+}
+.timeline-list p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
 .editor-entry small {
   display: block;
   margin-top: 5px;
@@ -1343,6 +1407,13 @@ footer {
     border-top: 1px solid var(--line);
     padding: 35px 0 0;
     margin-top: 45px;
+  }
+  .timeline-form {
+    grid-template-columns: 1fr;
+  }
+  .timeline-list article {
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 }
 .application-details {
