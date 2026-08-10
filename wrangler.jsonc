@@ -8,8 +8,7 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "jnswde-db",
-      "database_id": "3fc26441-8c14-4f66-a29b-eefd11ad9d14",
+      "database_name": "jnswde-local",
       "migrations_dir": "drizzle",
     },
   ],
