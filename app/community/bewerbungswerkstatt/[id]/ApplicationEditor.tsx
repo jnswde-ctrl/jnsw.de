@@ -6,6 +6,7 @@ import {
   applicationDocumentTypeLabels,
   type ApplicationDocumentStatus,
 } from "../../../../db/application-documents";
+import { applicationStatusLabels, nextApplicationStatuses } from "../../../../db/workflow";
 type Attachment = { id: string; kind: string; fileName: string; size: string };
 type DocumentVersion = {
   id: string;
@@ -25,9 +26,17 @@ type Application = {
   salary: string | null;
   deadlineAt: string | null;
   followUpAt: string | null;
+  applicationMethod: string | null;
+  appliedAt: string | null;
   notes: string;
 };
-type Detail = { app: Application; attachments: Attachment[]; documents: DocumentVersion[] };
+type TimelineEvent = { id: string; type: string; occurredAt: string; note: string };
+type Detail = {
+  app: Application;
+  attachments: Attachment[];
+  documents: DocumentVersion[];
+  timeline: TimelineEvent[];
+};
 const request = async (path: string, options?: RequestInit) => {
   const response = await fetch(path, {
       ...options,
@@ -104,6 +113,23 @@ export function ApplicationEditor({ id }: { id: string }) {
       );
     }
   };
+  const addTimeline = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    try {
+      await request(`/api/bewerbungswerkstatt/applications/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ action: "timeline", ...Object.fromEntries(new FormData(form)) }),
+      });
+      form.reset();
+      setMessage("Ereignis in der Timeline ergänzt.");
+      await load();
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Ereignis konnte nicht gespeichert werden.",
+      );
+    }
+  };
   const remove = async (attachmentId: string) => {
     try {
       const response = await fetch(
@@ -174,12 +200,76 @@ export function ApplicationEditor({ id }: { id: string }) {
               Follow-up
               <input name="followUpAt" type="date" defaultValue={app.followUpAt ?? ""} />
             </label>
+            <label>
+              Status
+              <select name="status" defaultValue={app.status}>
+                {nextApplicationStatuses(app.status as keyof typeof applicationStatusLabels).map(
+                  (value) => (
+                    <option key={value} value={value}>
+                      {applicationStatusLabels[value]}
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
+            <label>
+              Versanddatum
+              <input name="appliedAt" type="date" defaultValue={app.appliedAt ?? ""} />
+            </label>
+            <label>
+              Versandweg
+              <input
+                name="applicationMethod"
+                defaultValue={app.applicationMethod ?? ""}
+                maxLength={160}
+                placeholder="z. B. Karriereportal"
+              />
+            </label>
             <label className="editor-wide">
               Notizen
               <textarea name="notes" defaultValue={app.notes} maxLength={8000} />
             </label>
             <button className="community-button">Stellendaten speichern</button>
+            <p className="editor-hint">
+              Der Status kann nur zum nächsten fachlich erlaubten Schritt wechseln und erzeugt
+              automatisch einen Timeline-Eintrag.
+            </p>
           </form>
+          <section className="timeline-section">
+            <p className="eyebrow">Verlauf</p>
+            <h2>Timeline</h2>
+            <form className="timeline-form" onSubmit={addTimeline}>
+              <label>
+                Ereignis
+                <select name="type" defaultValue="note">
+                  <option value="follow_up">Follow-up</option>
+                  <option value="interview">Interview</option>
+                  <option value="response">Rückmeldung</option>
+                  <option value="note">Notiz</option>
+                </select>
+              </label>
+              <label>
+                Tatsächliches Datum
+                <input name="occurredAt" type="date" required />
+              </label>
+              <label className="editor-wide">
+                Notiz
+                <textarea name="note" maxLength={4000} placeholder="Was ist passiert?" />
+              </label>
+              <button className="community-button">Ereignis nachtragen</button>
+            </form>
+            <div className="timeline-list">
+              {detail.timeline.map((event) => (
+                <article key={event.id}>
+                  <time>{event.occurredAt.slice(0, 10)}</time>
+                  <div>
+                    <b>{event.type.replaceAll("_", " ")}</b>
+                    {event.note && <p>{event.note}</p>}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
         </div>
         <aside>
           <p className="eyebrow">Textversionen</p>

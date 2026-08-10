@@ -12,6 +12,7 @@ import {
   isApplicationDocumentStatus,
   isApplicationDocumentType,
 } from "../../../../../db/application-documents";
+import { isManualTimelineEventType } from "../../../../../db/workflow";
 import {
   activeUser,
   date,
@@ -64,7 +65,12 @@ export async function PATCH(request: Request, { params }: Context) {
           ? body.occurredAt
           : null,
       note = text(body.note, 4000) ?? "";
-    if (!type || !occurredAt || !(await applicationDetail(user.id, id)))
+    if (
+      !type ||
+      !isManualTimelineEventType(type) ||
+      !occurredAt ||
+      !(await applicationDetail(user.id, id))
+    )
       return denied(400, "Invalid event");
     return Response.json(
       { event: await addTimelineEvent(user.id, id, type, occurredAt, note) },
@@ -87,6 +93,8 @@ export async function PATCH(request: Request, { params }: Context) {
     notes: text(body?.notes, 8000) ?? undefined,
     jobUrl: text(body?.jobUrl, 2048) ?? undefined,
     salary: text(body?.salary, 120) ?? undefined,
+    applicationMethod: text(body?.applicationMethod, 160) ?? undefined,
+    appliedAt: date(body?.appliedAt),
     deadlineAt: date(body?.deadlineAt),
     followUpAt: date(body?.followUpAt),
     status: applicationStatusValues.includes(body?.status as never)

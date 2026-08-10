@@ -16,7 +16,11 @@ import {
   type ApplicationDocumentType,
   nextDocumentVersion,
 } from "./application-documents";
-import { applicationStatusLabels, canTransitionApplicationStatus } from "./workflow";
+import {
+  applicationStatusLabels,
+  canTransitionApplicationStatus,
+  nextApplicationAction,
+} from "./workflow";
 
 export type ApplicationStatus = (typeof applicationStatusValues)[number];
 export type CareerItemKind = (typeof careerItemKindValues)[number];
@@ -32,11 +36,19 @@ export async function listApplications(userId: string) {
 export async function dashboard(userId: string) {
   const applications = await listApplications(userId);
   const today = new Date().toISOString().slice(0, 10);
+  const actions = applications
+    .map((application) => {
+      const action = nextApplicationAction(application, today);
+      return action ? { application, ...action } : null;
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null)
+    .sort(
+      (a, b) =>
+        a.priority - b.priority || (a.date ?? "9999-12-31").localeCompare(b.date ?? "9999-12-31"),
+    );
   return {
     applications,
-    followUps: applications
-      .filter((item) => item.followUpAt && item.followUpAt >= today)
-      .sort((a, b) => a.followUpAt!.localeCompare(b.followUpAt!)),
+    actions,
     monthlyCount: applications.filter((item) => item.createdAt.startsWith(today.slice(0, 7)))
       .length,
   };
@@ -69,6 +81,8 @@ export async function updateApplication(
       | "status"
       | "notes"
       | "followUpAt"
+      | "applicationMethod"
+      | "appliedAt"
       | "archivedAt"
     >
   >,

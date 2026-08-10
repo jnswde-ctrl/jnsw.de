@@ -16,6 +16,12 @@ type Application = {
   deadlineAt: string | null;
   followUpAt: string | null;
 };
+type NextAction = {
+  application: Application;
+  label: string;
+  date: string | null;
+  priority: number;
+};
 type Opportunity = {
   id: string;
   company: string;
@@ -58,6 +64,7 @@ async function request(path: string, options?: RequestInit) {
 export function Bewerbungswerkstatt() {
   const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
+  const [actions, setActions] = useState<NextAction[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [skills, setSkills] = useState<ProfileSkill[]>([]);
@@ -80,6 +87,7 @@ export function Bewerbungswerkstatt() {
         request("/api/bewerbungswerkstatt/skills"),
       ]);
       setApplications(a.applications);
+      setActions(a.actions);
       setOpportunities(o.opportunities);
       setItems(p.items);
       setSkills(s.skills);
@@ -324,8 +332,27 @@ export function Bewerbungswerkstatt() {
           </div>
           <aside>
             <p className="eyebrow">Nächste Schritte</p>
-            <h2>{applications.filter((app) => app.followUpAt).length} Follow-ups</h2>
-            <p>Fristen und Follow-ups bleiben pro Bewerbung dokumentiert.</p>
+            <h2>Was jetzt zählt.</h2>
+            <p>Fällige Follow-ups und Fristen stehen vor der gesamten Bewerbungsübersicht.</p>
+            <div className="next-actions" aria-label="Priorisierte nächste Aktionen">
+              {actions.length ? (
+                actions.map(({ application, label, date }) => (
+                  <Link
+                    className={`next-action ${label.includes("überfällig") ? "is-overdue" : ""}`}
+                    href={`/community/bewerbungswerkstatt/${application.id}`}
+                    key={`${application.id}-${label}`}
+                  >
+                    <b>{label}</b>
+                    <span>
+                      {application.role} · {application.company}
+                    </span>
+                    {date && <small>{date}</small>}
+                  </Link>
+                ))
+              ) : (
+                <p className="next-actions-empty">Keine offene Aktion. Gut so.</p>
+              )}
+            </div>
             <div className="legacy-import">
               <p className="eyebrow">Altbestand</p>
               <h3>Bewerbungen übernehmen.</h3>
