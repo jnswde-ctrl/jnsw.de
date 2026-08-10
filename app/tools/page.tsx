@@ -4,7 +4,8 @@ import { ToolsExperience } from "./ToolsExperience";
 
 export const metadata: Metadata = {
   title: "Digitale Tools für klare Aufgaben | JNSW.DE",
-  description: "Kostenlose Werkzeuge für digitale Arbeit – direkt und datensparsam im Browser.",
+  description:
+    "Kostenlose, datensparsame Werkzeuge für konkrete digitale Aufgaben – direkt im Browser und ohne unnötige Konten.",
 };
 
 export default function ToolsPage() {
