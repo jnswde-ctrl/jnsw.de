@@ -1,10 +1,13 @@
-export type LegacyApplicationStatus =
-  | "application_closed"
-  | "applied"
-  | "not_recommended"
-  | "rejected"
-  | "reviewed_hold"
-  | "status_unknown";
+export const legacyApplicationStatuses = [
+  "application_closed",
+  "applied",
+  "not_recommended",
+  "rejected",
+  "reviewed_hold",
+  "status_unknown",
+] as const;
+
+export type LegacyApplicationStatus = (typeof legacyApplicationStatuses)[number];
 
 export type LegacyApplication = {
   id: string;
@@ -65,16 +68,10 @@ export type ImportReport = {
   conflicts: number;
   privateReferences: number;
   unlinkedLetters: number;
+  sourceStatusCounts: Record<LegacyApplicationStatus, number>;
 };
 
-const validStatuses = new Set<LegacyApplicationStatus>([
-  "application_closed",
-  "applied",
-  "not_recommended",
-  "rejected",
-  "reviewed_hold",
-  "status_unknown",
-]);
+const validStatuses = new Set<LegacyApplicationStatus>(legacyApplicationStatuses);
 
 function isoTimestamp(value: string | null | undefined) {
   if (!value || Number.isNaN(Date.parse(value))) return null;
@@ -195,6 +192,9 @@ export function createImportPlan(
     conflicts: 0,
     privateReferences: 0,
     unlinkedLetters,
+    sourceStatusCounts: Object.fromEntries(
+      legacyApplicationStatuses.map((status) => [status, 0]),
+    ) as Record<LegacyApplicationStatus, number>,
   };
   const inserts: ImportRecord[] = [];
   const applicationBackfills: ImportRecord[] = [];
@@ -204,6 +204,7 @@ export function createImportPlan(
 
   for (const source of applications) {
     const record = toImportRecord(source);
+    report.sourceStatusCounts[source.status]++;
     report.privateReferences += record.privateReferenceCount;
     if (seen.has(record.sourceKey)) {
       report.conflicts++;
