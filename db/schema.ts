@@ -292,8 +292,12 @@ export const opportunityAnalyses = sqliteTable(
     strengths: text("strengths").notNull().default("[]"),
     gaps: text("gaps").notNull().default("[]"),
     risks: text("risks").notNull().default("[]"),
-    modelVersion: text("model_version"),
-    promptVersion: text("prompt_version"),
+    profileVersion: text("profile_version").notNull(),
+    modelVersion: text("model_version").notNull(),
+    promptVersion: text("prompt_version").notNull(),
+    supersedesAnalysisId: text("supersedes_analysis_id").references(() => opportunityAnalyses.id, {
+      onDelete: "restrict",
+    }),
     confirmedAt: text("confirmed_at"),
     correctionNote: text("correction_note"),
     createdAt: text("created_at")

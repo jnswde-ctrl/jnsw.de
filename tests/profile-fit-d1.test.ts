@@ -16,6 +16,7 @@ const migrations = [
   "0009_bent_dragon_lord",
   "0010_loving_molly_hayes",
   "0011_eminent_vertigo",
+  "0012_melted_unus",
 ].map((name) => new URL(`../drizzle/${name}.sql`, import.meta.url));
 
 async function migrate(db: D1Database) {
@@ -58,7 +59,12 @@ test("keeps analysis versions, evidence and confirmations tenant-scoped in D1", 
       .run();
     await db
       .prepare(
-        "INSERT INTO opportunity_analyses (id,user_id,opportunity_id,version,score,recommendation,strengths,gaps,risks,model_version,prompt_version) VALUES ('v1','a','oa','1','80','recommended','[]','[]','[]','m1','p1')",
+        "INSERT INTO opportunity_analyses (id,user_id,opportunity_id,version,score,recommendation,strengths,gaps,risks,profile_version,model_version,prompt_version) VALUES ('v1','a','oa','1','80','recommended','[]','[]','[]','profile-1','m1','p1')",
+      )
+      .run();
+    await db
+      .prepare(
+        "INSERT INTO opportunity_analyses (id,user_id,opportunity_id,version,score,recommendation,strengths,gaps,risks,profile_version,model_version,prompt_version,supersedes_analysis_id) VALUES ('v2','a','oa','2','75','on_hold','[]','[]','[]','profile-2','m2','p2','v1')",
       )
       .run();
     await db
@@ -93,10 +99,43 @@ test("keeps analysis versions, evidence and confirmations tenant-scoped in D1", 
     await assert.rejects(
       db.prepare("UPDATE opportunity_analyses SET score='99' WHERE id='v1'").run(),
     );
+    await assert.rejects(
+      db.prepare("UPDATE opportunity_requirements SET text='JavaScript' WHERE id='r1'").run(),
+    );
+    await assert.rejects(
+      db
+        .prepare("UPDATE opportunity_analysis_evidence SET career_item_id='ca' WHERE id='e1'")
+        .run(),
+    );
+    await assert.rejects(
+      db
+        .prepare(
+          "UPDATE opportunity_analysis_confirmations SET correction_note='changed' WHERE id='c1'",
+        )
+        .run(),
+    );
     const version = await db
-      .prepare("SELECT version, strengths FROM opportunity_analyses WHERE id='v1'")
-      .first<{ version: string; strengths: string }>();
-    assert.deepEqual(version, { version: "1", strengths: "[]" });
+      .prepare(
+        "SELECT version, strengths, profile_version, model_version, prompt_version FROM opportunity_analyses WHERE id='v1'",
+      )
+      .first<{
+        version: string;
+        strengths: string;
+        profile_version: string;
+        model_version: string;
+        prompt_version: string;
+      }>();
+    assert.deepEqual(version, {
+      version: "1",
+      strengths: "[]",
+      profile_version: "profile-1",
+      model_version: "m1",
+      prompt_version: "p1",
+    });
+    const correction = await db
+      .prepare("SELECT supersedes_analysis_id FROM opportunity_analyses WHERE id='v2'")
+      .first<{ supersedes_analysis_id: string }>();
+    assert.deepEqual(correction, { supersedes_analysis_id: "v1" });
   } finally {
     await runtime.dispose();
   }
