@@ -19,9 +19,11 @@ test("keeps cover letters, emails and form responses as separate document types"
 
 test("requires explicit confirmation before a document can be finalized", () => {
   assert.equal(isApplicationDocumentStatus("draft"), true);
-  assert.equal(canFinalizeDocument("draft", false), true);
-  assert.equal(canFinalizeDocument("final", false), false);
-  assert.equal(canFinalizeDocument("final", true), true);
+  assert.equal(canFinalizeDocument("draft", false, false, 0), true);
+  assert.equal(canFinalizeDocument("final", false, true, 1), false);
+  assert.equal(canFinalizeDocument("final", true, false, 1), false);
+  assert.equal(canFinalizeDocument("final", true, true, 0), false);
+  assert.equal(canFinalizeDocument("final", true, true, 1), true);
 });
 
 test("increments immutable document versions per document type", () => {
