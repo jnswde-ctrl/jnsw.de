@@ -351,12 +351,25 @@ export const applicationDocumentVersions = sqliteTable(
     applicationId: text("application_id")
       .notNull()
       .references(() => jobApplications.id, { onDelete: "cascade" }),
+    documentType: text("document_type").notNull().default("cover_letter"),
+    status: text("status").notNull().default("draft"),
+    version: text("version").notNull().default("1"),
     content: text("content").notNull(),
+    sourceNote: text("source_note").notNull().default(""),
+    analysisId: text("analysis_id").references(() => opportunityAnalyses.id, {
+      onDelete: "set null",
+    }),
+    evidenceSnapshot: text("evidence_snapshot").notNull().default("[]"),
     createdAt: text("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
+    uniqueIndex("application_document_versions_type_version_unique").on(
+      table.applicationId,
+      table.documentType,
+      table.version,
+    ),
     index("application_document_versions_user_id_idx").on(table.userId),
     index("application_document_versions_application_id_idx").on(table.applicationId),
   ],

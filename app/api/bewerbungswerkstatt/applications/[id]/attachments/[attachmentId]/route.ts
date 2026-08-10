@@ -10,7 +10,7 @@ export async function GET(_: Request, { params }: Context) {
   return new Response(result.object.body, {
     headers: {
       ...privateHeaders,
-      "Content-Type": "application/pdf",
+      "Content-Type": result.item.contentType,
       "Content-Disposition": "attachment",
       "Cache-Control": "private, no-store",
     },

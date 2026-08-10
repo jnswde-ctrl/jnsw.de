@@ -8,6 +8,11 @@ import {
 } from "../../../../../db/applications";
 import { applicationStatusValues } from "../../../../../db/schema";
 import {
+  canFinalizeDocument,
+  isApplicationDocumentStatus,
+  isApplicationDocumentType,
+} from "../../../../../db/application-documents";
+import {
   activeUser,
   date,
   denied,
@@ -30,9 +35,24 @@ export async function PATCH(request: Request, { params }: Context) {
   const body = await json(request),
     id = (await params).id;
   if (body?.action === "document") {
-    const content = text(body.content, 20000, true);
-    if (!content) return denied(400, "Invalid document");
-    const item = await addDocumentVersion(user.id, id, content);
+    const content = text(body.content, 20000, true),
+      sourceNote = text(body.sourceNote, 4000, true),
+      documentType = body.documentType,
+      status = body.status;
+    if (
+      !content ||
+      !sourceNote ||
+      !isApplicationDocumentType(documentType) ||
+      !isApplicationDocumentStatus(status) ||
+      !canFinalizeDocument(status, body.finalConfirmed === true)
+    )
+      return denied(400, "Invalid document");
+    const item = await addDocumentVersion(user.id, id, {
+      content,
+      sourceNote,
+      documentType,
+      status,
+    });
     return item
       ? Response.json({ document: item }, { headers: privateHeaders })
       : denied(404, "Not found");
