@@ -10,6 +10,8 @@ Erfahrungsaussagen und dürfen ohne Beleg erfasst werden; Erfahrungs-Kompetenzen
 
 ## Bewertung
 
+`profileVersion` identifiziert den unveränderlichen Profilstand der Analyse und wird mit ihr persistiert.
+
 Die Skala ist `0-100`: 0-39 bedeutet wesentliche unbelegte Muss-Anforderungen, 40-69 eine
 teilweise Passung mit klaren Lücken oder Risiken und 70-100 eine weitgehend belegte
 Muss-Passung. Die Empfehlung (`recommended`, `on_hold`, `not_recommended`) muss mit Stärken,

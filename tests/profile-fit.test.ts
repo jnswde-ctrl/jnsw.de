@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { positiveClaimHasEvidence, scoreGuidance, scoreScale } from "../db/profile-fit";
+import {
+  analysisVersionsPresent,
+  positiveClaimHasEvidence,
+  scoreGuidance,
+  scoreScale,
+} from "../db/profile-fit";
 
 test("requires individual evidence for every positive requirement assessment", () => {
   assert.equal(positiveClaimHasEvidence("met", []), false);
@@ -12,6 +17,13 @@ test("requires individual evidence for every positive requirement assessment", (
 test("documents a stable, interpretable score scale", () => {
   assert.equal(scoreScale, "0-100");
   assert.equal(scoreGuidance.length, 3);
+});
+
+test("requires the profile, model and prompt versions for every analysis", () => {
+  assert.equal(analysisVersionsPresent("profile-4", "model-1", "prompt-2"), true);
+  assert.equal(analysisVersionsPresent(null, "model-1", "prompt-2"), false);
+  assert.equal(analysisVersionsPresent("profile-4", null, "prompt-2"), false);
+  assert.equal(analysisVersionsPresent("profile-4", "model-1", null), false);
 });
 
 test("keeps tenant-scoped evidence identifiers explicit", () => {

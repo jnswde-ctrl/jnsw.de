@@ -8,6 +8,14 @@ export const scoreGuidance = [
 
 export type EvidenceClaim = { text: string; evidenceItemIds: string[] };
 
+export function analysisVersionsPresent(
+  profileVersion: string | null,
+  modelVersion: string | null,
+  promptVersion: string | null,
+) {
+  return Boolean(profileVersion && modelVersion && promptVersion);
+}
+
 export function positiveClaimHasEvidence(
   assessment: "met" | "partial" | "not_met" | "unknown",
   evidenceItemIds: string[],

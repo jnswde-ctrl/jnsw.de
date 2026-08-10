@@ -8,7 +8,7 @@ import {
   opportunityRequirementKindValues,
   requirementAssessmentValues,
 } from "../../../../../../db/schema";
-import { scoreScale } from "../../../../../../db/profile-fit";
+import { analysisVersionsPresent, scoreScale } from "../../../../../../db/profile-fit";
 import { activeUser, denied, json, mutationAllowed, privateHeaders, text } from "../../../support";
 
 type Context = { params: Promise<{ id: string }> };
@@ -48,7 +48,10 @@ export async function POST(request: Request, { params }: Context) {
         : null,
     gaps = stringList(body?.gaps),
     risks = stringList(body?.risks),
-    evidenceItemIds = stringList(body?.evidenceItemIds);
+    evidenceItemIds = stringList(body?.evidenceItemIds),
+    profileVersion = text(body?.profileVersion, 120, true),
+    modelVersion = text(body?.modelVersion, 120, true),
+    promptVersion = text(body?.promptVersion, 120, true);
   if (
     !Number.isInteger(score) ||
     score < 0 ||
@@ -59,7 +62,7 @@ export async function POST(request: Request, { params }: Context) {
     !gaps ||
     !risks ||
     !evidenceItemIds ||
-    !strengths ||
+    !analysisVersionsPresent(profileVersion, modelVersion, promptVersion) ||
     strengths.some(
       (item) =>
         !item || !text(item.text, 500, true) || !stringList(item.evidenceItemIds, 20)?.length,
@@ -86,8 +89,9 @@ export async function POST(request: Request, { params }: Context) {
     gaps,
     risks,
     evidenceItemIds,
-    modelVersion: text(body?.modelVersion, 120, true),
-    promptVersion: text(body?.promptVersion, 120, true),
+    profileVersion,
+    modelVersion,
+    promptVersion,
     supersedesAnalysisId: text(body?.supersedesAnalysisId, 120),
     requirements: requirements.map((item) => ({
       text: text(item!.text, 500, true)!,

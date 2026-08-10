@@ -123,8 +123,9 @@ export async function addAnalysis(
     gaps: string[];
     risks: string[];
     evidenceItemIds: string[];
-    modelVersion: string | null;
-    promptVersion: string | null;
+    profileVersion: string;
+    modelVersion: string;
+    promptVersion: string;
     supersedesAnalysisId: string | null;
   },
 ) {
@@ -185,8 +186,10 @@ export async function addAnalysis(
         strengths: JSON.stringify(input.strengths),
         gaps: JSON.stringify(input.gaps),
         risks: JSON.stringify(input.risks),
+        profileVersion: input.profileVersion,
         modelVersion: input.modelVersion,
         promptVersion: input.promptVersion,
+        supersedesAnalysisId: input.supersedesAnalysisId,
       }),
     ...input.requirements.map((requirement) =>
       getDb()
