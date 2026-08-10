@@ -80,6 +80,7 @@ async function request(path: string, options?: RequestInit) {
 export function Bewerbungswerkstatt() {
   const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
+  const [archivedApplications, setArchivedApplications] = useState<Application[]>([]);
   const [actions, setActions] = useState<NextAction[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [items, setItems] = useState<Item[]>([]);
@@ -103,6 +104,7 @@ export function Bewerbungswerkstatt() {
         request("/api/bewerbungswerkstatt/skills"),
       ]);
       setApplications(a.applications);
+      setArchivedApplications(a.archivedApplications);
       setActions(a.actions);
       setOpportunities(o.opportunities);
       setItems(p.items);
@@ -343,6 +345,23 @@ export function Bewerbungswerkstatt() {
                 ))
               ) : (
                 <p>Noch keine Bewerbung angelegt.</p>
+              )}
+            </div>
+            <h2 className="workbench-list-heading">Archiv</h2>
+            <div className="application-list" aria-label="Archivierte Bewerbungen">
+              {archivedApplications.length ? (
+                archivedApplications.map((app) => (
+                  <article key={app.id}>
+                    <div>
+                      <Link href={`/community/bewerbungswerkstatt/${app.id}`}>
+                        <b>{app.role}</b>
+                        <span>{app.company} · Archiviert</span>
+                      </Link>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p>Keine archivierten Bewerbungen.</p>
               )}
             </div>
           </div>

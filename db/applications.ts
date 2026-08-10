@@ -27,15 +27,23 @@ export type ApplicationStatus = (typeof applicationStatusValues)[number];
 export type CareerItemKind = (typeof careerItemKindValues)[number];
 const now = () => new Date().toISOString();
 
-export async function listApplications(userId: string) {
+export async function listApplications(userId: string, archived = false) {
   return getDb()
     .select()
     .from(jobApplications)
-    .where(and(eq(jobApplications.userId, userId), ne(jobApplications.status, "archived")))
+    .where(
+      and(
+        eq(jobApplications.userId, userId),
+        archived ? eq(jobApplications.status, "archived") : ne(jobApplications.status, "archived"),
+      ),
+    )
     .orderBy(desc(jobApplications.updatedAt));
 }
 export async function dashboard(userId: string) {
-  const applications = await listApplications(userId);
+  const [applications, archivedApplications] = await Promise.all([
+    listApplications(userId),
+    listApplications(userId, true),
+  ]);
   const today = new Date().toISOString().slice(0, 10);
   const actions = applications
     .map((application) => {
@@ -52,6 +60,7 @@ export async function dashboard(userId: string) {
     actions,
     monthlyCount: applications.filter((item) => item.createdAt.startsWith(today.slice(0, 7)))
       .length,
+    archivedApplications,
   };
 }
 export async function createApplication(
