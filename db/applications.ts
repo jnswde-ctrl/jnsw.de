@@ -10,6 +10,7 @@ import {
   type careerItemKindValues,
 } from "./schema";
 import { listAttachments } from "./application-attachments";
+import { applicationStatusLabels, canTransitionApplicationStatus } from "./workflow";
 
 export type ApplicationStatus = (typeof applicationStatusValues)[number];
 export type CareerItemKind = (typeof careerItemKindValues)[number];
@@ -66,12 +67,26 @@ export async function updateApplication(
     >
   >,
 ) {
+  const current = await getDb().query.jobApplications.findFirst({
+    where: and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)),
+  });
+  if (!current) return { kind: "not_found" as const };
+  if (changes.status && !canTransitionApplicationStatus(current.status, changes.status))
+    return { kind: "invalid_transition" as const };
   const [item] = await getDb()
     .update(jobApplications)
     .set({ ...changes, updatedAt: now() })
     .where(and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)))
     .returning();
-  return item;
+  if (changes.status && changes.status !== current.status)
+    await addTimelineEvent(
+      userId,
+      id,
+      "status_changed",
+      now(),
+      `Bewerbungsstatus: ${applicationStatusLabels[current.status]} → ${applicationStatusLabels[changes.status]}.`,
+    );
+  return { kind: "ok" as const, value: item };
 }
 export async function deleteApplication(userId: string, id: string) {
   const result = await getDb()

@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
+import { applicationStatusLabels } from "../../../db/workflow";
 type Application = {
   id: string;
   company: string;
@@ -17,17 +18,6 @@ type Suggestion = {
   salary: string | null;
   deadlineAt: string | null;
   notes: string;
-};
-const labels: Record<string, string> = {
-  draft: "Entwurf",
-  ready: "Bereit",
-  sent: "Versendet",
-  waiting: "Rückmeldung offen",
-  interview: "Interview",
-  offer: "Angebot",
-  rejected: "Abgesagt",
-  withdrawn: "Zurückgezogen",
-  archived: "Archiviert",
 };
 async function request(path: string, options?: RequestInit) {
   const response = await fetch(path, {
@@ -146,7 +136,10 @@ export function Bewerbungswerkstatt() {
                       <Link href={`/community/bewerbungswerkstatt/${app.id}`}>
                         <b>{app.role}</b>
                         <span>
-                          {app.company} · {labels[app.status]}
+                          {app.company} ·{" "}
+                          {applicationStatusLabels[
+                            app.status as keyof typeof applicationStatusLabels
+                          ] ?? app.status}
                         </span>
                       </Link>
                       {app.deadlineAt && <small>Frist: {app.deadlineAt}</small>}
