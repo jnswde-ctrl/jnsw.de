@@ -53,6 +53,11 @@ npm exec wrangler -- d1 migrations list DB --local --persist-to .wrangler/state
 
 Lokale D1-Daten liegen unter `.wrangler/state` und sind nicht versioniert. Produktionsmigrationen werden ausschließlich über den später festzulegenden Deployment-Prozess ausgeführt; keine Produktions-ID oder Secrets gehören in dieses Repository.
 
+`wrangler.jsonc` beschreibt ausschließlich die lokale D1-Simulation. Die Produktion erhält die
+Binding `DB` ausschließlich über `.openai/hosting.json` und Sites. Deshalb sind direkte
+`wrangler d1 ... --remote`-Befehle aus diesem Repository nicht zulässig: Sie könnten nie die von
+Sites verwaltete Produktionsdatenbank zuverlässig adressieren.
+
 ## Sicherheitsregeln
 
 - Passwortverarbeitung erfolgt ausschließlich über `app/passwords.ts`.
