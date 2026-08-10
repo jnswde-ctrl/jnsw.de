@@ -50,6 +50,22 @@ type LegacyImportReport = {
   conflicts: number;
   privateReferences: number;
   unlinkedLetters: number;
+  sourceStatusCounts: Record<LegacyStatus, number>;
+};
+type LegacyStatus =
+  | "application_closed"
+  | "applied"
+  | "not_recommended"
+  | "rejected"
+  | "reviewed_hold"
+  | "status_unknown";
+const legacyStatusLabels: Record<LegacyStatus, string> = {
+  application_closed: "Bewerbung geschlossen",
+  applied: "Beworben",
+  not_recommended: "Nicht empfohlen",
+  rejected: "Abgesagt",
+  reviewed_hold: "Zurückgestellt",
+  status_unknown: "Unbekannt",
 };
 type ProfileSkill = { id: string; name: string; kind: "experience" | "learning"; level: string };
 async function request(path: string, options?: RequestInit) {
@@ -403,6 +419,16 @@ export function Bewerbungswerkstatt() {
                     {legacyReport.privateReferences} private Dokumentreferenzen und{" "}
                     {legacyReport.unlinkedLetters} Anschreiben werden nicht übernommen.
                   </p>
+                  <dl className="legacy-status-counts" aria-label="Altstatus im Importbestand">
+                    {(Object.entries(legacyStatusLabels) as Array<[LegacyStatus, string]>).map(
+                      ([status, label]) => (
+                        <div key={status}>
+                          <dt>{label}</dt>
+                          <dd>{legacyReport.sourceStatusCounts[status]}</dd>
+                        </div>
+                      ),
+                    )}
+                  </dl>
                   <button
                     type="button"
                     className="community-button"

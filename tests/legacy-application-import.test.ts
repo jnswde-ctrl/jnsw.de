@@ -66,6 +66,14 @@ test("is idempotent and reports mismatches without scheduling writes for them", 
     conflicts: 0,
     privateReferences: 0,
     unlinkedLetters: 0,
+    sourceStatusCounts: {
+      application_closed: 0,
+      applied: 1,
+      not_recommended: 0,
+      rejected: 0,
+      reviewed_hold: 0,
+      status_unknown: 0,
+    },
   });
   const conflict = createImportPlan([applied], [{ ...existing[0], company: "Different GmbH" }]);
   assert.equal(conflict.report.conflicts, 1);
@@ -76,6 +84,26 @@ test("is idempotent and reports mismatches without scheduling writes for them", 
   );
   assert.equal(conflict.inserts.length, 0);
   assert.equal(conflict.applicationBackfills.length, 0);
+});
+
+test("reports every legacy status group without exposing application data", () => {
+  const plan = createImportPlan(
+    [
+      { ...applied, status: "applied" },
+      { ...applied, id: "legacy-2", status: "rejected" },
+      { ...applied, id: "legacy-3", status: "status_unknown", appliedAt: null },
+    ],
+    [],
+  );
+  assert.deepEqual(plan.report.sourceStatusCounts, {
+    application_closed: 0,
+    applied: 1,
+    not_recommended: 0,
+    rejected: 1,
+    reviewed_hold: 0,
+    status_unknown: 1,
+  });
+  assert.equal(JSON.stringify(plan.report.sourceStatusCounts).includes("Example GmbH"), false);
 });
 
 test("keeps document references out of the import payload while counting them", () => {

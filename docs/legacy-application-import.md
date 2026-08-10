@@ -6,7 +6,7 @@ Die Bewerbungswerkstatt importiert den strukturierten Altbestand aus `bewerbunge
 
 Nach der Anmeldung in der Bewerbungswerkstatt wählst du `bewerbungen.json` aus und startest den Probelauf. Die Datei wird im Browser gelesen. Anschreiben können optional gewählt werden und fließen nur als Zähler in den Bericht ein.
 
-Der Probelauf gibt ausschließlich Zähler aus. Erst die separate Aktion `Jetzt … Einträge übernehmen` schreibt in die Datenbank. Die Route verwendet das Sites-D1-Binding `DB`; ein direkter `wrangler d1 --remote`-Import ist absichtlich nicht vorgesehen, weil er nicht die Sites-Produktionsdatenbank adressiert.
+Der Probelauf gibt ausschließlich Zähler aus, einschließlich einer Menge pro Altstatusgruppe. Damit lässt sich die erwartete Verteilung ohne Freitexte oder personenbezogene Daten abgleichen. Erst die separate Aktion `Jetzt … Einträge übernehmen` schreibt in die Datenbank. Die Route verwendet das Sites-D1-Binding `DB`; ein direkter `wrangler d1 --remote`-Import ist absichtlich nicht vorgesehen, weil er nicht die Sites-Produktionsdatenbank adressiert.
 
 ## Mapping
 
