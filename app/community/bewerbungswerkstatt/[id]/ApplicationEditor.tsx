@@ -263,11 +263,9 @@ export function ApplicationEditor({ id }: { id: string }) {
             <h2>Timeline</h2>
             <form className="timeline-form" onSubmit={addTimeline}>
               <label>
-                Ereignis
+                Ereignis ohne Statuswechsel
                 <select name="type" defaultValue="note">
                   <option value="follow_up">Follow-up</option>
-                  <option value="interview">Interview</option>
-                  <option value="response">Rückmeldung</option>
                   <option value="note">Notiz</option>
                 </select>
               </label>

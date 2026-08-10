@@ -63,7 +63,7 @@ export function nextApplicationStatuses(status: ApplicationStatus) {
 }
 
 export type FollowUpState = "overdue" | "due_today" | "upcoming";
-const manualTimelineEventTypes = ["follow_up", "interview", "response", "note"] as const;
+const manualTimelineEventTypes = ["follow_up", "note"] as const;
 
 export function isManualTimelineEventType(value: unknown) {
   return typeof value === "string" && manualTimelineEventTypes.includes(value as never);

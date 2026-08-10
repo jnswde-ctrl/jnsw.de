@@ -21,7 +21,8 @@ test("uses German labels for every persisted workflow status", () => {
 
 test("allows only non-status events to be added manually to an application timeline", () => {
   assert.equal(isManualTimelineEventType("follow_up"), true);
-  assert.equal(isManualTimelineEventType("interview"), true);
+  assert.equal(isManualTimelineEventType("interview"), false);
+  assert.equal(isManualTimelineEventType("response"), false);
   assert.equal(isManualTimelineEventType("status_changed"), false);
 });
 
