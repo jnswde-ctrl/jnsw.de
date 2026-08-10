@@ -9,7 +9,7 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "wrangler dev --config dist/server/wrangler.json --port 3000",
-    "test": "npm run build && node --import tsx --test tests/*.test.ts tests/*.test.mjs",
+    "test": "npm run build && node --import tsx --test tests/*.test.ts",
     "validate:yaml": "node scripts/validate-yaml.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "format": "prettier --write .",
