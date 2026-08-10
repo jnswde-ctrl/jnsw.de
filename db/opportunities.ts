@@ -4,6 +4,7 @@ import { addTimelineEvent, type ApplicationStatus } from "./applications";
 import {
   jobApplications,
   jobOpportunities,
+  opportunityAnalyses,
   opportunityTimelineEvents,
   type opportunityListingStatusValues,
   type opportunityRemoteModelValues,
@@ -14,6 +15,7 @@ import {
   canTransitionOpportunityReviewStatus,
   opportunityListingStatusLabels,
   opportunityReviewStatusLabels,
+  requiresOpportunityAnalysis,
 } from "./workflow";
 
 export type OpportunitySourceType = (typeof opportunitySourceTypeValues)[number];
@@ -24,6 +26,7 @@ export type OpportunityResult<T> =
   | { kind: "ok"; value: T }
   | { kind: "not_found" }
   | { kind: "invalid_transition" }
+  | { kind: "analysis_required" }
   | { kind: "already_converted"; application: typeof jobApplications.$inferSelect };
 
 const now = () => new Date().toISOString();
@@ -118,6 +121,12 @@ export async function updateOpportunity(
     !canTransitionOpportunityReviewStatus(current.reviewStatus, changes.reviewStatus)
   )
     return { kind: "invalid_transition" };
+  if (
+    changes.reviewStatus &&
+    requiresOpportunityAnalysis(changes.reviewStatus) &&
+    !(await hasOpportunityAnalysis(userId, id))
+  )
+    return { kind: "analysis_required" };
   const [opportunity] = await getDb()
     .update(jobOpportunities)
     .set({ ...changes, updatedAt: now() })
@@ -152,6 +161,11 @@ export async function convertOpportunityToApplication(
     where: and(eq(jobOpportunities.id, opportunityId), eq(jobOpportunities.userId, userId)),
   });
   if (!opportunity) return { kind: "not_found" };
+  if (
+    opportunity.reviewStatus !== "recommended" ||
+    !(await hasOpportunityAnalysis(userId, opportunityId))
+  )
+    return { kind: "analysis_required" };
   const existing = await getDb().query.jobApplications.findFirst({
     where: and(
       eq(jobApplications.opportunityId, opportunityId),
@@ -196,6 +210,17 @@ export async function convertOpportunityToApplication(
     if (concurrent) return { kind: "already_converted", application: concurrent };
     throw new Error("Unable to convert opportunity to application");
   }
+}
+
+async function hasOpportunityAnalysis(userId: string, opportunityId: string) {
+  return Boolean(
+    await getDb().query.opportunityAnalyses.findFirst({
+      where: and(
+        eq(opportunityAnalyses.userId, userId),
+        eq(opportunityAnalyses.opportunityId, opportunityId),
+      ),
+    }),
+  );
 }
 
 export async function deleteOpportunity(userId: string, id: string) {

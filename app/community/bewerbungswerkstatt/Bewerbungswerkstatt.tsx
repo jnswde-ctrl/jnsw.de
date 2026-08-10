@@ -1,7 +1,13 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { applicationStatusLabels } from "../../../db/workflow";
+import {
+  applicationStatusLabels,
+  opportunityListingStatusLabels,
+  opportunityReviewStatusLabels,
+} from "../../../db/workflow";
+import { importedOpportunityPayload } from "./opportunity-payload";
 type Application = {
   id: string;
   company: string;
@@ -9,6 +15,14 @@ type Application = {
   status: string;
   deadlineAt: string | null;
   followUpAt: string | null;
+};
+type Opportunity = {
+  id: string;
+  company: string;
+  role: string;
+  listingStatus: keyof typeof opportunityListingStatusLabels;
+  reviewStatus: keyof typeof opportunityReviewStatusLabels;
+  sourceCheckedAt: string | null;
 };
 type Item = { id: string; kind: string; title: string; organization: string | null };
 type Suggestion = {
@@ -42,7 +56,9 @@ async function request(path: string, options?: RequestInit) {
   return data;
 }
 export function Bewerbungswerkstatt() {
+  const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [skills, setSkills] = useState<ProfileSkill[]>([]);
   const [message, setMessage] = useState("");
@@ -57,12 +73,14 @@ export function Bewerbungswerkstatt() {
   const legacyApplicationsFile = useRef<HTMLInputElement>(null);
   async function load() {
     try {
-      const [a, p, s] = await Promise.all([
+      const [a, o, p, s] = await Promise.all([
         request("/api/bewerbungswerkstatt/applications"),
+        request("/api/bewerbungswerkstatt/opportunities"),
         request("/api/bewerbungswerkstatt/profile"),
         request("/api/bewerbungswerkstatt/skills"),
       ]);
       setApplications(a.applications);
+      setOpportunities(o.opportunities);
       setItems(p.items);
       setSkills(s.skills);
     } catch (error) {
@@ -108,6 +126,30 @@ export function Bewerbungswerkstatt() {
       setSuggestion(result.suggestion);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Import fehlgeschlagen.");
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function createOpportunity(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setMessage("");
+    try {
+      const result = await request("/api/bewerbungswerkstatt/opportunities", {
+        method: "POST",
+        body: JSON.stringify(
+          importedOpportunityPayload(
+            new FormData(event.currentTarget),
+            `import:${crypto.randomUUID()}`,
+            new Date().toISOString(),
+          ),
+        ),
+      });
+      router.push(`/community/bewerbungswerkstatt/opportunities/${result.opportunity.id}`);
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Stellenprüfung konnte nicht angelegt werden.",
+      );
     } finally {
       setLoading(false);
     }
@@ -232,7 +274,31 @@ export function Bewerbungswerkstatt() {
         <section className="workbench-grid">
           <div>
             <p className="eyebrow">Pipeline</p>
-            <h2>Deine Bewerbungen</h2>
+            <h2>Stellenprüfungen</h2>
+            <div className="application-list">
+              {opportunities.length ? (
+                opportunities.map((opportunity) => (
+                  <article key={opportunity.id}>
+                    <div>
+                      <Link href={`/community/bewerbungswerkstatt/opportunities/${opportunity.id}`}>
+                        <b>{opportunity.role}</b>
+                        <span>
+                          {opportunity.company} ·{" "}
+                          {opportunityReviewStatusLabels[opportunity.reviewStatus]}
+                        </span>
+                      </Link>
+                      <small>
+                        Quelle: {opportunityListingStatusLabels[opportunity.listingStatus]} ·
+                        geprüft: {opportunity.sourceCheckedAt?.slice(0, 10) ?? "unbekannt"}
+                      </small>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p>Noch keine Stelle zur Prüfung angelegt.</p>
+              )}
+            </div>
+            <h2 className="workbench-list-heading">Deine Bewerbungen</h2>
             <div className="application-list">
               {applications.length ? (
                 applications.map((app) => (
@@ -326,7 +392,7 @@ export function Bewerbungswerkstatt() {
       )}
       {step === "application" && (
         <section className="workbench-form">
-          <p className="eyebrow">Neue Bewerbung</p>
+          <p className="eyebrow">Neue Stellenprüfung</p>
           <h2>Stelle importieren.</h2>
           <p className="workbench-intro">
             Lies eine öffentlich erreichbare Anzeige oder füge ihren Text ein. Die KI-Ausgabe ist
@@ -368,16 +434,7 @@ export function Bewerbungswerkstatt() {
             </button>
           </form>
           {suggestion && (
-            <form
-              className="job-preview"
-              onSubmit={(event) =>
-                void submit(
-                  event,
-                  "/api/bewerbungswerkstatt/applications",
-                  "Bewerbung gespeichert.",
-                )
-              }
-            >
+            <form className="job-preview" onSubmit={(event) => void createOpportunity(event)}>
               <p className="eyebrow">KI-Vorschlag · vor dem Speichern prüfen</p>
               <h2>Vorschau bearbeiten.</h2>
               <label>
@@ -399,26 +456,26 @@ export function Bewerbungswerkstatt() {
               </label>
               <label>
                 Gehalt / Vergütung
-                <input name="salary" maxLength={120} defaultValue={suggestion.salary ?? ""} />
+                <input
+                  name="advertisedSalary"
+                  maxLength={120}
+                  defaultValue={suggestion.salary ?? ""}
+                />
               </label>
               <label>
                 Frist
                 <input name="deadlineAt" type="date" defaultValue={suggestion.deadlineAt ?? ""} />
-              </label>
-              <label>
-                Status
-                <select name="status">
-                  <option value="draft">Entwurf</option>
-                </select>
               </label>
               <label className="workbench-wide">
                 Notizen
                 <input name="notes" maxLength={8000} defaultValue={suggestion.notes} />
               </label>
               <p className="workbench-wide import-notice">
-                Erst mit „Bewerbung speichern“ wird ein privater Eintrag angelegt.
+                Erst mit „Stellenprüfung anlegen“ wird ein privater Eintrag angelegt.
               </p>
-              <button className="community-button">Bewerbung speichern</button>
+              <button className="community-button" disabled={loading}>
+                {loading ? "Wird angelegt …" : "Stellenprüfung anlegen"}
+              </button>
             </form>
           )}
         </section>

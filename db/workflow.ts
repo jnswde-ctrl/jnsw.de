@@ -27,6 +27,10 @@ export const opportunityListingStatusLabels: Record<OpportunityListingStatus, st
   closed: "Geschlossen",
 };
 
+export function requiresOpportunityAnalysis(status: OpportunityReviewStatus) {
+  return status === "recommended" || status === "on_hold" || status === "not_recommended";
+}
+
 const applicationTransitions: Record<ApplicationStatus, readonly ApplicationStatus[]> = {
   draft: ["ready", "withdrawn", "archived"],
   ready: ["sent", "withdrawn", "archived"],
