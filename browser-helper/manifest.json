@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "JNSW.DE Browser-Helfer",
+  "description": "Sichert die aktuell geöffnete Seite lokal als XML für die Bewerbungswerkstatt.",
+  "version": "0.1.0",
+  "permissions": ["activeTab", "scripting", "clipboardWrite", "downloads"],
+  "action": {
+    "default_title": "Seite für die Bewerbungswerkstatt sichern",
+    "default_popup": "popup.html"
+  }
+}

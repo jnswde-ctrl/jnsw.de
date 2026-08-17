@@ -66,3 +66,7 @@ Sites verwaltete Produktionsdatenbank zuverlässig adressieren.
 - Nutzerobjekte in API-Antworten werden mit `publicUser()` reduziert.
 
 Weitere Architektur- und Risikoentscheidungen stehen in [`docs/technical-baseline.md`](docs/technical-baseline.md).
+
+## Browser-Helfer
+
+Die wiederverwendbare Anwenderanleitung für Installation, Aktualisierung und Test der lokalen Chrome-Erweiterung steht in [`docs/browser-helfer.md`](docs/browser-helfer.md).
