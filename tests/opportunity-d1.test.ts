@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { Miniflare } from "miniflare";
+import { convertV4MiniflareOptions, Miniflare } from "miniflare";
 
 const migrations = Array.from(
   { length: 9 },
@@ -32,15 +32,17 @@ async function applyMigration(db: D1Database, migration: URL) {
 }
 
 test("migrates legacy applications and enforces one application per opportunity in D1", async () => {
-  const runtime = new Miniflare({
-    workers: [
-      {
-        modules: true,
-        script: "export default { fetch() { return new Response('ok'); } };",
-        d1Databases: { DB: "opportunity-test" },
-      },
-    ],
-  });
+  const runtime = new Miniflare(
+    convertV4MiniflareOptions({
+      workers: [
+        {
+          modules: true,
+          script: "export default { fetch() { return new Response('ok'); } };",
+          d1Databases: { DB: "opportunity-test" },
+        },
+      ],
+    }),
+  );
   try {
     const db = await runtime.getD1Database("DB");
     for (const migration of migrations.slice(0, 8)) await applyMigration(db, migration);
