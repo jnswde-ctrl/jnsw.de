@@ -8,6 +8,12 @@ import {
 } from "../../../../../db/applications";
 import { applicationStatusValues } from "../../../../../db/schema";
 import {
+  canFinalizeDocument,
+  isApplicationDocumentStatus,
+  isApplicationDocumentType,
+} from "../../../../../db/application-documents";
+import { isManualTimelineEventType } from "../../../../../db/workflow";
+import {
   activeUser,
   date,
   denied,
@@ -30,9 +36,29 @@ export async function PATCH(request: Request, { params }: Context) {
   const body = await json(request),
     id = (await params).id;
   if (body?.action === "document") {
-    const content = text(body.content, 20000, true);
-    if (!content) return denied(400, "Invalid document");
-    const item = await addDocumentVersion(user.id, id, content);
+    const content = text(body.content, 20000, true),
+      sourceNote = text(body.sourceNote, 4000, true),
+      documentType = body.documentType,
+      status = body.status,
+      finalConfirmed = body.finalConfirmed === true,
+      evidenceConfirmed = body.evidenceConfirmed === true;
+    const detail = await applicationDetail(user.id, id);
+    if (
+      !content ||
+      !sourceNote ||
+      !isApplicationDocumentType(documentType) ||
+      !isApplicationDocumentStatus(status) ||
+      !canFinalizeDocument(status, finalConfirmed, evidenceConfirmed, detail?.evidence.length ?? 0)
+    )
+      return denied(400, "Invalid document");
+    const item = await addDocumentVersion(user.id, id, {
+      content,
+      sourceNote,
+      documentType,
+      status,
+      finalConfirmed,
+      evidenceConfirmed,
+    });
     return item
       ? Response.json({ document: item }, { headers: privateHeaders })
       : denied(404, "Not found");
@@ -44,7 +70,12 @@ export async function PATCH(request: Request, { params }: Context) {
           ? body.occurredAt
           : null,
       note = text(body.note, 4000) ?? "";
-    if (!type || !occurredAt || !(await applicationDetail(user.id, id)))
+    if (
+      !type ||
+      !isManualTimelineEventType(type) ||
+      !occurredAt ||
+      !(await applicationDetail(user.id, id))
+    )
       return denied(400, "Invalid event");
     return Response.json(
       { event: await addTimelineEvent(user.id, id, type, occurredAt, note) },
@@ -67,6 +98,8 @@ export async function PATCH(request: Request, { params }: Context) {
     notes: text(body?.notes, 8000) ?? undefined,
     jobUrl: text(body?.jobUrl, 2048) ?? undefined,
     salary: text(body?.salary, 120) ?? undefined,
+    applicationMethod: text(body?.applicationMethod, 160) ?? undefined,
+    appliedAt: date(body?.appliedAt),
     deadlineAt: date(body?.deadlineAt),
     followUpAt: date(body?.followUpAt),
     status: applicationStatusValues.includes(body?.status as never)
@@ -81,8 +114,9 @@ export async function PATCH(request: Request, { params }: Context) {
   )
     return denied(400, "Invalid application data");
   const item = await updateApplication(user.id, id, changes);
-  return item
-    ? Response.json({ application: item }, { headers: privateHeaders })
+  if (item.kind === "invalid_transition") return denied(400, "Invalid status transition");
+  return item.kind === "ok"
+    ? Response.json({ application: item.value }, { headers: privateHeaders })
     : denied(404, "Not found");
 }
 export async function DELETE(request: Request, { params }: Context) {

@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, ne } from "drizzle-orm";
 import { getDb } from ".";
 import {
   applicationDocumentVersions,
@@ -6,32 +6,61 @@ import {
   applicationTimelineEvents,
   careerItems,
   jobApplications,
+  opportunityAnalyses,
   type applicationStatusValues,
   type careerItemKindValues,
 } from "./schema";
 import { listAttachments } from "./application-attachments";
+import {
+  canFinalizeDocument,
+  type ApplicationDocumentStatus,
+  type ApplicationDocumentType,
+  nextDocumentVersion,
+} from "./application-documents";
+import {
+  applicationStatusLabels,
+  canTransitionApplicationStatus,
+  nextApplicationAction,
+} from "./workflow";
 
 export type ApplicationStatus = (typeof applicationStatusValues)[number];
 export type CareerItemKind = (typeof careerItemKindValues)[number];
 const now = () => new Date().toISOString();
 
-export async function listApplications(userId: string) {
+export async function listApplications(userId: string, archived = false) {
   return getDb()
     .select()
     .from(jobApplications)
-    .where(and(eq(jobApplications.userId, userId), ne(jobApplications.status, "archived")))
+    .where(
+      and(
+        eq(jobApplications.userId, userId),
+        archived ? eq(jobApplications.status, "archived") : ne(jobApplications.status, "archived"),
+      ),
+    )
     .orderBy(desc(jobApplications.updatedAt));
 }
 export async function dashboard(userId: string) {
-  const applications = await listApplications(userId);
+  const [applications, archivedApplications] = await Promise.all([
+    listApplications(userId),
+    listApplications(userId, true),
+  ]);
   const today = new Date().toISOString().slice(0, 10);
+  const actions = applications
+    .map((application) => {
+      const action = nextApplicationAction(application, today);
+      return action ? { application, ...action } : null;
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null)
+    .sort(
+      (a, b) =>
+        a.priority - b.priority || (a.date ?? "9999-12-31").localeCompare(b.date ?? "9999-12-31"),
+    );
   return {
     applications,
-    followUps: applications
-      .filter((item) => item.followUpAt && item.followUpAt >= today)
-      .sort((a, b) => a.followUpAt!.localeCompare(b.followUpAt!)),
+    actions,
     monthlyCount: applications.filter((item) => item.createdAt.startsWith(today.slice(0, 7)))
       .length,
+    archivedApplications,
   };
 }
 export async function createApplication(
@@ -62,16 +91,32 @@ export async function updateApplication(
       | "status"
       | "notes"
       | "followUpAt"
+      | "applicationMethod"
+      | "appliedAt"
       | "archivedAt"
     >
   >,
 ) {
+  const current = await getDb().query.jobApplications.findFirst({
+    where: and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)),
+  });
+  if (!current) return { kind: "not_found" as const };
+  if (changes.status && !canTransitionApplicationStatus(current.status, changes.status))
+    return { kind: "invalid_transition" as const };
   const [item] = await getDb()
     .update(jobApplications)
     .set({ ...changes, updatedAt: now() })
     .where(and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)))
     .returning();
-  return item;
+  if (changes.status && changes.status !== current.status)
+    await addTimelineEvent(
+      userId,
+      id,
+      "status_changed",
+      now(),
+      `Bewerbungsstatus: ${applicationStatusLabels[current.status]} → ${applicationStatusLabels[changes.status]}.`,
+    );
+  return { kind: "ok" as const, value: item };
 }
 export async function deleteApplication(userId: string, id: string) {
   const result = await getDb()
@@ -142,7 +187,7 @@ export async function applicationDetail(userId: string, id: string) {
     where: and(eq(jobApplications.id, id), eq(jobApplications.userId, userId)),
   });
   if (!app) return null;
-  const [evidence, documents, timeline, attachments] = await Promise.all([
+  const [evidence, documents, timeline, attachments, career] = await Promise.all([
     getDb()
       .select()
       .from(applicationEvidence)
@@ -170,8 +215,9 @@ export async function applicationDetail(userId: string, id: string) {
       )
       .orderBy(desc(applicationTimelineEvents.occurredAt)),
     listAttachments(userId, id),
+    listCareerItems(userId),
   ]);
-  return { app, evidence, documents, timeline, attachments };
+  return { app, evidence, documents, timeline, attachments, career };
 }
 export async function replaceEvidence(
   userId: string,
@@ -206,11 +252,81 @@ export async function replaceEvidence(
       );
   return true;
 }
-export async function addDocumentVersion(userId: string, applicationId: string, content: string) {
+export async function addDocumentVersion(
+  userId: string,
+  applicationId: string,
+  input: {
+    content: string;
+    documentType: ApplicationDocumentType;
+    status: ApplicationDocumentStatus;
+    sourceNote: string;
+    finalConfirmed: boolean;
+    evidenceConfirmed: boolean;
+  },
+) {
+  const application = await getDb().query.jobApplications.findFirst({
+    where: and(eq(jobApplications.id, applicationId), eq(jobApplications.userId, userId)),
+  });
+  if (!application) return null;
+  const [latest, evidence, analysis] = await Promise.all([
+    getDb().query.applicationDocumentVersions.findFirst({
+      where: and(
+        eq(applicationDocumentVersions.userId, userId),
+        eq(applicationDocumentVersions.applicationId, applicationId),
+        eq(applicationDocumentVersions.documentType, input.documentType),
+      ),
+      orderBy: desc(applicationDocumentVersions.version),
+    }),
+    getDb()
+      .select({ careerItemId: applicationEvidence.careerItemId })
+      .from(applicationEvidence)
+      .where(
+        and(
+          eq(applicationEvidence.userId, userId),
+          eq(applicationEvidence.applicationId, applicationId),
+        ),
+      ),
+    application.opportunityId
+      ? getDb().query.opportunityAnalyses.findFirst({
+          where: and(
+            eq(opportunityAnalyses.userId, userId),
+            eq(opportunityAnalyses.opportunityId, application.opportunityId),
+            isNotNull(opportunityAnalyses.confirmedAt),
+          ),
+          orderBy: desc(opportunityAnalyses.version),
+        })
+      : Promise.resolve(undefined),
+  ]);
+  if (
+    !canFinalizeDocument(
+      input.status,
+      input.finalConfirmed,
+      input.evidenceConfirmed,
+      evidence.length,
+    )
+  )
+    return null;
   const [item] = await getDb()
     .insert(applicationDocumentVersions)
-    .values({ id: crypto.randomUUID(), userId, applicationId, content })
+    .values({
+      id: crypto.randomUUID(),
+      userId,
+      applicationId,
+      documentType: input.documentType,
+      status: input.status,
+      version: nextDocumentVersion(latest?.version),
+      content: input.content,
+      sourceNote: input.sourceNote,
+      analysisId: analysis?.id ?? null,
+      evidenceSnapshot: JSON.stringify(evidence.map((item) => item.careerItemId)),
+    })
     .returning();
-  await addTimelineEvent(userId, applicationId, "document", now(), "Bewerbungstext gespeichert.");
+  await addTimelineEvent(
+    userId,
+    applicationId,
+    "document",
+    now(),
+    `Bewerbungstext gespeichert: ${input.documentType} v${item.version} (${input.status}).`,
+  );
   return item;
 }

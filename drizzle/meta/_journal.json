@@ -57,6 +57,41 @@
       "when": 1785960000000,
       "tag": "0007_clear_user_data",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1786229288096,
+      "tag": "0008_wealthy_goblin_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1786375048897,
+      "tag": "0009_bent_dragon_lord",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1786382723729,
+      "tag": "0010_loving_molly_hayes",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1786391498165,
+      "tag": "0011_eminent_vertigo",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1786393086379,
+      "tag": "0012_melted_unus",
+      "breakpoints": true
     }
   ]
 }

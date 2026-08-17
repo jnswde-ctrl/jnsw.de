@@ -1,6 +1,13 @@
 "use client";
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import {
+  applicationStatusLabels,
+  opportunityListingStatusLabels,
+  opportunityReviewStatusLabels,
+} from "../../../db/workflow";
+import { importedOpportunityPayload } from "./opportunity-payload";
 type Application = {
   id: string;
   company: string;
@@ -8,6 +15,20 @@ type Application = {
   status: string;
   deadlineAt: string | null;
   followUpAt: string | null;
+};
+type NextAction = {
+  application: Application;
+  label: string;
+  date: string | null;
+  priority: number;
+};
+type Opportunity = {
+  id: string;
+  company: string;
+  role: string;
+  listingStatus: keyof typeof opportunityListingStatusLabels;
+  reviewStatus: keyof typeof opportunityReviewStatusLabels;
+  sourceCheckedAt: string | null;
 };
 type Item = { id: string; kind: string; title: string; organization: string | null };
 type Suggestion = {
@@ -18,17 +39,35 @@ type Suggestion = {
   deadlineAt: string | null;
   notes: string;
 };
-const labels: Record<string, string> = {
-  draft: "Entwurf",
-  ready: "Bereit",
-  sent: "Versendet",
-  waiting: "Rückmeldung offen",
-  interview: "Interview",
-  offer: "Angebot",
-  rejected: "Abgesagt",
-  withdrawn: "Zurückgezogen",
-  archived: "Archiviert",
+type LegacyImportPayload = {
+  applications: Array<Record<string, unknown>>;
+  unlinkedLetters: number;
 };
+type LegacyImportReport = {
+  new: number;
+  updated: number;
+  skipped: number;
+  conflicts: number;
+  privateReferences: number;
+  unlinkedLetters: number;
+  sourceStatusCounts: Record<LegacyStatus, number>;
+};
+type LegacyStatus =
+  | "application_closed"
+  | "applied"
+  | "not_recommended"
+  | "rejected"
+  | "reviewed_hold"
+  | "status_unknown";
+const legacyStatusLabels: Record<LegacyStatus, string> = {
+  application_closed: "Bewerbung geschlossen",
+  applied: "Beworben",
+  not_recommended: "Nicht empfohlen",
+  rejected: "Abgesagt",
+  reviewed_hold: "Zurückgestellt",
+  status_unknown: "Unbekannt",
+};
+type ProfileSkill = { id: string; name: string; kind: "experience" | "learning"; level: string };
 async function request(path: string, options?: RequestInit) {
   const response = await fetch(path, {
     ...options,
@@ -39,22 +78,37 @@ async function request(path: string, options?: RequestInit) {
   return data;
 }
 export function Bewerbungswerkstatt() {
+  const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
+  const [archivedApplications, setArchivedApplications] = useState<Application[]>([]);
+  const [actions, setActions] = useState<NextAction[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [items, setItems] = useState<Item[]>([]);
+  const [skills, setSkills] = useState<ProfileSkill[]>([]);
   const [message, setMessage] = useState("");
   const [step, setStep] = useState<"overview" | "application" | "profile">("overview");
   const [source, setSource] = useState("");
   const [mode, setMode] = useState<"url" | "text">("url");
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const [loading, setLoading] = useState(false);
+  const [legacyPayload, setLegacyPayload] = useState<LegacyImportPayload | null>(null);
+  const [legacyReport, setLegacyReport] = useState<LegacyImportReport | null>(null);
+  const [legacyFileName, setLegacyFileName] = useState("");
+  const legacyApplicationsFile = useRef<HTMLInputElement>(null);
   async function load() {
     try {
-      const [a, p] = await Promise.all([
+      const [a, o, p, s] = await Promise.all([
         request("/api/bewerbungswerkstatt/applications"),
+        request("/api/bewerbungswerkstatt/opportunities"),
         request("/api/bewerbungswerkstatt/profile"),
+        request("/api/bewerbungswerkstatt/skills"),
       ]);
       setApplications(a.applications);
+      setArchivedApplications(a.archivedApplications);
+      setActions(a.actions);
+      setOpportunities(o.opportunities);
       setItems(p.items);
+      setSkills(s.skills);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Laden fehlgeschlagen.");
     }
@@ -69,7 +123,12 @@ export function Bewerbungswerkstatt() {
     try {
       await request(path, {
         method: "POST",
-        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        body: JSON.stringify({
+          ...Object.fromEntries(new FormData(form)),
+          ...(path.endsWith("/skills")
+            ? { careerItemIds: new FormData(form).getAll("careerItemIds") }
+            : {}),
+        }),
       });
       form.reset();
       setMessage(success);
@@ -91,6 +150,110 @@ export function Bewerbungswerkstatt() {
         body: JSON.stringify(mode === "url" ? { url: source } : { text: source }),
       });
       setSuggestion(result.suggestion);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Import fehlgeschlagen.");
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function createOpportunity(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setMessage("");
+    try {
+      const result = await request("/api/bewerbungswerkstatt/opportunities", {
+        method: "POST",
+        body: JSON.stringify(
+          importedOpportunityPayload(
+            new FormData(event.currentTarget),
+            `import:${crypto.randomUUID()}`,
+            new Date().toISOString(),
+          ),
+        ),
+      });
+      router.push(`/community/bewerbungswerkstatt/opportunities/${result.opportunity.id}`);
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Stellenprüfung konnte nicht angelegt werden.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function selectLegacyFiles(applicationFile?: File, lettersFile?: File) {
+    if (!applicationFile) return;
+    setMessage("");
+    setLegacyReport(null);
+    if (applicationFile.size > 512_000 || (lettersFile && lettersFile.size > 128_000)) {
+      setMessage("Die ausgewählten Dateien sind für den lokalen Import zu groß.");
+      return;
+    }
+    try {
+      const source = JSON.parse(await applicationFile.text()) as { applications?: unknown };
+      if (!Array.isArray(source.applications))
+        throw new Error("bewerbungen.json enthält keine Liste von Bewerbungen.");
+      let unlinkedLetters = 0;
+      if (lettersFile) {
+        const letters = JSON.parse(await lettersFile.text()) as { jobs?: unknown };
+        if (!Array.isArray(letters.jobs))
+          throw new Error("anschreiben_jobs.json enthält keine Liste von Anschreiben.");
+        unlinkedLetters = letters.jobs.length;
+      }
+      const applications = source.applications.map((item) => {
+        if (!item || typeof item !== "object")
+          throw new Error("Eine Bewerbung hat ein ungültiges Format.");
+        const record = item as Record<string, unknown>;
+        return {
+          id: record.id,
+          company: record.company,
+          role: record.role,
+          sourceUrl: record.sourceUrl,
+          reviewedAt: record.reviewedAt,
+          appliedAt: record.appliedAt,
+          status: record.status,
+          notes: record.notes,
+          statusUpdatedAt: record.statusUpdatedAt,
+          privateReferenceCount:
+            (Array.isArray(record.documents) ? record.documents.length : 0) +
+            (Array.isArray(record.evidenceDocuments) ? record.evidenceDocuments.length : 0),
+        };
+      });
+      setLegacyPayload({ applications, unlinkedLetters });
+      setLegacyFileName(applicationFile.name);
+    } catch (error) {
+      setLegacyPayload(null);
+      setMessage(error instanceof Error ? error.message : "Datei konnte nicht gelesen werden.");
+    }
+  }
+  async function previewLegacyImport() {
+    if (!legacyPayload) return;
+    setLoading(true);
+    setMessage("");
+    try {
+      const result = await request("/api/bewerbungswerkstatt/legacy-import", {
+        method: "POST",
+        body: JSON.stringify({ ...legacyPayload, mode: "dry-run" }),
+      });
+      setLegacyReport(result.report);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Probelauf fehlgeschlagen.");
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function applyLegacyImport() {
+    if (!legacyPayload || !legacyReport) return;
+    setLoading(true);
+    setMessage("");
+    try {
+      const result = await request("/api/bewerbungswerkstatt/legacy-import", {
+        method: "POST",
+        body: JSON.stringify({ ...legacyPayload, mode: "apply" }),
+      });
+      setLegacyReport(result.report);
+      setLegacyPayload(null);
+      setMessage("Altbestand importiert.");
+      await load();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Import fehlgeschlagen.");
     } finally {
@@ -137,7 +300,31 @@ export function Bewerbungswerkstatt() {
         <section className="workbench-grid">
           <div>
             <p className="eyebrow">Pipeline</p>
-            <h2>Deine Bewerbungen</h2>
+            <h2>Stellenprüfungen</h2>
+            <div className="application-list">
+              {opportunities.length ? (
+                opportunities.map((opportunity) => (
+                  <article key={opportunity.id}>
+                    <div>
+                      <Link href={`/community/bewerbungswerkstatt/opportunities/${opportunity.id}`}>
+                        <b>{opportunity.role}</b>
+                        <span>
+                          {opportunity.company} ·{" "}
+                          {opportunityReviewStatusLabels[opportunity.reviewStatus]}
+                        </span>
+                      </Link>
+                      <small>
+                        Quelle: {opportunityListingStatusLabels[opportunity.listingStatus]} ·
+                        geprüft: {opportunity.sourceCheckedAt?.slice(0, 10) ?? "unbekannt"}
+                      </small>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p>Noch keine Stelle zur Prüfung angelegt.</p>
+              )}
+            </div>
+            <h2 className="workbench-list-heading">Deine Bewerbungen</h2>
             <div className="application-list">
               {applications.length ? (
                 applications.map((app) => (
@@ -146,7 +333,10 @@ export function Bewerbungswerkstatt() {
                       <Link href={`/community/bewerbungswerkstatt/${app.id}`}>
                         <b>{app.role}</b>
                         <span>
-                          {app.company} · {labels[app.status]}
+                          {app.company} ·{" "}
+                          {applicationStatusLabels[
+                            app.status as keyof typeof applicationStatusLabels
+                          ] ?? app.status}
                         </span>
                       </Link>
                       {app.deadlineAt && <small>Frist: {app.deadlineAt}</small>}
@@ -157,17 +347,124 @@ export function Bewerbungswerkstatt() {
                 <p>Noch keine Bewerbung angelegt.</p>
               )}
             </div>
+            <h2 className="workbench-list-heading">Archiv</h2>
+            <div className="application-list" aria-label="Archivierte Bewerbungen">
+              {archivedApplications.length ? (
+                archivedApplications.map((app) => (
+                  <article key={app.id}>
+                    <div>
+                      <Link href={`/community/bewerbungswerkstatt/${app.id}`}>
+                        <b>{app.role}</b>
+                        <span>{app.company} · Archiviert</span>
+                      </Link>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p>Keine archivierten Bewerbungen.</p>
+              )}
+            </div>
           </div>
           <aside>
             <p className="eyebrow">Nächste Schritte</p>
-            <h2>{applications.filter((app) => app.followUpAt).length} Follow-ups</h2>
-            <p>Fristen und Follow-ups bleiben pro Bewerbung dokumentiert.</p>
+            <h2>Was jetzt zählt.</h2>
+            <p>Fällige Follow-ups und Fristen stehen vor der gesamten Bewerbungsübersicht.</p>
+            <div className="next-actions" aria-label="Priorisierte nächste Aktionen">
+              {actions.length ? (
+                actions.map(({ application, label, date }) => (
+                  <Link
+                    className={`next-action ${label.includes("überfällig") ? "is-overdue" : ""}`}
+                    href={`/community/bewerbungswerkstatt/${application.id}`}
+                    key={`${application.id}-${label}`}
+                  >
+                    <b>{label}</b>
+                    <span>
+                      {application.role} · {application.company}
+                    </span>
+                    {date && <small>{date}</small>}
+                  </Link>
+                ))
+              ) : (
+                <p className="next-actions-empty">Keine offene Aktion. Gut so.</p>
+              )}
+            </div>
+            <div className="legacy-import">
+              <p className="eyebrow">Altbestand</p>
+              <h3>Bewerbungen übernehmen.</h3>
+              <p>
+                Die JSON-Dateien werden zuerst nur in diesem Browser gelesen. Dokumentnamen und
+                Anschreiben werden nicht hochgeladen.
+              </p>
+              <label>
+                bewerbungen.json
+                <input
+                  ref={legacyApplicationsFile}
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={(event) =>
+                    void selectLegacyFiles(event.currentTarget.files?.[0], undefined)
+                  }
+                />
+              </label>
+              <label>
+                anschreiben_jobs.json <small>(optional, nur für den Bericht)</small>
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={(event) => {
+                    void selectLegacyFiles(
+                      legacyApplicationsFile.current?.files?.[0],
+                      event.currentTarget.files?.[0],
+                    );
+                  }}
+                />
+              </label>
+              {legacyPayload && <p>{legacyFileName} bereit. Erst Probelauf starten.</p>}
+              <button
+                type="button"
+                className="community-button"
+                disabled={!legacyPayload || loading}
+                onClick={() => void previewLegacyImport()}
+              >
+                {loading ? "Wird geprüft …" : "Probelauf"}
+              </button>
+              {legacyReport && (
+                <div className="legacy-report" role="status">
+                  <p>
+                    {legacyReport.new} neu, {legacyReport.updated} ergänzbar, {legacyReport.skipped}{" "}
+                    unverändert, {legacyReport.conflicts} Konflikte.
+                  </p>
+                  <p>
+                    {legacyReport.privateReferences} private Dokumentreferenzen und{" "}
+                    {legacyReport.unlinkedLetters} Anschreiben werden nicht übernommen.
+                  </p>
+                  <dl className="legacy-status-counts" aria-label="Altstatus im Importbestand">
+                    {(Object.entries(legacyStatusLabels) as Array<[LegacyStatus, string]>).map(
+                      ([status, label]) => (
+                        <div key={status}>
+                          <dt>{label}</dt>
+                          <dd>{legacyReport.sourceStatusCounts[status]}</dd>
+                        </div>
+                      ),
+                    )}
+                  </dl>
+                  <button
+                    type="button"
+                    className="community-button"
+                    disabled={loading || legacyReport.conflicts > 0}
+                    onClick={() => void applyLegacyImport()}
+                  >
+                    Jetzt {legacyReport.new + legacyReport.updated} Einträge übernehmen
+                  </button>
+                </div>
+              )}
+            </div>
           </aside>
         </section>
       )}
       {step === "application" && (
         <section className="workbench-form">
-          <p className="eyebrow">Neue Bewerbung</p>
+          <p className="eyebrow">Neue Stellenprüfung</p>
           <h2>Stelle importieren.</h2>
           <p className="workbench-intro">
             Lies eine öffentlich erreichbare Anzeige oder füge ihren Text ein. Die KI-Ausgabe ist
@@ -209,16 +506,7 @@ export function Bewerbungswerkstatt() {
             </button>
           </form>
           {suggestion && (
-            <form
-              className="job-preview"
-              onSubmit={(event) =>
-                void submit(
-                  event,
-                  "/api/bewerbungswerkstatt/applications",
-                  "Bewerbung gespeichert.",
-                )
-              }
-            >
+            <form className="job-preview" onSubmit={(event) => void createOpportunity(event)}>
               <p className="eyebrow">KI-Vorschlag · vor dem Speichern prüfen</p>
               <h2>Vorschau bearbeiten.</h2>
               <label>
@@ -240,26 +528,26 @@ export function Bewerbungswerkstatt() {
               </label>
               <label>
                 Gehalt / Vergütung
-                <input name="salary" maxLength={120} defaultValue={suggestion.salary ?? ""} />
+                <input
+                  name="advertisedSalary"
+                  maxLength={120}
+                  defaultValue={suggestion.salary ?? ""}
+                />
               </label>
               <label>
                 Frist
                 <input name="deadlineAt" type="date" defaultValue={suggestion.deadlineAt ?? ""} />
-              </label>
-              <label>
-                Status
-                <select name="status">
-                  <option value="draft">Entwurf</option>
-                </select>
               </label>
               <label className="workbench-wide">
                 Notizen
                 <input name="notes" maxLength={8000} defaultValue={suggestion.notes} />
               </label>
               <p className="workbench-wide import-notice">
-                Erst mit „Bewerbung speichern“ wird ein privater Eintrag angelegt.
+                Erst mit „Stellenprüfung anlegen“ wird ein privater Eintrag angelegt.
               </p>
-              <button className="community-button">Bewerbung speichern</button>
+              <button className="community-button" disabled={loading}>
+                {loading ? "Wird angelegt …" : "Stellenprüfung anlegen"}
+              </button>
             </form>
           )}
         </section>
@@ -305,6 +593,58 @@ export function Bewerbungswerkstatt() {
               </article>
             ))}
           </div>
+          <section className="skill-form">
+            <p className="eyebrow">Kompetenzen</p>
+            <h2>Belegte Erfahrung.</h2>
+            <p className="workbench-intro">
+              Lernfelder bleiben ausdrücklich getrennt. Erfahrung braucht mindestens einen Beleg.
+            </p>
+            <form
+              onSubmit={(event) =>
+                void submit(event, "/api/bewerbungswerkstatt/skills", "Kompetenz gespeichert.")
+              }
+            >
+              <label>
+                Name
+                <input name="name" required maxLength={120} />
+              </label>
+              <label>
+                Art
+                <select name="kind">
+                  <option value="experience">Erfahrung</option>
+                  <option value="learning">Lernfeld</option>
+                </select>
+              </label>
+              <label>
+                Niveau
+                <select name="level">
+                  <option value="basic">Grundlagen</option>
+                  <option value="working">Praxis</option>
+                  <option value="advanced">Fortgeschritten</option>
+                  <option value="expert">Expertise</option>
+                </select>
+              </label>
+              <label className="workbench-wide">
+                Belege (bei Erfahrung mindestens einer)
+                <select name="careerItemIds" multiple>
+                  {items.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button className="community-button">Kompetenz speichern</button>
+            </form>
+            {skills.map((skill) => (
+              <article className="editor-entry" key={skill.id}>
+                <b>{skill.name}</b>
+                <small>
+                  {skill.kind === "learning" ? "Lernfeld" : "Erfahrung"} · {skill.level}
+                </small>
+              </article>
+            ))}
+          </section>
         </section>
       )}
     </main>

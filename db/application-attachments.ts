@@ -1,9 +1,22 @@
 import { and, desc, eq } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import { getDb } from ".";
+import {
+  attachmentFileTypes,
+  isOwnedAttachment,
+  type AttachmentContentType,
+} from "./application-documents";
 import { applicationAttachments, jobApplications } from "./schema";
 
-export const attachmentKinds = ["application", "confirmation", "response", "other"] as const;
+export const attachmentKinds = [
+  "cover_letter",
+  "email",
+  "form_response",
+  "application",
+  "confirmation",
+  "response",
+  "other",
+] as const;
 export type AttachmentKind = (typeof attachmentKinds)[number];
 export const maxAttachmentSize = 10 * 1024 * 1024;
 
@@ -29,17 +42,19 @@ export async function addAttachment(
   applicationId: string,
   kind: AttachmentKind,
   file: File,
+  contentType: AttachmentContentType,
 ) {
   const owned = await getDb().query.jobApplications.findFirst({
     where: and(eq(jobApplications.id, applicationId), eq(jobApplications.userId, userId)),
   });
   if (!owned) return null;
   const id = crypto.randomUUID(),
-    objectKey = `${userId}/${applicationId}/${id}.pdf`,
-    fileName = file.name.replace(/[\\/:*?"<>|]/g, "_").slice(0, 180) || "dokument.pdf";
+    extension = attachmentFileTypes[contentType].extension,
+    objectKey = `${userId}/${applicationId}/${id}.${extension}`,
+    fileName = file.name.replace(/[\\/:*?"<>|]/g, "_").slice(0, 180) || `dokument.${extension}`;
   await bucket().put(objectKey, file.stream(), {
     httpMetadata: {
-      contentType: "application/pdf",
+      contentType,
       contentDisposition: `attachment; filename="${fileName}"`,
     },
   });
@@ -52,7 +67,7 @@ export async function addAttachment(
       kind,
       fileName,
       objectKey,
-      contentType: "application/pdf",
+      contentType,
       size: String(file.size),
     })
     .returning();
@@ -66,7 +81,7 @@ export async function getAttachment(userId: string, applicationId: string, attac
       eq(applicationAttachments.applicationId, applicationId),
     ),
   });
-  if (!item) return null;
+  if (!item || !isOwnedAttachment(item, userId, applicationId)) return null;
   const object = await bucket().get(item.objectKey);
   return object ? { item, object } : null;
 }
