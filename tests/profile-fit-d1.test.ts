@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { Miniflare } from "miniflare";
+import { convertV4MiniflareOptions, Miniflare } from "miniflare";
 
 const migrations = [
   "0000_odd_taskmaster",
@@ -27,15 +27,17 @@ async function migrate(db: D1Database) {
 }
 
 test("keeps analysis versions, evidence and confirmations tenant-scoped in D1", async () => {
-  const runtime = new Miniflare({
-    workers: [
-      {
-        modules: true,
-        script: "export default { fetch() { return new Response('ok'); } };",
-        d1Databases: { DB: "profile-fit-test" },
-      },
-    ],
-  });
+  const runtime = new Miniflare(
+    convertV4MiniflareOptions({
+      workers: [
+        {
+          modules: true,
+          script: "export default { fetch() { return new Response('ok'); } };",
+          d1Databases: { DB: "profile-fit-test" },
+        },
+      ],
+    }),
+  );
   try {
     const db = await runtime.getD1Database("DB");
     await migrate(db);
