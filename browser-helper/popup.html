@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JNSW.DE Browser-Helfer</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Bewerbungswerkstatt</p>
+      <h1>Geöffnete Seite sichern</h1>
+      <p class="intro">URL, Titel und Body-HTML werden nur auf deinem Gerät als XML vorbereitet.</p>
+      <div class="actions">
+        <button type="button" id="copy-button">In Zwischenablage kopieren</button>
+        <button type="button" id="download-button" class="secondary">Als TXT herunterladen</button>
+      </div>
+      <p id="status" role="status" aria-live="polite"></p>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
