@@ -5,3 +5,4 @@ dist/
 .wrangler/
 coverage/
 package-lock.json
+public/mockServiceWorker.js
