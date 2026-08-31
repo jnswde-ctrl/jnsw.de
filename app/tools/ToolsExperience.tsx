@@ -2,24 +2,29 @@
 
 import { useRef } from "react";
 import { PdfWorkbench } from "./pdf-zusammenfuegen/PdfWorkbench";
+import { WohnungssucheWorkbench } from "./wohnungssuche/WohnungssucheWorkbench";
 
 export function ToolsExperience() {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const closeTool = () => dialogRef.current?.close();
+  const pdfDialogRef = useRef<HTMLDialogElement>(null);
+  const pdfTriggerRef = useRef<HTMLButtonElement>(null);
+  const closePdfTool = () => pdfDialogRef.current?.close();
+
+  const wohnungDialogRef = useRef<HTMLDialogElement>(null);
+  const wohnungTriggerRef = useRef<HTMLButtonElement>(null);
+  const closeWohnungTool = () => wohnungDialogRef.current?.close();
 
   return (
     <>
       <section className="tools-directory" aria-labelledby="tools-directory-title">
         <div className="tools-directory-heading">
-          <p className="eyebrow">01 / Verfügbar</p>
+          <p className="eyebrow">01–02 / Verfügbar</p>
           <p id="tools-directory-title">Werkzeuge, die eine konkrete Aufgabe lösen.</p>
         </div>
         <button
-          ref={triggerRef}
+          ref={pdfTriggerRef}
           type="button"
           className="tool-row"
-          onClick={() => dialogRef.current?.showModal()}
+          onClick={() => pdfDialogRef.current?.showModal()}
         >
           <span className="tool-index">01</span>
           <span className="tool-title">PDF-Werkbank</span>
@@ -28,15 +33,28 @@ export function ToolsExperience() {
             ↗
           </span>
         </button>
+        <button
+          ref={wohnungTriggerRef}
+          type="button"
+          className="tool-row"
+          onClick={() => wohnungDialogRef.current?.showModal()}
+        >
+          <span className="tool-index">02</span>
+          <span className="tool-title">Wohnungssuche-Assistent</span>
+          <span className="tool-meta">Prototyp · Mock-Daten · Freigabe-Queue</span>
+          <span className="tool-arrow" aria-hidden="true">
+            ↗
+          </span>
+        </button>
       </section>
       <dialog
-        ref={dialogRef}
+        ref={pdfDialogRef}
         className="tool-dialog"
         aria-labelledby="pdf-workspace-title"
-        onCancel={closeTool}
-        onClose={() => triggerRef.current?.focus()}
+        onCancel={closePdfTool}
+        onClose={() => pdfTriggerRef.current?.focus()}
         onClick={(event) => {
-          if (event.target === dialogRef.current) closeTool();
+          if (event.target === pdfDialogRef.current) closePdfTool();
         }}
       >
         <div className="tool-workspace">
@@ -51,7 +69,7 @@ export function ToolsExperience() {
             <button
               type="button"
               className="workspace-close"
-              onClick={closeTool}
+              onClick={closePdfTool}
               aria-label="PDF-Werkzeug schließen"
             >
               <span>Schließen</span>
@@ -60,6 +78,40 @@ export function ToolsExperience() {
           </header>
           <div className="tool-workspace-body">
             <PdfWorkbench />
+          </div>
+        </div>
+      </dialog>
+      <dialog
+        ref={wohnungDialogRef}
+        className="tool-dialog"
+        aria-labelledby="wohnung-workspace-title"
+        onCancel={closeWohnungTool}
+        onClose={() => wohnungTriggerRef.current?.focus()}
+        onClick={(event) => {
+          if (event.target === wohnungDialogRef.current) closeWohnungTool();
+        }}
+      >
+        <div className="tool-workspace">
+          <header className="tool-workspace-header">
+            <div>
+              <p className="eyebrow">JNSW.DE / Tools / Prototyp</p>
+              <h2 id="wohnung-workspace-title">Wohnungssuche-Assistent</h2>
+            </div>
+            <p className="workspace-privacy">
+              <span aria-hidden="true">●</span> Prototyp · Mock-Daten, kein Backend
+            </p>
+            <button
+              type="button"
+              className="workspace-close"
+              onClick={closeWohnungTool}
+              aria-label="Wohnungssuche-Prototyp schließen"
+            >
+              <span>Schließen</span>
+              <b aria-hidden="true">×</b>
+            </button>
+          </header>
+          <div className="tool-workspace-body">
+            <WohnungssucheWorkbench />
           </div>
         </div>
       </dialog>
