@@ -1,13 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  initialListings,
-  Listing,
-  ListingStatus,
-  Platform,
-  STATUS_LABELS,
-} from "./listingsData";
+import { initialListings, Listing, ListingStatus, Platform, STATUS_LABELS } from "./listingsData";
 
 const PLATFORMS: Platform[] = ["Kleinanzeigen", "Immowelt", "WG-Gesucht", "ImmoScout24"];
 const STATUSES: ListingStatus[] = ["neu", "interessant", "abgelehnt", "vorbereitet", "versendet"];
@@ -56,8 +50,8 @@ export function WohnungssucheWorkbench() {
       <p className="eyebrow">Schritt 01 / Freigabe-Queue</p>
       <h3 id="wohnung-tool-title">Prototyp · Wohnungssuche-Assistent</h3>
       <p>
-        Mock-Daten, rein clientseitig. Keine echte Feed- oder KI-Anbindung – zeigt nur den
-        geplanten Screen-Flow der Freigabe-Queue.
+        Mock-Daten, rein clientseitig. Keine echte Feed- oder KI-Anbindung – zeigt nur den geplanten
+        Screen-Flow der Freigabe-Queue.
       </p>
 
       <div className="wohnung-filters">
@@ -89,7 +83,10 @@ export function WohnungssucheWorkbench() {
         </label>
         <label>
           Plattform
-          <select value={platform} onChange={(e) => setPlatform(e.target.value as Platform | "alle")}>
+          <select
+            value={platform}
+            onChange={(e) => setPlatform(e.target.value as Platform | "alle")}
+          >
             <option value="alle">Alle</option>
             {PLATFORMS.map((p) => (
               <option key={p} value={p}>

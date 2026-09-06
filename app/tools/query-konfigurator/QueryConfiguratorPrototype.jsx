@@ -2,9 +2,22 @@
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import {
-  Plus, X, ChevronDown, Search, Save, Trash2, RotateCcw,
-  FolderOpen, Layers, CircleAlert, Check, SlidersHorizontal, Code2,
-  Bell, HelpCircle, Camera,
+  Plus,
+  X,
+  ChevronDown,
+  Search,
+  Save,
+  Trash2,
+  RotateCcw,
+  FolderOpen,
+  Layers,
+  CircleAlert,
+  Check,
+  SlidersHorizontal,
+  Code2,
+  Bell,
+  HelpCircle,
+  Camera,
 } from "lucide-react";
 import CodeMirror from "@uiw/react-codemirror";
 import { EditorView } from "@codemirror/view";
@@ -65,11 +78,18 @@ const FIELD_GROUPS = [
     fields: [
       { key: "kostentraeger", label: "Kostenträger", type: "text" },
       {
-        key: "kostentraegerart", label: "Kostenträgerart", type: "select",
+        key: "kostentraegerart",
+        label: "Kostenträgerart",
+        type: "select",
         options: ["GKV", "PKV", "Privat", "Berufsgenossenschaft"],
       },
       { key: "kt_ik", label: "KT IK Nummer", type: "text" },
-      { key: "filiale", label: "Filiale", type: "select", options: ["CaseFlow", "Filiale 1", "Standort Nord", "Testfiliale"] },
+      {
+        key: "filiale",
+        label: "Filiale",
+        type: "select",
+        options: ["CaseFlow", "Filiale 1", "Standort Nord", "Testfiliale"],
+      },
     ],
   },
   {
@@ -112,8 +132,18 @@ const FIELD_GROUPS = [
   {
     label: "Lieferung",
     fields: [
-      { key: "liefermethode", label: "Liefermethode", type: "select", options: ["Versand", "Abholung", "Botendienst", "Direktmitnahme"] },
-      { key: "prioritaet", label: "Priorität", type: "select", options: ["Niedrig", "Normal", "Hoch", "Dringend"] },
+      {
+        key: "liefermethode",
+        label: "Liefermethode",
+        type: "select",
+        options: ["Versand", "Abholung", "Botendienst", "Direktmitnahme"],
+      },
+      {
+        key: "prioritaet",
+        label: "Priorität",
+        type: "select",
+        options: ["Niedrig", "Normal", "Hoch", "Dringend"],
+      },
       { key: "vollstaendig_geliefert", label: "Vollständig geliefert", type: "boolean" },
     ],
   },
@@ -147,12 +177,30 @@ const uid = () => Math.random().toString(36).slice(2, 10);
  *  daher direkt beim Tastendruck (keydown) UND bereinigen zusätzlich
  *  den Wert bei Paste/Autofill (onChange) als zweite Absicherung.
  * ------------------------------------------------------------------ */
-const NAV_KEYS = ["Backspace", "Delete", "Tab", "Escape", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"];
+const NAV_KEYS = [
+  "Backspace",
+  "Delete",
+  "Tab",
+  "Escape",
+  "Enter",
+  "ArrowLeft",
+  "ArrowRight",
+  "ArrowUp",
+  "ArrowDown",
+  "Home",
+  "End",
+];
 function numericKeyDown(e, { allowDecimal = false, allowNegative = false } = {}) {
   if (NAV_KEYS.includes(e.key) || e.metaKey || e.ctrlKey || e.altKey) return;
   if (/^[0-9]$/.test(e.key)) return;
   if (allowDecimal && (e.key === "." || e.key === ",")) return;
-  if (allowNegative && e.key === "-" && e.currentTarget.selectionStart === 0 && !e.currentTarget.value.includes("-")) return;
+  if (
+    allowNegative &&
+    e.key === "-" &&
+    e.currentTarget.selectionStart === 0 &&
+    !e.currentTarget.value.includes("-")
+  )
+    return;
   e.preventDefault();
 }
 function sanitizeInteger(raw, maxLen) {
@@ -166,12 +214,28 @@ function sanitizeDecimal(raw, allowNegative = true) {
   let hasSep = false;
   for (const ch of s) {
     if (/[0-9]/.test(ch)) out += ch;
-    else if ((ch === "." || ch === ",") && !hasSep) { out += "."; hasSep = true; }
+    else if ((ch === "." || ch === ",") && !hasSep) {
+      out += ".";
+      hasSep = true;
+    }
   }
   return out;
 }
 
-const MONTH_NAMES = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+const MONTH_NAMES = [
+  "Januar",
+  "Februar",
+  "März",
+  "April",
+  "Mai",
+  "Juni",
+  "Juli",
+  "August",
+  "September",
+  "Oktober",
+  "November",
+  "Dezember",
+];
 
 // Granularität wird direkt am Format des gespeicherten Werts erkannt:
 // "2026" = Jahr, "2026-05" = Monat, "2026-05-14" = Tag. So bleibt die
@@ -220,7 +284,15 @@ function getOperatorOptions(field, granularity) {
   return base.map((op) => ({ value: op, label: dateOperatorLabel(op, granularity || "tag") }));
 }
 
-const newRule = () => ({ id: uid(), kind: "rule", field: "", operator: "", value: "", value2: "", granularity: "tag" });
+const newRule = () => ({
+  id: uid(),
+  kind: "rule",
+  field: "",
+  operator: "",
+  value: "",
+  value2: "",
+  granularity: "tag",
+});
 const newGroup = () => ({ id: uid(), kind: "group", logic: "UND", children: [newRule()] });
 
 /* ------------------------------------------------------------------ *
@@ -228,16 +300,22 @@ const newGroup = () => ({ id: uid(), kind: "group", logic: "UND", children: [new
  * ------------------------------------------------------------------ */
 function updateNode(node, id, patch) {
   if (node.id === id) return { ...node, ...patch };
-  if (node.kind === "group") return { ...node, children: node.children.map((c) => updateNode(c, id, patch)) };
+  if (node.kind === "group")
+    return { ...node, children: node.children.map((c) => updateNode(c, id, patch)) };
   return node;
 }
 function removeNode(node, id) {
   if (node.kind !== "group") return node;
-  return { ...node, children: node.children.filter((c) => c.id !== id).map((c) => removeNode(c, id)) };
+  return {
+    ...node,
+    children: node.children.filter((c) => c.id !== id).map((c) => removeNode(c, id)),
+  };
 }
 function addChild(node, groupId, child) {
-  if (node.id === groupId && node.kind === "group") return { ...node, children: [...node.children, child] };
-  if (node.kind === "group") return { ...node, children: node.children.map((c) => addChild(c, groupId, child)) };
+  if (node.id === groupId && node.kind === "group")
+    return { ...node, children: [...node.children, child] };
+  if (node.kind === "group")
+    return { ...node, children: node.children.map((c) => addChild(c, groupId, child)) };
   return node;
 }
 function countRules(node) {
@@ -364,7 +442,8 @@ function nodeToQueryText(node) {
     const field = FIELD_BY_KEY[node.field];
     if (!field) return "⟨Feld wählen⟩";
     if (!node.operator) return field.label;
-    if (["ist leer", "ist nicht leer"].includes(node.operator)) return `${field.label} ${node.operator}`;
+    if (["ist leer", "ist nicht leer"].includes(node.operator))
+      return `${field.label} ${node.operator}`;
     if (node.operator === "zwischen") {
       const v1 = node.value ? valueLiteral(field, node.value) : "⟨Wert⟩";
       const v2 = node.value2 ? valueLiteral(field, node.value2) : "⟨Wert⟩";
@@ -439,10 +518,16 @@ function matchLongestOperator(s, i, type) {
 function parseValue(s, i, field) {
   i = skipWs(s, i);
   if (s[i] === '"') {
-    let j = i + 1, out = "";
+    let j = i + 1,
+      out = "";
     while (j < s.length && s[j] !== '"') {
-      if (s[j] === "\\" && s[j + 1] === '"') { out += '"'; j += 2; }
-      else { out += s[j]; j++; }
+      if (s[j] === "\\" && s[j + 1] === '"') {
+        out += '"';
+        j += 2;
+      } else {
+        out += s[j];
+        j++;
+      }
     }
     if (s[j] !== '"') throw new ParseError('Schließendes " fehlt', j);
     return { val: out, i: j + 1 };
@@ -450,9 +535,14 @@ function parseValue(s, i, field) {
   if (field.type === "date") {
     const rest = s.slice(i);
     let m = /^\d{4}-\d{2}-\d{2}/.exec(rest) || /^\d{4}-\d{2}/.exec(rest) || /^\d{4}/.exec(rest);
-    if (!m) throw new ParseError(`Datum erwartet für "${field.label}" (JJJJ, JJJJ-MM oder JJJJ-MM-TT)`, i);
+    if (!m)
+      throw new ParseError(
+        `Datum erwartet für "${field.label}" (JJJJ, JJJJ-MM oder JJJJ-MM-TT)`,
+        i,
+      );
     const end = i + m[0].length;
-    if (/\d/.test(s[end] || "")) throw new ParseError(`Ungültiges Datumsformat für "${field.label}"`, i);
+    if (/\d/.test(s[end] || ""))
+      throw new ParseError(`Ungültiges Datumsformat für "${field.label}"`, i);
     return { val: m[0], i: end };
   }
   if (field.type === "number" || field.type === "currency") {
@@ -468,7 +558,10 @@ function parseValue(s, i, field) {
     if (!m) throw new ParseError(`Wert erwartet für "${field.label}"`, i);
     return { val: m[0], i: i + m[0].length };
   }
-  throw new ParseError(`Textwert für "${field.label}" muss in Anführungszeichen stehen, z. B. "Wert"`, i);
+  throw new ParseError(
+    `Textwert für "${field.label}" muss in Anführungszeichen stehen, z. B. "Wert"`,
+    i,
+  );
 }
 function parseCondition(s, i) {
   i = skipWs(s, i);
@@ -479,23 +572,31 @@ function parseCondition(s, i) {
   if (!om) throw new ParseError(`Unbekannter Operator für Feld "${fm.field.label}"`, i);
   i = skipWs(s, om.i);
   const operator = om.op;
-  let value = "", value2 = "";
+  let value = "",
+    value2 = "";
   if (!["ist leer", "ist nicht leer"].includes(operator)) {
     if (operator === "zwischen") {
-      const v1 = parseValue(s, i, fm.field); i = v1.i;
+      const v1 = parseValue(s, i, fm.field);
+      i = v1.i;
       i = skipWs(s, i);
       const undI = matchKeyword(s, i, "und");
       if (undI == null) throw new ParseError('"und" erwartet, z. B. "zwischen 1 und 10"', i);
       i = skipWs(s, undI);
-      const v2 = parseValue(s, i, fm.field); i = v2.i;
-      value = v1.val; value2 = v2.val;
+      const v2 = parseValue(s, i, fm.field);
+      i = v2.i;
+      value = v1.val;
+      value2 = v2.val;
     } else {
-      const v1 = parseValue(s, i, fm.field); i = v1.i;
+      const v1 = parseValue(s, i, fm.field);
+      i = v1.i;
       value = v1.val;
     }
   }
   const granularity = fm.field.type === "date" ? dateGranularity(value || value2 || "") : undefined;
-  return { node: { kind: "rule", id: uid(), field: fm.field.key, operator, value, value2, granularity }, i };
+  return {
+    node: { kind: "rule", id: uid(), field: fm.field.key, operator, value, value2, granularity },
+    i,
+  };
 }
 function parsePrimary(s, i) {
   i = skipWs(s, i);
@@ -517,13 +618,21 @@ function parseLevel(s, i) {
     const j = skipWs(s, i);
     const u = matchKeyword(s, j, "UND");
     const o = matchKeyword(s, j, "ODER");
-    let matchedEnd = null, kind = null;
-    if (u != null) { matchedEnd = u; kind = "UND"; }
-    else if (o != null) { matchedEnd = o; kind = "ODER"; }
-    else break;
+    let matchedEnd = null,
+      kind = null;
+    if (u != null) {
+      matchedEnd = u;
+      kind = "UND";
+    } else if (o != null) {
+      matchedEnd = o;
+      kind = "ODER";
+    } else break;
     if (logic === null) logic = kind;
     else if (logic !== kind) {
-      throw new ParseError("UND und ODER können nicht auf derselben Ebene gemischt werden – bitte Klammern verwenden", j);
+      throw new ParseError(
+        "UND und ODER können nicht auf derselben Ebene gemischt werden – bitte Klammern verwenden",
+        j,
+      );
     }
     i = skipWs(s, matchedEnd);
     const nxt = parsePrimary(s, i);
@@ -538,7 +647,12 @@ function normalizeTree(node) {
     const field = FIELD_BY_KEY[node.field];
     if (field?.type === "date" && node.operator === "zwischen") {
       const gran = node.granularity || dateGranularity(node.value);
-      return { ...node, granularity: gran, value: convertDateValue(node.value, gran), value2: convertDateValue(node.value2, gran) };
+      return {
+        ...node,
+        granularity: gran,
+        value: convertDateValue(node.value, gran),
+        value2: convertDateValue(node.value2, gran),
+      };
     }
     return node;
   }
@@ -561,7 +675,9 @@ function parseQuery(text) {
 function useClickAway(onAway) {
   const ref = useRef(null);
   useEffect(() => {
-    function handle(e) { if (ref.current && !ref.current.contains(e.target)) onAway(); }
+    function handle(e) {
+      if (ref.current && !ref.current.contains(e.target)) onAway();
+    }
     document.addEventListener("mousedown", handle);
     return () => document.removeEventListener("mousedown", handle);
   }, [onAway]);
@@ -579,8 +695,10 @@ function FieldPicker({ value, onChange, placeholder = "Feld wählen…" }) {
 
   const filteredGroups = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return FIELD_GROUPS.map((g) => ({ ...g, fields: g.fields.filter((f) => f.label.toLowerCase().includes(q)) }))
-      .filter((g) => g.fields.length > 0);
+    return FIELD_GROUPS.map((g) => ({
+      ...g,
+      fields: g.fields.filter((f) => f.label.toLowerCase().includes(q)),
+    })).filter((g) => g.fields.length > 0);
   }, [query]);
 
   return (
@@ -590,25 +708,43 @@ function FieldPicker({ value, onChange, placeholder = "Feld wählen…" }) {
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-800 hover:border-slate-400 min-w-[168px] justify-between"
       >
-        <span className={selected ? "" : "text-slate-400 font-normal"}>{selected ? selected.label : placeholder}</span>
+        <span className={selected ? "" : "text-slate-400 font-normal"}>
+          {selected ? selected.label : placeholder}
+        </span>
         <ChevronDown className="h-3.5 w-3.5 text-slate-400 shrink-0" />
       </button>
       {open && (
         <div className="absolute z-20 mt-1 w-72 rounded-lg border border-slate-200 bg-white shadow-lg">
           <div className="flex items-center gap-2 border-b border-slate-100 px-2.5 py-2">
             <Search className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <input autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Feld suchen…"
-              className="w-full text-sm outline-none placeholder:text-slate-400" />
+            <input
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Feld suchen…"
+              className="w-full text-sm outline-none placeholder:text-slate-400"
+            />
           </div>
           <div className="max-h-72 overflow-y-auto py-1">
-            {filteredGroups.length === 0 && <div className="px-3 py-3 text-sm text-slate-400">Keine Felder gefunden.</div>}
+            {filteredGroups.length === 0 && (
+              <div className="px-3 py-3 text-sm text-slate-400">Keine Felder gefunden.</div>
+            )}
             {filteredGroups.map((g) => (
               <div key={g.label} className="py-1">
-                <div className="px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{g.label}</div>
+                <div className="px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                  {g.label}
+                </div>
                 {g.fields.map((f) => (
-                  <button key={f.key} type="button"
-                    onClick={() => { onChange(f); setOpen(false); setQuery(""); }}
-                    className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-sm hover:bg-orange-50 ${f.key === value ? "bg-orange-50 text-orange-700 font-medium" : "text-slate-700"}`}>
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => {
+                      onChange(f);
+                      setOpen(false);
+                      setQuery("");
+                    }}
+                    className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-sm hover:bg-orange-50 ${f.key === value ? "bg-orange-50 text-orange-700 font-medium" : "text-slate-700"}`}
+                  >
                     {f.label}
                     {f.key === value && <Check className="h-3.5 w-3.5" />}
                   </button>
@@ -626,13 +762,20 @@ function FieldPicker({ value, onChange, placeholder = "Feld wählen…" }) {
  *  Value input – abhängig vom Feldtyp/Operator
  * ------------------------------------------------------------------ */
 function ValueInput({ field, operator, value, value2, granularity, onChange }) {
-  if (!field || !operator) return <div className="text-sm text-slate-300 italic px-1">Feld & Operator wählen</div>;
+  if (!field || !operator)
+    return <div className="text-sm text-slate-300 italic px-1">Feld & Operator wählen</div>;
   if (["ist leer", "ist nicht leer"].includes(operator)) return null;
-  const common = "rounded-md border border-slate-300 px-2.5 py-1.5 text-sm w-36 focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-300";
+  const common =
+    "rounded-md border border-slate-300 px-2.5 py-1.5 text-sm w-36 focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-300";
 
   if (field.type === "date") {
     const gran = granularity || "tag";
-    const setGran = (g) => onChange({ granularity: g, value: convertDateValue(value, g), value2: convertDateValue(value2, g) });
+    const setGran = (g) =>
+      onChange({
+        granularity: g,
+        value: convertDateValue(value, g),
+        value2: convertDateValue(value2, g),
+      });
     const dateInput = (val, key) => {
       if (gran === "jahr") {
         return (
@@ -653,14 +796,42 @@ function ValueInput({ field, operator, value, value2, granularity, onChange }) {
           />
         );
       }
-      if (gran === "monat") return <input type="month" value={val} onChange={(e) => onChange({ [key]: e.target.value })} className={common + " w-40"} />;
-      return <input type="date" value={val} onChange={(e) => onChange({ [key]: e.target.value })} className={common + " w-40"} />;
+      if (gran === "monat")
+        return (
+          <input
+            type="month"
+            value={val}
+            onChange={(e) => onChange({ [key]: e.target.value })}
+            className={common + " w-40"}
+          />
+        );
+      return (
+        <input
+          type="date"
+          value={val}
+          onChange={(e) => onChange({ [key]: e.target.value })}
+          className={common + " w-40"}
+        />
+      );
     };
     const granSwitch = (
-      <div className="flex overflow-hidden rounded-md border border-slate-300 text-xs" role="group" aria-label="Datumsgranularität">
-        {[["tag", "Tag"], ["monat", "Monat"], ["jahr", "Jahr"]].map(([g, label]) => (
-          <button key={g} type="button" onClick={() => setGran(g)} aria-pressed={gran === g}
-            className={`px-2 py-1 font-medium ${gran === g ? "bg-orange-600 text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}>
+      <div
+        className="flex overflow-hidden rounded-md border border-slate-300 text-xs"
+        role="group"
+        aria-label="Datumsgranularität"
+      >
+        {[
+          ["tag", "Tag"],
+          ["monat", "Monat"],
+          ["jahr", "Jahr"],
+        ].map(([g, label]) => (
+          <button
+            key={g}
+            type="button"
+            onClick={() => setGran(g)}
+            aria-pressed={gran === g}
+            className={`px-2 py-1 font-medium ${gran === g ? "bg-orange-600 text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}
+          >
             {label}
           </button>
         ))}
@@ -692,31 +863,61 @@ function ValueInput({ field, operator, value, value2, granularity, onChange }) {
             onChange={(e) => onChange({ [key]: sanitizeDecimal(e.target.value, true) })}
             className={common + (field.type === "currency" ? " pr-6" : "")}
           />
-          {field.type === "currency" && <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400">€</span>}
+          {field.type === "currency" && (
+            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+              €
+            </span>
+          )}
         </div>
       );
     }
     if (field.type === "select") {
       return (
-        <select value={val} onChange={(e) => onChange({ [key]: e.target.value })} className={common}>
+        <select
+          value={val}
+          onChange={(e) => onChange({ [key]: e.target.value })}
+          className={common}
+        >
           <option value="">Wählen…</option>
-          {field.options.map((o) => <option key={o} value={o}>{o}</option>)}
+          {field.options.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
         </select>
       );
     }
     if (field.type === "boolean") {
       return (
-        <select value={val} onChange={(e) => onChange({ [key]: e.target.value })} className={common}>
+        <select
+          value={val}
+          onChange={(e) => onChange({ [key]: e.target.value })}
+          className={common}
+        >
           <option value="">Wählen…</option>
           <option value="Ja">Ja</option>
           <option value="Nein">Nein</option>
         </select>
       );
     }
-    return <input type="text" value={val} onChange={(e) => onChange({ [key]: e.target.value })} className={common} placeholder="Wert…" />;
+    return (
+      <input
+        type="text"
+        value={val}
+        onChange={(e) => onChange({ [key]: e.target.value })}
+        className={common}
+        placeholder="Wert…"
+      />
+    );
   };
   if (operator === "zwischen") {
-    return <div className="flex items-center gap-2">{single(value, "value")}<span className="text-xs text-slate-400">und</span>{single(value2, "value2")}</div>;
+    return (
+      <div className="flex items-center gap-2">
+        {single(value, "value")}
+        <span className="text-xs text-slate-400">und</span>
+        {single(value2, "value2")}
+      </div>
+    );
   }
   return single(value, "value");
 }
@@ -730,18 +931,45 @@ function RuleRow({ rule, onChange, onRemove }) {
   const incomplete = !isComplete(rule);
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-md bg-white px-2 py-2">
-      <FieldPicker value={rule.field} onChange={(f) => onChange({ field: f.key, operator: "", value: "", value2: "", granularity: "tag" })} />
-      <select value={rule.operator} onChange={(e) => onChange({ operator: e.target.value, value: "", value2: "" })} disabled={!field}
-        className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-300 min-w-[128px]">
+      <FieldPicker
+        value={rule.field}
+        onChange={(f) =>
+          onChange({ field: f.key, operator: "", value: "", value2: "", granularity: "tag" })
+        }
+      />
+      <select
+        value={rule.operator}
+        onChange={(e) => onChange({ operator: e.target.value, value: "", value2: "" })}
+        disabled={!field}
+        className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-300 min-w-[128px]"
+      >
         <option value="">Operator…</option>
-        {opList.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        {opList.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
       </select>
-      <ValueInput field={field} operator={rule.operator} value={rule.value} value2={rule.value2} granularity={rule.granularity} onChange={onChange} />
+      <ValueInput
+        field={field}
+        operator={rule.operator}
+        value={rule.value}
+        value2={rule.value2}
+        granularity={rule.granularity}
+        onChange={onChange}
+      />
       {incomplete && field && rule.operator && (
-        <span title="Bedingung ist unvollständig"><CircleAlert className="h-4 w-4 text-amber-500" /></span>
+        <span title="Bedingung ist unvollständig">
+          <CircleAlert className="h-4 w-4 text-amber-500" />
+        </span>
       )}
-      <button type="button" onClick={onRemove} aria-label="Bedingung entfernen" title="Bedingung entfernen"
-        className="ml-auto rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600">
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label="Bedingung entfernen"
+        title="Bedingung entfernen"
+        className="ml-auto rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
+      >
         <X className="h-4 w-4" />
       </button>
     </div>
@@ -753,25 +981,49 @@ function RuleRow({ rule, onChange, onRemove }) {
  * ------------------------------------------------------------------ */
 function Group({ node, depth, onChange, onRemove, isRoot }) {
   const bg = depth % 2 === 0 ? "bg-slate-50" : "bg-white";
-  function patchChild(id, patch) { onChange((prev) => updateNode(prev, id, patch)); }
-  function removeChild(id) { onChange((prev) => removeNode(prev, id)); }
-  function addRuleTo(groupId) { onChange((prev) => addChild(prev, groupId, newRule())); }
-  function addGroupTo(groupId) { onChange((prev) => addChild(prev, groupId, newGroup())); }
-  function toggleLogic() { onChange((prev) => updateNode(prev, node.id, { logic: node.logic === "UND" ? "ODER" : "UND" })); }
+  function patchChild(id, patch) {
+    onChange((prev) => updateNode(prev, id, patch));
+  }
+  function removeChild(id) {
+    onChange((prev) => removeNode(prev, id));
+  }
+  function addRuleTo(groupId) {
+    onChange((prev) => addChild(prev, groupId, newRule()));
+  }
+  function addGroupTo(groupId) {
+    onChange((prev) => addChild(prev, groupId, newGroup()));
+  }
+  function toggleLogic() {
+    onChange((prev) => updateNode(prev, node.id, { logic: node.logic === "UND" ? "ODER" : "UND" }));
+  }
   return (
-    <div className={`rounded-lg border ${depth === 0 ? "border-slate-200" : "border-slate-300 border-dashed"} ${bg} p-3`}>
+    <div
+      className={`rounded-lg border ${depth === 0 ? "border-slate-200" : "border-slate-300 border-dashed"} ${bg} p-3`}
+    >
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Layers className="h-3.5 w-3.5 text-slate-400" />
-          <span className="text-xs font-medium text-slate-500">{isRoot ? "Alle folgenden Bedingungen verknüpft mit" : "Untergruppe verknüpft mit"}</span>
-          <button type="button" onClick={toggleLogic} disabled={node.children.length < 2}
+          <span className="text-xs font-medium text-slate-500">
+            {isRoot ? "Alle folgenden Bedingungen verknüpft mit" : "Untergruppe verknüpft mit"}
+          </span>
+          <button
+            type="button"
+            onClick={toggleLogic}
+            disabled={node.children.length < 2}
             className={`rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors disabled:opacity-40 ${node.logic === "UND" ? "bg-slate-700 text-white hover:bg-slate-600" : "bg-amber-500 text-white hover:bg-amber-400"}`}
-            title="Klicken zum Umschalten UND / ODER">
+            title="Klicken zum Umschalten UND / ODER"
+          >
             {node.logic}
           </button>
         </div>
         {!isRoot && (
-          <button type="button" onClick={onRemove} aria-label="Gruppe entfernen" title="Gruppe entfernen" className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600">
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label="Gruppe entfernen"
+            title="Gruppe entfernen"
+            className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600"
+          >
             <X className="h-4 w-4" />
           </button>
         )}
@@ -781,24 +1033,50 @@ function Group({ node, depth, onChange, onRemove, isRoot }) {
           <div key={child.id}>
             {i > 0 && (
               <div className="my-1 flex items-center gap-2 pl-1">
-                <span className={`text-[11px] font-semibold ${node.logic === "UND" ? "text-slate-400" : "text-amber-600"}`}>{node.logic}</span>
+                <span
+                  className={`text-[11px] font-semibold ${node.logic === "UND" ? "text-slate-400" : "text-amber-600"}`}
+                >
+                  {node.logic}
+                </span>
                 <div className="h-px flex-1 bg-slate-200" />
               </div>
             )}
             {child.kind === "rule" ? (
-              <RuleRow rule={child} onChange={(patch) => patchChild(child.id, patch)} onRemove={() => removeChild(child.id)} />
+              <RuleRow
+                rule={child}
+                onChange={(patch) => patchChild(child.id, patch)}
+                onRemove={() => removeChild(child.id)}
+              />
             ) : (
-              <Group node={child} depth={depth + 1} onChange={onChange} onRemove={() => removeChild(child.id)} isRoot={false} />
+              <Group
+                node={child}
+                depth={depth + 1}
+                onChange={onChange}
+                onRemove={() => removeChild(child.id)}
+                isRoot={false}
+              />
             )}
           </div>
         ))}
-        {node.children.length === 0 && <div className="px-1 py-2 text-sm text-slate-400 italic">Keine Bedingungen. Über die Buttons unten hinzufügen.</div>}
+        {node.children.length === 0 && (
+          <div className="px-1 py-2 text-sm text-slate-400 italic">
+            Keine Bedingungen. Über die Buttons unten hinzufügen.
+          </div>
+        )}
       </div>
       <div className="mt-2.5 flex gap-2">
-        <button type="button" onClick={() => addRuleTo(node.id)} className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-orange-600 hover:bg-orange-50">
+        <button
+          type="button"
+          onClick={() => addRuleTo(node.id)}
+          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-orange-600 hover:bg-orange-50"
+        >
           <Plus className="h-3.5 w-3.5" /> Bedingung
         </button>
-        <button type="button" onClick={() => addGroupTo(node.id)} className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100">
+        <button
+          type="button"
+          onClick={() => addGroupTo(node.id)}
+          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100"
+        >
           <Plus className="h-3.5 w-3.5" /> Untergruppe
         </button>
       </div>
@@ -827,7 +1105,7 @@ const ALL_OPERATOR_WORDS = Array.from(
     ...Object.values(OPERATORS).flat(),
     ...Object.keys(OPERATOR_ALIASES),
     ...Object.keys(DATE_OPERATOR_ALIASES),
-  ])
+  ]),
 ).sort((a, b) => b.length - a.length);
 
 const queryStreamParser = {
@@ -843,10 +1121,17 @@ const queryStreamParser = {
     }
     for (const op of ALL_OPERATOR_WORDS) {
       const isSymbol = /^[<>=≥≤≠!]+$/.test(op);
-      const re = isSymbol ? new RegExp("^" + escapeRe(op)) : new RegExp("^" + escapeRe(op) + "(?![A-Za-z0-9ÄÖÜäöüß_.-])", "i");
+      const re = isSymbol
+        ? new RegExp("^" + escapeRe(op))
+        : new RegExp("^" + escapeRe(op) + "(?![A-Za-z0-9ÄÖÜäöüß_.-])", "i");
       if (stream.match(re)) return "operator";
     }
-    if (stream.match(/^\d{4}-\d{2}-\d{2}/) || stream.match(/^\d{4}-\d{2}/) || stream.match(/^\d{4}/)) return "number";
+    if (
+      stream.match(/^\d{4}-\d{2}-\d{2}/) ||
+      stream.match(/^\d{4}-\d{2}/) ||
+      stream.match(/^\d{4}/)
+    )
+      return "number";
     if (stream.match(/^-?\d+([.,]\d+)?/)) return "number";
     stream.next();
     return null;
@@ -904,21 +1189,33 @@ function queryLinter(view) {
   if (!text.trim()) return [];
   const idxPh = text.indexOf("⟨");
   if (idxPh !== -1) {
-    return [{ from: idxPh, to: idxPh + 1, severity: "error", message: "Unvollständiger Platzhalter – bitte ersetzen." }];
+    return [
+      {
+        from: idxPh,
+        to: idxPh + 1,
+        severity: "error",
+        message: "Unvollständiger Platzhalter – bitte ersetzen.",
+      },
+    ];
   }
   try {
     parseQuery(text);
     return [];
   } catch (e) {
     const from = Math.max(0, Math.min(e.index ?? 0, text.length));
-    const to = Math.min(from + 1, text.length) === from ? from + 1 : Math.min(from + 1, text.length);
+    const to =
+      Math.min(from + 1, text.length) === from ? from + 1 : Math.min(from + 1, text.length);
     return [{ from, to: Math.max(to, from + 1), severity: "error", message: e.message }];
   }
 }
 
 const queryEditorTheme = EditorView.theme({
   "&": { fontSize: "13px" },
-  ".cm-content": { fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace", padding: "8px 10px", minHeight: "96px" },
+  ".cm-content": {
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+    padding: "8px 10px",
+    minHeight: "96px",
+  },
   "&.cm-focused": { outline: "none" },
   ".cm-variableName": { color: "#c2410c", fontWeight: "600" },
   ".cm-operator": { color: "#334155", fontWeight: "600" },
@@ -938,15 +1235,24 @@ function QueryView({ text, setText, queryError }) {
     <div className="px-4 py-3">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-xs font-medium text-slate-500">Abfrage als Text bearbeiten</span>
-        <span className="text-[11px] text-slate-400">Autocomplete: tippen → ↑↓ → Enter/Tab · Fehler werden inline unterstrichen</span>
+        <span className="text-[11px] text-slate-400">
+          Autocomplete: tippen → ↑↓ → Enter/Tab · Fehler werden inline unterstrichen
+        </span>
       </div>
-      <div className={`overflow-hidden rounded-md border ${queryError ? "border-red-300" : "border-slate-300 focus-within:border-orange-400 focus-within:ring-1 focus-within:ring-orange-300"}`}>
+      <div
+        className={`overflow-hidden rounded-md border ${queryError ? "border-red-300" : "border-slate-300 focus-within:border-orange-400 focus-within:ring-1 focus-within:ring-orange-300"}`}
+      >
         <CodeMirror
           value={text}
           height="140px"
           basicSetup={{ lineNumbers: false, foldGutter: false, highlightActiveLine: false }}
           theme={queryEditorTheme}
-          extensions={[queryLanguage, autocompletion({ override: [fieldCompletionSource] }), linter(queryLinter), EditorView.lineWrapping]}
+          extensions={[
+            queryLanguage,
+            autocompletion({ override: [fieldCompletionSource] }),
+            linter(queryLinter),
+            EditorView.lineWrapping,
+          ]}
           onChange={(value) => setText(value)}
         />
       </div>
@@ -956,29 +1262,109 @@ function QueryView({ text, setText, queryError }) {
         </div>
       )}
       <p className="mt-2 text-[11px] leading-relaxed text-slate-400">
-        Syntax: <span className="font-mono">Feld Operator Wert</span> · Text in Anführungszeichen <span className="font-mono">"…"</span> ·
-        Datum als <span className="font-mono">JJJJ</span> (Jahr), <span className="font-mono">JJJJ-MM</span> (Monat) oder <span className="font-mono">JJJJ-MM-TT</span> (Tag) · Bereich mit <span className="font-mono">zwischen X und Y</span> ·
-        Gruppieren mit <span className="font-mono">( )</span> · Verknüpfen mit <span className="font-mono">UND</span> / <span className="font-mono">ODER</span> (nicht gemischt ohne Klammern)
+        Syntax: <span className="font-mono">Feld Operator Wert</span> · Text in Anführungszeichen{" "}
+        <span className="font-mono">&quot;…&quot;</span> · Datum als{" "}
+        <span className="font-mono">JJJJ</span> (Jahr), <span className="font-mono">JJJJ-MM</span>{" "}
+        (Monat) oder <span className="font-mono">JJJJ-MM-TT</span> (Tag) · Bereich mit{" "}
+        <span className="font-mono">zwischen X und Y</span> · Gruppieren mit{" "}
+        <span className="font-mono">( )</span> · Verknüpfen mit{" "}
+        <span className="font-mono">UND</span> / <span className="font-mono">ODER</span> (nicht
+        gemischt ohne Klammern)
       </p>
     </div>
   );
 }
 
-
 /* ------------------------------------------------------------------ *
  *  Beispieldaten für die Ergebnistabelle (rein fiktiv)
  * ------------------------------------------------------------------ */
 const SAMPLE_ROWS = [
-  { auf_id: "A04B260508001", kunde: "Petra Schlicksupp", geburtsdatum: "1958-04-26", kostentraeger: "Postbeamtenkrankenkasse B (PBeaKK)", kostentraegerart: "Privat", filiale: "Filiale 1", erstelldatum: "2026-05-08", liefermethode: "Direktmitnahme", vk_netto: "73.48", vk_brutto: "87.44" },
-  { auf_id: "A04B260511002", kunde: "Tobias Mustermann", geburtsdatum: "1949-05-02", kostentraeger: "Privat-KT", kostentraegerart: "Privat", filiale: "CaseFlow", erstelldatum: "2026-05-11" },
-  { auf_id: "A04B260512003", kunde: "Annamaria Annika Adelheid", geburtsdatum: "1976-03-11", kostentraeger: "AOK Rheinland-Pfalz / Saarland", kostentraegerart: "GKV", filiale: "Filiale 1", erstelldatum: "2026-05-12", liefermethode: "Abholung", gkv_netto: "171.97" },
-  { auf_id: "A04B260513001", kunde: "Klaus Testpatient", geburtsdatum: "2000-01-01", kostentraeger: "hkk", kostentraegerart: "GKV", filiale: "CaseFlow", erstelldatum: "2026-05-13", gkv_netto: "37.60" },
-  { auf_id: "A04B260513002", kunde: "Lisa Emilia Frei", geburtsdatum: "1948-11-18", kostentraeger: "actimonda Krankenkasse", kostentraegerart: "GKV", filiale: "CaseFlow", erstelldatum: "2026-05-13" },
-  { auf_id: "A04B260515010", kunde: "Testperson Eins", geburtsdatum: "1992-08-18", kostentraeger: "AOK Rheinland/Hamburg", kostentraegerart: "GKV", filiale: "Testfiliale", erstelldatum: "2026-05-15" },
-  { auf_id: "A04B260518010", kunde: "Testperson Sieben", geburtsdatum: "1964-06-27", kostentraeger: "(TK) Techniker Krankenkasse", kostentraegerart: "GKV", filiale: "Standort Nord", erstelldatum: "2026-05-18", gkv_netto: "136.71" },
-  { auf_id: "A04B260518014", kunde: "Testperson Acht", geburtsdatum: "1999-10-20", kostentraeger: "Barmer GEK", kostentraegerart: "GKV", filiale: "Standort Nord", erstelldatum: "2026-05-18", liefermethode: "Abholung", gkv_netto: "140.20" },
+  {
+    auf_id: "A04B260508001",
+    kunde: "Petra Schlicksupp",
+    geburtsdatum: "1958-04-26",
+    kostentraeger: "Postbeamtenkrankenkasse B (PBeaKK)",
+    kostentraegerart: "Privat",
+    filiale: "Filiale 1",
+    erstelldatum: "2026-05-08",
+    liefermethode: "Direktmitnahme",
+    vk_netto: "73.48",
+    vk_brutto: "87.44",
+  },
+  {
+    auf_id: "A04B260511002",
+    kunde: "Tobias Mustermann",
+    geburtsdatum: "1949-05-02",
+    kostentraeger: "Privat-KT",
+    kostentraegerart: "Privat",
+    filiale: "CaseFlow",
+    erstelldatum: "2026-05-11",
+  },
+  {
+    auf_id: "A04B260512003",
+    kunde: "Annamaria Annika Adelheid",
+    geburtsdatum: "1976-03-11",
+    kostentraeger: "AOK Rheinland-Pfalz / Saarland",
+    kostentraegerart: "GKV",
+    filiale: "Filiale 1",
+    erstelldatum: "2026-05-12",
+    liefermethode: "Abholung",
+    gkv_netto: "171.97",
+  },
+  {
+    auf_id: "A04B260513001",
+    kunde: "Klaus Testpatient",
+    geburtsdatum: "2000-01-01",
+    kostentraeger: "hkk",
+    kostentraegerart: "GKV",
+    filiale: "CaseFlow",
+    erstelldatum: "2026-05-13",
+    gkv_netto: "37.60",
+  },
+  {
+    auf_id: "A04B260513002",
+    kunde: "Lisa Emilia Frei",
+    geburtsdatum: "1948-11-18",
+    kostentraeger: "actimonda Krankenkasse",
+    kostentraegerart: "GKV",
+    filiale: "CaseFlow",
+    erstelldatum: "2026-05-13",
+  },
+  {
+    auf_id: "A04B260515010",
+    kunde: "Testperson Eins",
+    geburtsdatum: "1992-08-18",
+    kostentraeger: "AOK Rheinland/Hamburg",
+    kostentraegerart: "GKV",
+    filiale: "Testfiliale",
+    erstelldatum: "2026-05-15",
+  },
+  {
+    auf_id: "A04B260518010",
+    kunde: "Testperson Sieben",
+    geburtsdatum: "1964-06-27",
+    kostentraeger: "(TK) Techniker Krankenkasse",
+    kostentraegerart: "GKV",
+    filiale: "Standort Nord",
+    erstelldatum: "2026-05-18",
+    gkv_netto: "136.71",
+  },
+  {
+    auf_id: "A04B260518014",
+    kunde: "Testperson Acht",
+    geburtsdatum: "1999-10-20",
+    kostentraeger: "Barmer GEK",
+    kostentraegerart: "GKV",
+    filiale: "Standort Nord",
+    erstelldatum: "2026-05-18",
+    liefermethode: "Abholung",
+    gkv_netto: "140.20",
+  },
 ];
-const STATUS_STYLES = { "Bestätigt": "bg-emerald-100 text-emerald-700", "Offen": "bg-slate-100 text-slate-600" };
+const STATUS_STYLES = {
+  Bestätigt: "bg-emerald-100 text-emerald-700",
+  Offen: "bg-slate-100 text-slate-600",
+};
 function rowBetrag(row) {
   const val = row.vk_brutto ?? row.gkv_netto ?? row.vk_netto;
   if (val === undefined) return "–";
@@ -1004,9 +1390,15 @@ function displayDate(iso) {
  * ------------------------------------------------------------------ */
 const NAV_GROUPS = [
   { label: "Portal", items: ["Übersicht", "Digital", "Routing", "BI (lite)", "DATEV"] },
-  { label: "Auftragsabwicklung", items: ["Vorgänge", "Controlling", "Abrechnung", "Verschrottung", "Arbeitsaufträge"] },
+  {
+    label: "Auftragsabwicklung",
+    items: ["Vorgänge", "Controlling", "Abrechnung", "Verschrottung", "Arbeitsaufträge"],
+  },
   { label: "Production", items: ["Insoles"] },
-  { label: "Warenverkehr", items: ["Abverkauf/Bedarf", "Bestellung", "Wareneingang extern", "Picklists", "Etiketten"] },
+  {
+    label: "Warenverkehr",
+    items: ["Abverkauf/Bedarf", "Bestellung", "Wareneingang extern", "Picklists", "Etiketten"],
+  },
   { label: "Stammdaten", items: ["Kontakte", "BZN", "GKV", "EK/VK Konditionen"] },
   { label: "Einstellungen", items: ["Benutzer", "Gruppen", "Grundeinstellungen"] },
 ];
@@ -1023,13 +1415,17 @@ function Sidebar({ activeItem }) {
       <nav className="space-y-4">
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
-            <div className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-orange-500">{group.label}</div>
+            <div className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-orange-500">
+              {group.label}
+            </div>
             <div className="space-y-0.5">
               {group.items.map((item) => {
                 const active = item === activeItem;
                 return (
-                  <div key={item}
-                    className={`cursor-default truncate rounded-md px-2 py-1.5 text-sm ${active ? "border-l-2 border-orange-500 bg-orange-50 font-medium text-orange-700" : "text-slate-600 hover:bg-slate-50"}`}>
+                  <div
+                    key={item}
+                    className={`cursor-default truncate rounded-md px-2 py-1.5 text-sm ${active ? "border-l-2 border-orange-500 bg-orange-50 font-medium text-orange-700" : "text-slate-600 hover:bg-slate-50"}`}
+                  >
                     {item}
                   </div>
                 );
@@ -1046,14 +1442,18 @@ function Header() {
   return (
     <header className="flex items-center gap-4 border-b border-slate-200 bg-white px-5 py-2.5">
       <div className="flex items-center gap-2 md:hidden">
-        <div className="flex h-6 w-6 items-center justify-center rounded bg-orange-500 text-white"><Layers className="h-3.5 w-3.5" /></div>
+        <div className="flex h-6 w-6 items-center justify-center rounded bg-orange-500 text-white">
+          <Layers className="h-3.5 w-3.5" />
+        </div>
         <span className="text-sm font-bold text-slate-800">CaseFlow</span>
       </div>
       <div className="flex flex-1 items-center rounded-full bg-slate-100 px-3 py-1.5 text-sm text-slate-400 max-w-md">
         <Search className="mr-2 h-3.5 w-3.5" /> Suche
       </div>
       <div className="ml-auto flex items-center gap-3 text-slate-400">
-        <span className="hidden rounded-full border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-500 sm:inline">Keine TSE-Kasse</span>
+        <span className="hidden rounded-full border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-500 sm:inline">
+          Keine TSE-Kasse
+        </span>
         <Camera className="h-4 w-4" />
         <Bell className="h-4 w-4" />
         <HelpCircle className="h-4 w-4" />
@@ -1088,8 +1488,15 @@ export default function QueryConfiguratorPrototype() {
   const complete = isComplete(tree);
   const ruleCount = countRules(tree);
 
-  function handleChange(updater) { setTree((prev) => updater(prev)); }
-  function handleReset() { setTree(newGroup()); setSelectedSaved(""); setVisibleRows(SAMPLE_ROWS); setLastSearched(null); }
+  function handleChange(updater) {
+    setTree((prev) => updater(prev));
+  }
+  function handleReset() {
+    setTree(newGroup());
+    setSelectedSaved("");
+    setVisibleRows(SAMPLE_ROWS);
+    setLastSearched(null);
+  }
 
   function goToQueryView() {
     setQueryText(nodeToQueryText(tree));
@@ -1098,7 +1505,11 @@ export default function QueryConfiguratorPrototype() {
   }
   function tryApplyQuery(switchAfter) {
     if (queryText.includes("⟨")) {
-      setQueryError({ message: "Es gibt noch unvollständige Platzhalter (⟨…⟩) – bitte ersetzen, bevor die Abfrage angewendet wird.", index: queryText.indexOf("⟨") });
+      setQueryError({
+        message:
+          "Es gibt noch unvollständige Platzhalter (⟨…⟩) – bitte ersetzen, bevor die Abfrage angewendet wird.",
+        index: queryText.indexOf("⟨"),
+      });
       return false;
     }
     try {
@@ -1113,10 +1524,12 @@ export default function QueryConfiguratorPrototype() {
     }
   }
   function goToBuilderView() {
-    if (viewMode !== "query") { setViewMode("builder"); return; }
+    if (viewMode !== "query") {
+      setViewMode("builder");
+      return;
+    }
     tryApplyQuery(true);
   }
-
 
   return (
     <div className="flex min-h-screen bg-slate-100 font-sans">
@@ -1125,119 +1538,195 @@ export default function QueryConfiguratorPrototype() {
         <Header />
         <div className="flex items-center gap-1 border-b border-slate-200 bg-white px-6">
           {["Übersicht", "Eskalationsregel", "Konfiguration"].map((tab, idx) => (
-            <div key={tab} className={`border-b-2 px-3 py-2.5 text-sm font-medium ${idx === 0 ? "border-orange-500 text-orange-700" : "border-transparent text-slate-400"}`}>
+            <div
+              key={tab}
+              className={`border-b-2 px-3 py-2.5 text-sm font-medium ${idx === 0 ? "border-orange-500 text-orange-700" : "border-transparent text-slate-400"}`}
+            >
               {tab}
             </div>
           ))}
         </div>
 
         <main className="mx-auto max-w-5xl p-6">
-      <div className="mb-1 flex items-center gap-2">
-        <SlidersHorizontal className="h-5 w-5 text-orange-600" />
-        <h1 className="text-lg font-semibold text-slate-900">Controlling · Filter</h1>
-      </div>
-      <div className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700">
-        Redesign-Konzept · gleiche Felder/Daten, überarbeitete Bedienung – arbeitet mit Beispieldaten
-      </div>
-
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-        {/* Tabs Builder / Abfrage */}
-        <div className="flex items-center gap-1 border-b border-slate-100 px-4 pt-3">
-          <button type="button" onClick={goToBuilderView}
-            className={`flex items-center gap-1.5 rounded-t-md px-3 py-2 text-sm font-medium ${viewMode === "builder" ? "border-b-2 border-orange-600 text-orange-700" : "text-slate-400 hover:text-slate-600"}`}>
-            <SlidersHorizontal className="h-3.5 w-3.5" /> Builder
-          </button>
-          <button type="button" onClick={goToQueryView}
-            className={`flex items-center gap-1.5 rounded-t-md px-3 py-2 text-sm font-medium ${viewMode === "query" ? "border-b-2 border-orange-600 text-orange-700" : "text-slate-400 hover:text-slate-600"}`}>
-            <Code2 className="h-3.5 w-3.5" /> Abfrage
-          </button>
-          {viewMode === "query" && (
-            <button type="button" onClick={() => tryApplyQuery(false)}
-              className="ml-auto mb-2 flex items-center gap-1.5 rounded-md bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700">
-              <Check className="h-3.5 w-3.5" /> Anwenden
-            </button>
-          )}
-        </div>
-
-        {viewMode === "builder" ? (
-          <div className="px-4 py-3">
-            <Group node={tree} depth={0} onChange={handleChange} isRoot />
+          <div className="mb-1 flex items-center gap-2">
+            <SlidersHorizontal className="h-5 w-5 text-orange-600" />
+            <h1 className="text-lg font-semibold text-slate-900">Controlling · Filter</h1>
           </div>
-        ) : (
-          <QueryView text={queryText} setText={setQueryText} queryError={queryError} />
-        )}
-
-        <div className="flex items-start gap-2 border-y border-slate-100 bg-slate-50 px-4 py-2.5 text-sm">
-          <span className="mt-0.5 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Vorschau</span>
-          <span className="text-slate-600">{ruleCount > 0 ? describe(tree) : "Noch keine Bedingung definiert."}</span>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <FolderOpen className="h-4 w-4 text-slate-400" />
-            <select value={selectedSaved} onChange={(e) => setSelectedSaved(e.target.value)}
-              className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-700 min-w-[200px]">
-              <option value="">Gespeicherter Filter…</option>
-              {savedFilters.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
-            </select>
-            <button type="button" onClick={() => { const name = window.prompt("Name für diesen Filter:"); if (name) setSavedFilters((s) => [...s, { id: uid(), name }]); }}
-              className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2.5 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
-              <Save className="h-3.5 w-3.5" /> Als neu speichern
-            </button>
-            <button type="button" disabled={!selectedSaved}
-              className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2.5 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40">
-              <Check className="h-3.5 w-3.5" /> Aktualisieren
-            </button>
-            <button type="button" disabled={!selectedSaved} onClick={() => { setSavedFilters((s) => s.filter((f) => f.id !== selectedSaved)); setSelectedSaved(""); }}
-              className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2.5 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:text-slate-300">
-              <Trash2 className="h-3.5 w-3.5" /> Löschen
-            </button>
+          <div className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700">
+            Redesign-Konzept · gleiche Felder/Daten, überarbeitete Bedienung – arbeitet mit
+            Beispieldaten
           </div>
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={handleReset} className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100">
-              <RotateCcw className="h-3.5 w-3.5" /> Zurücksetzen
-            </button>
-            <button type="button" disabled={!complete || ruleCount === 0} onClick={() => { setLastSearched(describe(tree)); setVisibleRows(SAMPLE_ROWS.filter((row) => evaluateTree(tree, row))); }}
-              className="flex items-center gap-1.5 rounded-md bg-orange-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-orange-500 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400">
-              <Search className="h-3.5 w-3.5" /> Suchen
-            </button>
-          </div>
-        </div>
-      </div>
 
-      <div className="mt-6">
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-700">Ergebnisse</h2>
-          {lastSearched && <span className="text-xs text-slate-400">Zuletzt gesucht: {lastSearched} · {visibleRows.length} Treffer</span>}
-        </div>
-        <div className="overflow-x-auto rounded-lg border border-slate-200">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-3 py-2">Auf.ID</th><th className="px-3 py-2">Kunde</th><th className="px-3 py-2">Kostenträger</th>
-                <th className="px-3 py-2">Filiale</th><th className="px-3 py-2">Erstelldatum</th><th className="px-3 py-2">Status</th><th className="px-3 py-2 text-right">Betrag</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {visibleRows.length === 0 && (
-                <tr><td colSpan={7} className="px-3 py-6 text-center text-sm text-slate-400 italic">Keine Treffer für diesen Filter.</td></tr>
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+            {/* Tabs Builder / Abfrage */}
+            <div className="flex items-center gap-1 border-b border-slate-100 px-4 pt-3">
+              <button
+                type="button"
+                onClick={goToBuilderView}
+                className={`flex items-center gap-1.5 rounded-t-md px-3 py-2 text-sm font-medium ${viewMode === "builder" ? "border-b-2 border-orange-600 text-orange-700" : "text-slate-400 hover:text-slate-600"}`}
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5" /> Builder
+              </button>
+              <button
+                type="button"
+                onClick={goToQueryView}
+                className={`flex items-center gap-1.5 rounded-t-md px-3 py-2 text-sm font-medium ${viewMode === "query" ? "border-b-2 border-orange-600 text-orange-700" : "text-slate-400 hover:text-slate-600"}`}
+              >
+                <Code2 className="h-3.5 w-3.5" /> Abfrage
+              </button>
+              {viewMode === "query" && (
+                <button
+                  type="button"
+                  onClick={() => tryApplyQuery(false)}
+                  className="ml-auto mb-2 flex items-center gap-1.5 rounded-md bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700"
+                >
+                  <Check className="h-3.5 w-3.5" /> Anwenden
+                </button>
               )}
-              {visibleRows.map((r) => (
-                <tr key={r.auf_id} className="hover:bg-slate-50">
-                  <td className="px-3 py-2 font-medium text-orange-600">{r.auf_id}</td>
-                  <td className="px-3 py-2 text-slate-700">{r.kunde}</td>
-                  <td className="px-3 py-2 text-slate-500">{r.kostentraeger}</td>
-                  <td className="px-3 py-2 text-slate-500">{r.filiale}</td>
-                  <td className="px-3 py-2 text-slate-500">{displayDate(r.erstelldatum)}</td>
-                  <td className="px-3 py-2"><span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[rowStatus(r)]}`}>{rowStatus(r)}</span></td>
-                  <td className="px-3 py-2 text-right text-slate-700">{rowBetrag(r)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-2 text-xs text-slate-400">Beispieldaten aus bereinigtem Test-Export (dumy1.ods) – Namen z. T. bewusste Testeinträge.</p>
-      </div>
+            </div>
+
+            {viewMode === "builder" ? (
+              <div className="px-4 py-3">
+                <Group node={tree} depth={0} onChange={handleChange} isRoot />
+              </div>
+            ) : (
+              <QueryView text={queryText} setText={setQueryText} queryError={queryError} />
+            )}
+
+            <div className="flex items-start gap-2 border-y border-slate-100 bg-slate-50 px-4 py-2.5 text-sm">
+              <span className="mt-0.5 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                Vorschau
+              </span>
+              <span className="text-slate-600">
+                {ruleCount > 0 ? describe(tree) : "Noch keine Bedingung definiert."}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <FolderOpen className="h-4 w-4 text-slate-400" />
+                <select
+                  value={selectedSaved}
+                  onChange={(e) => setSelectedSaved(e.target.value)}
+                  className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-700 min-w-[200px]"
+                >
+                  <option value="">Gespeicherter Filter…</option>
+                  {savedFilters.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const name = window.prompt("Name für diesen Filter:");
+                    if (name) setSavedFilters((s) => [...s, { id: uid(), name }]);
+                  }}
+                  className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2.5 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  <Save className="h-3.5 w-3.5" /> Als neu speichern
+                </button>
+                <button
+                  type="button"
+                  disabled={!selectedSaved}
+                  className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2.5 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                >
+                  <Check className="h-3.5 w-3.5" /> Aktualisieren
+                </button>
+                <button
+                  type="button"
+                  disabled={!selectedSaved}
+                  onClick={() => {
+                    setSavedFilters((s) => s.filter((f) => f.id !== selectedSaved));
+                    setSelectedSaved("");
+                  }}
+                  className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2.5 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:text-slate-300"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Löschen
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" /> Zurücksetzen
+                </button>
+                <button
+                  type="button"
+                  disabled={!complete || ruleCount === 0}
+                  onClick={() => {
+                    setLastSearched(describe(tree));
+                    setVisibleRows(SAMPLE_ROWS.filter((row) => evaluateTree(tree, row)));
+                  }}
+                  className="flex items-center gap-1.5 rounded-md bg-orange-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-orange-500 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
+                >
+                  <Search className="h-3.5 w-3.5" /> Suchen
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-slate-700">Ergebnisse</h2>
+              {lastSearched && (
+                <span className="text-xs text-slate-400">
+                  Zuletzt gesucht: {lastSearched} · {visibleRows.length} Treffer
+                </span>
+              )}
+            </div>
+            <div className="overflow-x-auto rounded-lg border border-slate-200">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <th className="px-3 py-2">Auf.ID</th>
+                    <th className="px-3 py-2">Kunde</th>
+                    <th className="px-3 py-2">Kostenträger</th>
+                    <th className="px-3 py-2">Filiale</th>
+                    <th className="px-3 py-2">Erstelldatum</th>
+                    <th className="px-3 py-2">Status</th>
+                    <th className="px-3 py-2 text-right">Betrag</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {visibleRows.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="px-3 py-6 text-center text-sm text-slate-400 italic"
+                      >
+                        Keine Treffer für diesen Filter.
+                      </td>
+                    </tr>
+                  )}
+                  {visibleRows.map((r) => (
+                    <tr key={r.auf_id} className="hover:bg-slate-50">
+                      <td className="px-3 py-2 font-medium text-orange-600">{r.auf_id}</td>
+                      <td className="px-3 py-2 text-slate-700">{r.kunde}</td>
+                      <td className="px-3 py-2 text-slate-500">{r.kostentraeger}</td>
+                      <td className="px-3 py-2 text-slate-500">{r.filiale}</td>
+                      <td className="px-3 py-2 text-slate-500">{displayDate(r.erstelldatum)}</td>
+                      <td className="px-3 py-2">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[rowStatus(r)]}`}
+                        >
+                          {rowStatus(r)}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-right text-slate-700">{rowBetrag(r)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-2 text-xs text-slate-400">
+              Beispieldaten aus bereinigtem Test-Export (dumy1.ods) – Namen z. T. bewusste
+              Testeinträge.
+            </p>
+          </div>
         </main>
       </div>
     </div>
