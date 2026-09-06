@@ -45,3 +45,5 @@ next-env.d.ts
 /.vscode
 
 .dev.vars
+# typescript build cache
+*.tsbuildinfo
