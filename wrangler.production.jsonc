@@ -1,0 +1,41 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Eigenständige Produktionskonfiguration für den direkten Betrieb auf
+  // Cloudflare Workers, unabhängig von der OpenAI-Sites-Hostingplattform
+  // (siehe .openai/hosting.json und docs/cloudflare-self-hosting.md).
+  //
+  // wrangler.jsonc bleibt unverändert die lokale D1-Simulation für `npm run dev`.
+  // Diese Datei wird nur für `wrangler deploy --config wrangler.production.jsonc`
+  // verwendet, sobald die Platzhalter unten durch echte Cloudflare-Ressourcen-IDs
+  // ersetzt wurden.
+  "name": "jnswde",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-05-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "ai": { "binding": "AI", "remote": true },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "jnswde-production",
+      // TODO: nach `wrangler d1 create jnswde-production --config wrangler.production.jsonc`
+      // die ausgegebene database_id hier eintragen.
+      "database_id": "REPLACE_WITH_REAL_D1_DATABASE_ID",
+      "migrations_dir": "drizzle",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "APPLICATION_DOCUMENTS",
+      // TODO: vorher anlegen mit
+      // `wrangler r2 bucket create jnswde-application-documents`
+      "bucket_name": "jnswde-application-documents",
+    },
+  ],
+  "routes": [
+    // TODO: Custom Domain in Cloudflare für diesen Worker einrichten und hier
+    // eintragen, sobald DNS (www.jnsw.de) von custom-domains.chatgpt.site auf
+    // diesen Worker umgestellt wird. Siehe docs/cloudflare-self-hosting.md.
+    // { "pattern": "jnsw.de/*", "custom_domain": true },
+    // { "pattern": "www.jnsw.de/*", "custom_domain": true },
+  ],
+}
