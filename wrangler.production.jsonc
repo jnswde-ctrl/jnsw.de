@@ -8,7 +8,7 @@
   // Diese Datei wird nur für `wrangler deploy --config wrangler.production.jsonc`
   // verwendet, sobald die Platzhalter unten durch echte Cloudflare-Ressourcen-IDs
   // ersetzt wurden.
-  "name": "jnswde",
+  "name": "jnsw-de",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-05-22",
   "compatibility_flags": ["nodejs_compat"],
@@ -16,21 +16,16 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "jnswde-production",
-      // TODO: nach `wrangler d1 create jnswde-production --config wrangler.production.jsonc`
-      // die ausgegebene database_id hier eintragen.
-      "database_id": "REPLACE_WITH_REAL_D1_DATABASE_ID",
+      "database_name": "jwx_db01",
+      "database_id": "abdb3246-a9b0-4236-a838-186d4187bdf4",
       "migrations_dir": "drizzle",
     },
   ],
-  "r2_buckets": [
-    {
-      "binding": "APPLICATION_DOCUMENTS",
-      // TODO: vorher anlegen mit
-      // `wrangler r2 bucket create jnswde-application-documents`
-      "bucket_name": "jnswde-application-documents",
-    },
-  ],
+  // R2 ist auf diesem Account noch nicht aktiviert (Cloudflare verlangt eine
+  // einmalige manuelle Bestätigung im Dashboard) und der bestehende Worker
+  // `jnsw-de` hat aktuell kein R2-Binding. Sobald `APPLICATION_DOCUMENTS`
+  // gebraucht wird (z. B. für die Bewerbungswerkstatt), hier ergänzen:
+  // "r2_buckets": [{ "binding": "APPLICATION_DOCUMENTS", "bucket_name": "..." }],
   "routes": [
     // TODO: Custom Domain in Cloudflare für diesen Worker einrichten und hier
     // eintragen, sobald DNS (www.jnsw.de) von custom-domains.chatgpt.site auf
